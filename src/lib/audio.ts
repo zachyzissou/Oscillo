@@ -95,36 +95,46 @@ async function initEffects() {
   if (chorus) return
   
   try {
-    // Ensure Tone.js context is ready before creating effects
-    await Tone.start()
-    await Tone.getContext().resume()
+    // Add timeout for effect initialization
+    const effectTimeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Effect initialization timeout')), 2000)
+    )
     
-    // Create effects with careful parameter checking for WebKit compatibility
-    chorus = new Tone.Chorus()
-    delay = new Tone.FeedbackDelay()
-    reverb = new Tone.Reverb()
-    filter = new Tone.AutoFilter()
-    distortion = new Tone.Distortion()
-    bitcrusher = new Tone.BitCrusher(4)
-    
-    // Safe parameter assignment with WebKit compatibility
-    try {
-      if (bitcrusher.wet?.value !== undefined) {
-        bitcrusher.wet.value = 0.3
-      }
-    } catch (error) {
-      console.warn('BitCrusher wet parameter error (WebKit compatibility):', error)
-    }
-    
-    // Chain effects together
-    bitcrusher.connect(distortion)
-    distortion.connect(filter)
-    filter.connect(reverb)
-    reverb.connect(delay)
-    delay.connect(chorus)
-    chorus.toDestination()
-    
-    masterChain = bitcrusher
+    await Promise.race([
+      (async () => {
+        // Ensure Tone.js context is ready before creating effects
+        await Tone.start()
+        await Tone.getContext().resume()
+        
+        // Create effects with careful parameter checking for WebKit compatibility
+        chorus = new Tone.Chorus()
+        delay = new Tone.FeedbackDelay()
+        reverb = new Tone.Reverb()
+        filter = new Tone.AutoFilter()
+        distortion = new Tone.Distortion()
+        bitcrusher = new Tone.BitCrusher(4)
+        
+        // Safe parameter assignment with WebKit compatibility
+        try {
+          if (bitcrusher.wet?.value !== undefined) {
+            bitcrusher.wet.value = 0.3
+          }
+        } catch (error) {
+          console.warn('BitCrusher wet parameter error (WebKit compatibility):', error)
+        }
+        
+        // Chain effects together
+        bitcrusher.connect(distortion)
+        distortion.connect(filter)
+        filter.connect(reverb)
+        reverb.connect(delay)
+        delay.connect(chorus)
+        chorus.toDestination()
+        
+        masterChain = bitcrusher
+      })(),
+      effectTimeout
+    ])
     if (typeof window !== 'undefined') {
       ;(window as any).__toneNodes__ = { chorus, delay, reverb, bitcrusher }
     }
@@ -191,9 +201,19 @@ export async function initAudioEngine() {
     if (audioInitialized) { initPromise = null; return }
     
     try {
-      await Tone.start()
-      await Tone.getContext().resume()
-      await initEffects()
+      // Add timeout for CI environments
+      const initTimeout = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Audio initialization timeout')), 3000)
+      )
+      
+      await Promise.race([
+        (async () => {
+          await Tone.start()
+          await Tone.getContext().resume()
+          await initEffects()
+        })(),
+        initTimeout
+      ])
       
       // Only proceed if effects were successfully initialized
       if (!masterChain) {

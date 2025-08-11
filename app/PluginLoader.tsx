@@ -175,7 +175,7 @@ export default function PluginLoader() {
         const context: PluginContext = {
           audioContext,
           toneInstance: Tone,
-          analyserData: analysisData,
+          analyserData: null, // Will be updated by separate useEffect
           
           // Visual system (would be populated with actual Three.js instances)
           scene: null,
