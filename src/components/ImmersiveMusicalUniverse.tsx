@@ -445,10 +445,6 @@ const AdvancedMusicalGrid = React.memo(() => {
     return result
   }, [scaleNotes])
   
-  const handleNoteClick = useCallback((noteId: string) => {
-    setActiveNote(noteId)
-    setTimeout(() => setActiveNote(null), 2000)
-  }, [])
   
   return (
     <group>
