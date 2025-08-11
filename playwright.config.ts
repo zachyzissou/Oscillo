@@ -15,10 +15,10 @@ export default defineConfig({
   
   // Optimized web server configuration for faster startup
   webServer: {
-    command: process.env.CI ? 'npm run build && npm start' : 'npm run dev',
+    command: 'npm run dev',
     port: 3000,
-    reuseExistingServer: true, // Always reuse for testing
-    timeout: process.env.CI ? 90000 : 120000, // Increased timeout for CI build
+    reuseExistingServer: false, // Force restart to avoid stale state
+    timeout: 120000,
     stderr: 'pipe',
     stdout: 'pipe',
   },
