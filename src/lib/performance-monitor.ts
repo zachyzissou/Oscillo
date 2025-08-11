@@ -120,10 +120,11 @@ class PerformanceMonitor {
   private getAudioLatency(): number {
     // Measure audio context latency if available
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-      const latency = audioContext.baseLatency * 1000 + (audioContext.outputLatency || 0) * 1000
-      audioContext.close()
-      return Math.round(latency * 100) / 100
+      if (!this.audioContext) {
+        this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      }
+      const latency = this.audioContext.baseLatency * 1000 + (this.audioContext.outputLatency || 0) * 1000;
+      return Math.round(latency * 100) / 100;
     } catch {
       return 0
     }
