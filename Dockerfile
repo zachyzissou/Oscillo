@@ -2,18 +2,11 @@
 # Multi-stage Dockerfile for Enhanced Oscillo Audio-Reactive Platform
 
 FROM node:20-alpine AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
 WORKDIR /app
 
-# Install dependencies for WebGPU/audio processing
-RUN apk add --no-cache \
-    libc6-compat \
-    curl \
-    make \
-    g++ \
-    python3 \
-    && npm install -g npm@latest
+# Install basic dependencies
+RUN apk add --no-cache libc6-compat && \
+    npm install -g npm@latest
 
 FROM base AS deps
 COPY package.json package-lock.json ./
@@ -82,7 +75,7 @@ USER nextjs
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:3000/api/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
 EXPOSE 3000
 
