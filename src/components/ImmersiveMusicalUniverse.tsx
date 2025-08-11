@@ -407,12 +407,6 @@ const MorphingGeometry = React.memo(({ position, type }: {
 MorphingGeometry.displayName = 'MorphingGeometry'
 
 // Simple glow effect using built-in Three.js features
-const SimplePostProcessing = React.memo(() => {
-  return null // For now, we'll skip complex post-processing
-})
-
-SimplePostProcessing.displayName = 'SimplePostProcessing'
-
 // Main musical grid with advanced particles
 const AdvancedMusicalGrid = React.memo(() => {
   const { scaleNotes } = useMusicalPalette()
