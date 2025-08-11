@@ -437,27 +437,37 @@ const AdvancedMusicalGrid = React.memo(() => {
           Math.sin(angle) * spiralRadius
         ] as [number, number, number],
         note: scaleNotes[i],
-        type: (i % 4 === 0 ? 'chord' : i % 3 === 0 ? 'beat' : 'note') as 'note' | 'chord' | 'beat',
-        color: `hsl(${(t * 360 + Date.now() * 0.01) % 360}, 85%, 65%)`
+        type: (i % 4 === 0 ? 'chord' : i % 3 === 0 ? 'beat' : 'note') as 'note' | 'chord' | 'beat'
+        // color property removed
       })
     }
     
     return result
   }, [scaleNotes])
-  
-  
+
+  // Animation time for color calculation
+  const timeRef = useRef(0)
+  useFrame((state) => {
+    timeRef.current = state.clock.getElapsedTime()
+  })
+
   return (
     <group>
-      {objects.map((obj) => (
-        <ParticleNoteSystem
-          key={obj.id}
-          position={obj.position}
-          color={obj.color}
-          note={obj.note}
-          type={obj.type}
-          isActive={activeNote === obj.id}
-        />
-      ))}
+      {objects.map((obj, i) => {
+        const t = i / objects.length
+        const hue = (t * 360 + timeRef.current * 10) % 360
+        const color = `hsl(${hue}, 85%, 65%)`
+        return (
+          <ParticleNoteSystem
+            key={obj.id}
+            position={obj.position}
+            color={color}
+            note={obj.note}
+            type={obj.type}
+            isActive={activeNote === obj.id}
+          />
+        )
+      })}
       
       {/* Add morphing geometries */}
       <MorphingGeometry position={[0, 0, 0]} type="primary" />
