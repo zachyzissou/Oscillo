@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useMemo } from 'react'
 import { useThree, useFrame } from '@react-three/fiber'
 import { useThemeSettings } from '@/store/useThemeSettings'
 import { useAudioStore } from '@/store/useAudioEngine'
@@ -38,12 +38,12 @@ export default function ShowcaseExporter({
   
   const themeConfig = getCurrentConfig()
 
-  // Quality settings
-  const qualitySettings = {
+  // Quality settings (memoized to prevent recreating on every render)
+  const qualitySettings = useMemo(() => ({
     '1080p': { width: 1920, height: 1080, scale: 1 },
     '4K': { width: 3840, height: 2160, scale: 2 },
     '8K': { width: 7680, height: 4320, scale: 4 }
-  }
+  }), [])
 
   // Screenshot capture
   const captureScreenshot = useCallback(() => {
@@ -67,7 +67,7 @@ export default function ShowcaseExporter({
     // Restore original size
     gl.setSize(originalSize.x, originalSize.y, false)
     gl.setPixelRatio(originalPixelRatio)
-  }, [gl, scene, camera, exportQuality])
+  }, [gl, scene, camera, exportQuality, qualitySettings])
 
   // GIF recording
   const startGifRecording = useCallback(async () => {
@@ -120,7 +120,7 @@ export default function ShowcaseExporter({
       console.error('GIF recording failed:', error)
       setIsRecording(false)
     }
-  }, [gl, scene, camera, exportQuality])
+  }, [gl, scene, camera, exportQuality, qualitySettings])
 
   // Video recording
   const startVideoRecording = useCallback(async () => {

@@ -3,6 +3,17 @@ import { useEffect, useRef } from 'react'
 import { PluginManager, Plugin, PluginContext } from '@/types/plugin'
 import { useAudioStore } from '@/store/useAudioStore'
 
+// Utility function to sanitize storage keys
+function sanitizeKey(key: string): string | null {
+  if (typeof key !== 'string' || key.length === 0) {
+    return null
+  }
+  
+  // Remove any potentially dangerous characters and limit length
+  const safe = key.replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 50)
+  return safe.length > 0 ? safe : null
+}
+
 class PluginManagerImpl implements PluginManager {
   private plugins = new Map<string, Plugin>()
   private loadedPlugins = new Set<string>()

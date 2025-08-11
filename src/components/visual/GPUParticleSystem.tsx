@@ -261,7 +261,7 @@ export function GPUParticleSystem({
       depthTest: false,
       vertexColors: false,
     })
-  }, [color, intensity])
+  }, [color, intensity, audioData.spectrum])
 
   // Update particle system
   useFrame((state, delta) => {
