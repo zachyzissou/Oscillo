@@ -171,19 +171,29 @@ export default function PluginLoader() {
           renderer: null,
           camera: null,
           
-          // State management (simplified)
+          // State management (sanitized)
           getState: (key: string) => {
+            const safeKey = sanitizeKey(key);
+            if (!safeKey) {
+              console.warn('Invalid plugin state key:', key);
+              return null;
+            }
             try {
-              return JSON.parse(localStorage.getItem(`plugin_${key}`) || 'null')
+              return JSON.parse(localStorage.getItem(`plugin_${safeKey}`) || 'null');
             } catch {
-              return null
+              return null;
             }
           },
           setState: (key: string, value: any) => {
+            const safeKey = sanitizeKey(key);
+            if (!safeKey) {
+              console.warn('Invalid plugin state key:', key);
+              return;
+            }
             try {
-              localStorage.setItem(`plugin_${key}`, JSON.stringify(value))
+              localStorage.setItem(`plugin_${safeKey}`, JSON.stringify(value));
             } catch (error) {
-              console.error('Failed to save plugin state:', error)
+              console.error('Failed to save plugin state:', error);
             }
           },
           
