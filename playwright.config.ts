@@ -13,20 +13,20 @@ export default defineConfig({
   ],
   timeout: 60 * 1000, // 60 seconds per test
   
-  // Optimized web server configuration for faster startup
-  webServer: {
-    command: process.env.CI ? 'npm run build && npm start' : 'npm run dev',
+  // Web server configuration - only start if needed
+  webServer: process.env.CI ? undefined : {
+    command: 'npm run dev',
     port: 3000,
-    reuseExistingServer: true, // Always reuse for testing
-    timeout: process.env.CI ? 90000 : 120000, // Increased timeout for CI build
+    reuseExistingServer: true,
+    timeout: 120000,
     stderr: 'pipe',
     stdout: 'pipe',
   },
   
   use: {
     baseURL: 'http://localhost:3000',
-    trace: 'off', // Disable tracing for CI to avoid FFmpeg issues
-    video: 'off', // Disable video recording for CI
+    trace: process.env.CI ? 'off' : 'on-first-retry',
+    video: process.env.CI ? 'off' : 'retain-on-failure',
     screenshot: 'only-on-failure',
     navigationTimeout: 30 * 1000, // 30 seconds for navigation
     actionTimeout: 15 * 1000, // 15 seconds for actions
@@ -40,7 +40,11 @@ export default defineConfig({
         // Use system Chrome for CI reliability
         channel: process.env.CI ? 'chrome' : undefined,
         // Optimize viewport for faster rendering
-        viewport: { width: 1280, height: 720 }
+        viewport: { width: 1280, height: 720 },
+        // Disable certain features for CI stability
+        launchOptions: process.env.CI ? {
+          args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+        } : {}
       },
     },
     {
