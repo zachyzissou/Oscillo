@@ -7,7 +7,7 @@ import * as Tone from 'tone'
 import { extend } from '@react-three/fiber'
 import { useMusicalPalette } from '../store/useMusicalPalette'
 import ModernStartOverlay from './ui/ModernStartOverlay'
-import { PerformanceOverlay } from './PerformanceOverlay'
+
 import { performanceMonitor } from '@/lib/performance-monitor'
 
 // Extend the fiber catalog with post-processing effects
