@@ -144,22 +144,36 @@ test.describe('Performance Tests', () => {
     
     // Get all JS resources
     const resourceSizes = await page.evaluate(() => {
+      // Get all script resources using initiatorType
       const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[]
-      const jsResources = resources.filter(r => r.name.includes('.js'))
-      
+      const jsResources = resources.filter(r => r.initiatorType === 'script')
+
+      // Get all <script src="..."> from the initial HTML
+      const initialScriptSrcs = Array.from(document.querySelectorAll('script[src]'))
+        .map((el: HTMLScriptElement) => el.src)
+
       let totalSize = 0
       let initialSize = 0
-      
+
       jsResources.forEach(resource => {
         const size = resource.transferSize || 0
         totalSize += size
-        
-        // Consider initial load (not lazy-loaded chunks)
-        if (!resource.name.includes('chunk') || resource.name.includes('main')) {
+
+        // If the resource was loaded as an initial script (present in HTML)
+        // Use URL comparison (ignoring query/hash for robustness)
+        const resourceUrl = new URL(resource.name, location.origin)
+        const isInitial = initialScriptSrcs.some(src => {
+          try {
+            const srcUrl = new URL(src, location.origin)
+            return srcUrl.pathname === resourceUrl.pathname
+          } catch {
+            return false
+          }
+        })
+        if (isInitial) {
           initialSize += size
         }
       })
-      
       return {
         totalSize,
         initialSize,
