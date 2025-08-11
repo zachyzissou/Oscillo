@@ -526,18 +526,7 @@ export default function ImmersiveMusicalUniverse() {
         />
         
         {/* Moving accent lights */}
-        <group>
-          <pointLight 
-            position={[Math.sin(Date.now() * 0.001) * 15, 5, Math.cos(Date.now() * 0.001) * 15]} 
-            intensity={1.0} 
-            color="#ff9500" 
-          />
-          <pointLight 
-            position={[Math.cos(Date.now() * 0.0008) * 12, Math.sin(Date.now() * 0.0012) * 8, 8]} 
-            intensity={0.8} 
-            color="#00ff87" 
-          />
-        </group>
+        <MovingAccentLights />
         
         {/* Directional rim lighting */}
         <directionalLight
