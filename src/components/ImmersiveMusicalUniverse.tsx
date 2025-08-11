@@ -1,5 +1,5 @@
 'use client'
-import React, { useRef, useState, useCallback, useMemo } from 'react'
+import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { OrbitControls, Stars, Effects, Environment, PerspectiveCamera } from '@react-three/drei'
 import * as THREE from 'three'
@@ -7,6 +7,8 @@ import * as Tone from 'tone'
 import { extend } from '@react-three/fiber'
 import { useMusicalPalette } from '../store/useMusicalPalette'
 import ModernStartOverlay from './ui/ModernStartOverlay'
+import { PerformanceOverlay } from './PerformanceOverlay'
+import { performanceMonitor } from '@/lib/performance-monitor'
 
 // Extend the fiber catalog with post-processing effects
 // extend({ EffectComposer, RenderPass, UnrealBloomPass, FilmPass, ShaderPass, GlitchPass })
@@ -525,6 +527,20 @@ SimplePostProcessing.displayName = 'SimplePostProcessing'
 // Main immersive canvas
 export default function ImmersiveMusicalUniverse() {
   const { key, scale, tempo } = useMusicalPalette()
+  
+  // Setup performance monitoring
+  useEffect(() => {
+    // Expose performance monitor globally for tests
+    if (typeof window !== 'undefined') {
+      (window as any).performanceMonitor = performanceMonitor
+      
+      // Auto-start performance monitoring based on URL params
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('perf') === '1') {
+        performanceMonitor.start()
+      }
+    }
+  }, [])
   
   const canvasSettings = useMemo(() => ({
     camera: { position: [0, 5, 15] as [number, number, number], fov: 75 },

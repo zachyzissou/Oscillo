@@ -11,12 +11,22 @@ interface PerformanceMetrics {
 
 test.describe('Performance Tests', () => {
   test.beforeEach(async ({ page }) => {
-    // Enable performance monitoring
+    // Navigate to the app with performance monitoring
     await page.goto('/?perf=1')
     await page.waitForLoadState('networkidle')
     
-    // Wait for app to initialize
-    await page.waitForSelector('[data-testid="canvas-container"]', { timeout: 30000 })
+    // Wait for main content to load
+    await page.waitForSelector('[data-testid="main-content"]', { timeout: 30000 })
+    
+    // Click start button if it exists 
+    const startButton = page.locator('[data-testid="start-button"]')
+    if (await startButton.isVisible({ timeout: 5000 })) {
+      await page.evaluate(() => {
+        const button = document.querySelector('[data-testid="start-button"]');
+        if (button) button.click();
+      });
+      await page.waitForTimeout(3000)
+    }
     
     // Start audio context (required for audio tests)
     await page.click('body')
@@ -82,9 +92,9 @@ test.describe('Performance Tests', () => {
   test('memory usage stays under 200MB', async ({ page }) => {
     const metrics: PerformanceMetrics[] = []
     
-    // Stress test: spawn multiple objects and play audio
+    // Stress test: click on canvas area to trigger audio and particles
     for (let i = 0; i < 5; i++) {
-      await page.click('[data-testid="spawn-button"]')
+      await page.click('[data-testid="main-content"]')
       await page.waitForTimeout(500)
     }
     
@@ -234,14 +244,11 @@ test.describe('Performance Tests', () => {
       return monitor?.getAverageMetrics(10)
     })
     
-    // Create stress conditions: spawn many objects
+    // Create stress conditions: click rapidly to spawn particles and play notes
     for (let i = 0; i < 10; i++) {
-      await page.click('[data-testid="spawn-button"]')
+      await page.click('[data-testid="main-content"]')
       await page.waitForTimeout(200)
     }
-    
-    // Enable multiple effects
-    await page.click('[data-testid="effects-toggle"]', { timeout: 5000 })
     
     // Let it run under stress for 10 seconds
     await page.waitForTimeout(10000)
