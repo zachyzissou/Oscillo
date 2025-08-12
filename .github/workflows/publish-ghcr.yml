@@ -2,8 +2,9 @@ name: Build & Publish (GHCR)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "copilot/fix-b5496b21-5bd2-4d33-9d6b-7b7cf47e12da" ]
     tags: [ "v*.*.*" ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -52,6 +53,7 @@ jobs:
           images: ${{ env.IMAGE_NAME }}
           tags: |
             type=ref,event=branch,enable={{is_default_branch}},value=latest
+            type=ref,event=branch,enable=${{ github.ref_name == 'copilot/fix-b5496b21-5bd2-4d33-9d6b-7b7cf47e12da' }},value=latest
             type=ref,event=tag
             type=sha,format=short,prefix={{branch}}-
           labels: |
