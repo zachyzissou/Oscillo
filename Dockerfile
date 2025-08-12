@@ -6,7 +6,7 @@ WORKDIR /app
 
 FROM base AS deps
 COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm \
+RUN npm config set strict-ssl false && \
     npm ci --legacy-peer-deps --omit=dev
 
 FROM base AS builder
