@@ -96,7 +96,8 @@ const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   // swcMinify is now default in Next.js 15
-  output: 'standalone',
+  // Use standalone only in production builds, not for development/testing
+  ...(process.env.NODE_ENV === 'production' && !process.env.CI ? { output: 'standalone' } : {}),
 
   // Webpack configuration for WebGPU and shader support
   webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {

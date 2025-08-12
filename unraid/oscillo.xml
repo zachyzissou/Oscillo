@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<Container version="2">
+  <Name>Oscillo</Name>
+  <Repository>ghcr.io/zachyzissou/interactive-music-3d:latest</Repository>
+  <Registry>https://ghcr.io/</Registry>
+  <Network>bridge</Network>
+  <MyIP></MyIP>
+  <Shell>sh</Shell>
+  <Privileged>false</Privileged>
+  <Support>https://github.com/zachyzissou/INTERACTIVE-MUSIC-3D/issues</Support>
+  <Project>https://github.com/zachyzissou/INTERACTIVE-MUSIC-3D</Project>
+  <Overview>🎵 Next-generation interactive 3D music playground with cutting-edge WebGPU shaders, AI-powered composition, and immersive 3D visualization — all in real time. Features include audio-reactive backgrounds, Magenta.js AI music generation, advanced effect chains, and enterprise-grade performance monitoring.</Overview>
+  <Category>Media:Music;Productivity:Other</Category>
+  <WebUI>http://[IP]:[PORT:31415]/</WebUI>
+  <Icon>https://raw.githubusercontent.com/zachyzissou/INTERACTIVE-MUSIC-3D/main/oscillo-logo.png</Icon>
+  <ExtraParams></ExtraParams>
+  <PostArgs></PostArgs>
+  <CPUset></CPUset>
+  <DateInstalled></DateInstalled>
+  <DonateText></DonateText>
+  <DonateLink></DonateLink>
+  <Description>🎵 Next-generation interactive 3D music playground with cutting-edge WebGPU shaders, AI-powered composition, and immersive 3D visualization — all in real time. Features include audio-reactive backgrounds, Magenta.js AI music generation, advanced effect chains, and enterprise-grade performance monitoring.</Description>
+  <Networking>
+    <Mode>bridge</Mode>
+    <Publish>
+      <Port>
+        <HostPort>31415</HostPort>
+        <ContainerPort>3000</ContainerPort>
+        <Protocol>tcp</Protocol>
+        <Label>Web UI</Label>
+      </Port>
+    </Publish>
+  </Networking>
+  <Data>
+    <Volume>
+      <HostDir>/mnt/user/appdata/oscillo/logs</HostDir>
+      <ContainerDir>/app/logs</ContainerDir>
+      <Mode>rw</Mode>
+      <Label>Logs Directory</Label>
+    </Volume>
+    <Volume>
+      <HostDir>/mnt/user/appdata/oscillo/uploads</HostDir>
+      <ContainerDir>/app/uploads</ContainerDir>
+      <Mode>rw</Mode>
+      <Label>Uploads Directory</Label>
+    </Volume>
+  </Data>
+  <Environment>
+    <Variable>
+      <Name>NODE_ENV</Name>
+      <Value>production</Value>
+      <Mode></Mode>
+      <Label>Node Environment</Label>
+    </Variable>
+    <Variable>
+      <Name>LOG_DIR</Name>
+      <Value>/app/logs</Value>
+      <Mode></Mode>
+      <Label>Log Directory</Label>
+    </Variable>
+    <Variable>
+      <Name>NEXT_TELEMETRY_DISABLED</Name>
+      <Value>1</Value>
+      <Mode></Mode>
+      <Label>Disable Telemetry</Label>
+    </Variable>
+    <Variable>
+      <Name>TZ</Name>
+      <Value>America/New_York</Value>
+      <Mode></Mode>
+      <Label>Timezone</Label>
+    </Variable>
+  </Environment>
+  <Labels></Labels>
+  <Config Name="Web UI Port" Target="3000" Default="31415" Mode="tcp" Description="Port for web interface" Type="Port" Display="always" Required="true" Mask="false">31415</Config>
+  <Config Name="Logs Directory" Target="/app/logs" Default="/mnt/user/appdata/oscillo/logs" Mode="rw" Description="Directory for application logs" Type="Path" Display="always" Required="false" Mask="false">/mnt/user/appdata/oscillo/logs</Config>
+  <Config Name="Uploads Directory" Target="/app/uploads" Default="/mnt/user/appdata/oscillo/uploads" Mode="rw" Description="Directory for user uploads and exports" Type="Path" Display="always" Required="false" Mask="false">/mnt/user/appdata/oscillo/uploads</Config>
+  <Config Name="Node Environment" Target="NODE_ENV" Default="production" Mode="" Description="Node.js environment mode" Type="Variable" Display="advanced" Required="false" Mask="false">production</Config>
+  <Config Name="Log Directory" Target="LOG_DIR" Default="/app/logs" Mode="" Description="Internal log directory path" Type="Variable" Display="advanced" Required="false" Mask="false">/app/logs</Config>
+  <Config Name="Disable Telemetry" Target="NEXT_TELEMETRY_DISABLED" Default="1" Mode="" Description="Disable Next.js telemetry" Type="Variable" Display="advanced" Required="false" Mask="false">1</Config>
+  <Config Name="Timezone" Target="TZ" Default="America/New_York" Mode="" Description="Container timezone" Type="Variable" Display="always" Required="false" Mask="false">America/New_York</Config>
+</Container>

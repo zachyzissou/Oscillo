@@ -14,13 +14,16 @@
     "lint": "next lint --fix",
     "lint:check": "next lint",
     "type-check": "tsc --noEmit",
-    "test": "playwright test",
-    "test:ci": "playwright test --reporter=list",
+    "test": "vitest",
+    "test:ui": "vitest --ui",
+    "test:unit": "vitest run",
+    "test:watch": "vitest watch",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:visual": "playwright test --project=visual",
     "test:smoke": "playwright test tests/e2e/essential-functionality.spec.ts tests/e2e/home.spec.ts --project=chromium --timeout=30000",
-    "test:performance": "playwright test tests/e2e/enhanced-features.spec.ts --project=chromium",
+    "test:performance": "playwright test tests/e2e/performance.spec.ts --project=chromium",
+    "test:a11y": "playwright test tests/e2e/accessibility.spec.ts --project=chromium",
     "build:analyze": "ANALYZE=true npm run build",
     "security:audit": "npm audit --audit-level moderate",
     "security:fix": "npm audit fix",
@@ -80,6 +83,7 @@
     "zustand": "^5.0.6"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.0",
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.32.0",
     "@playwright/test": "^1.53.2",
@@ -93,6 +97,7 @@
     "@typescript-eslint/eslint-plugin": "^8.38.0",
     "@typescript-eslint/parser": "^8.38.0",
     "@vitejs/plugin-react": "^4.6.0",
+    "@vitest/ui": "^2.1.8",
     "@webgpu/types": "^0.1.40",
     "critters": "^0.0.23",
     "eslint": "^9.32.0",
@@ -113,6 +118,7 @@
     "prettier-plugin-tailwindcss": "^0.6.9",
     "raw-loader": "^4.0.2",
     "ts-node": "^10.9.2",
+    "vitest": "^2.1.8",
     "webpack-bundle-analyzer": "^4.10.2"
   },
   "lint-staged": {
@@ -136,6 +142,14 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "overrides": {
+    "minimist": "^1.2.6",
+    "static-eval": "^2.1.0",
+    "@magenta/music": {
+      "minimist": "^1.2.6",
+      "static-eval": "^2.1.0"
+    }
   },
   "keywords": [
     "music",

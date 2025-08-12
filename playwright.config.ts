@@ -15,10 +15,10 @@ export default defineConfig({
   
   // Optimized web server configuration for faster startup
   webServer: {
-    command: process.env.CI ? 'npm run build && npm start' : 'npm run dev',
+    command: 'npm run dev',
     port: 3000,
-    reuseExistingServer: true, // Always reuse for testing
-    timeout: process.env.CI ? 90000 : 120000, // Increased timeout for CI build
+    reuseExistingServer: false, // Force restart to avoid stale state
+    timeout: 120000,
     stderr: 'pipe',
     stdout: 'pipe',
   },
@@ -30,6 +30,22 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     navigationTimeout: 30 * 1000, // 30 seconds for navigation
     actionTimeout: 15 * 1000, // 15 seconds for actions
+    // Headless mode for CI compatibility
+    headless: true,
+    // Ignore HTTPS errors for local testing
+    ignoreHTTPSErrors: true,
+    // Chromium args for CI environment
+    launchOptions: {
+      args: [
+        '--no-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor',
+        '--use-gl=swiftshader',
+        '--single-process'
+      ]
+    }
   },
   
   projects: [
@@ -37,10 +53,27 @@ export default defineConfig({
       name: 'chromium',
       use: { 
         ...devices['Desktop Chrome'],
-        // Use system Chrome for CI reliability
-        channel: process.env.CI ? 'chrome' : undefined,
         // Optimize viewport for faster rendering
-        viewport: { width: 1280, height: 720 }
+        viewport: { width: 1280, height: 720 },
+        // Use system chrome if available
+        executablePath: '/usr/bin/google-chrome',
+        // Override launch options for CI
+        launchOptions: {
+          executablePath: '/usr/bin/google-chrome',
+          args: [
+            '--no-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-gpu',
+            '--disable-web-security',
+            '--disable-features=VizDisplayCompositor',
+            '--use-gl=swiftshader',
+            '--single-process',
+            '--no-first-run',
+            '--disable-extensions',
+            '--disable-default-apps',
+            '--headless'
+          ]
+        }
       },
     },
     {

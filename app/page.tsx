@@ -2,7 +2,7 @@
 import React from "react"
 import dynamic from 'next/dynamic'
 
-const SimpleWorkingCanvas = dynamic(() => import('../src/components/SimpleWorkingCanvas'), { ssr: false })
+const ImmersiveMusicalUniverse = dynamic(() => import('../src/components/ImmersiveMusicalUniverse'), { ssr: false })
 
 
 export default function Home() {
@@ -16,10 +16,10 @@ export default function Home() {
         width: '100vw',
         height: '100vh',
         overflow: 'hidden',
-        backgroundColor: '#0f0f23'
+        backgroundColor: '#000011'
       }}
     >
-      <SimpleWorkingCanvas />
+      <ImmersiveMusicalUniverse />
     </div>
   )
 }

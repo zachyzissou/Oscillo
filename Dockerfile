@@ -1,61 +1,82 @@
 # syntax=docker/dockerfile:1.4
 # Multi-stage Dockerfile for Enhanced Oscillo Audio-Reactive Platform
 
-FROM ubuntu:22.04 AS base
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Etc/UTC
+FROM node:20-alpine AS base
 WORKDIR /app
 
-# Install Node 20 and enhanced build dependencies for WebGPU/audio processing
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends tzdata \
-    curl gnupg ca-certificates python3 make g++ \
-    libnss3 libatk-bridge2.0-0 libxss1 libgtk-3-0 libx11-xcb1 \
-    libasound2-dev libpulse-dev libjack-dev \
-    mesa-utils libgl1-mesa-dev libglu1-mesa-dev \
-    xvfb x11vnc fluxbox \
-    && ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && dpkg-reconfigure -f noninteractive tzdata \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && npm install -g npm@11.4.2 \
-    && rm -rf /var/lib/apt/lists/*
+# Install basic dependencies
+RUN apk add --no-cache libc6-compat && \
+    npm install -g npm@latest
 
 FROM base AS deps
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm \
-    --mount=type=cache,target=/app/.next/cache \
-    npm ci --legacy-peer-deps --prefer-offline
+    npm ci --legacy-peer-deps --omit=dev
 
 FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
+COPY package.json package-lock.json ./
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --legacy-peer-deps
+
 COPY . .
 
-# Build with enhanced optimizations for audio/graphics
+# Build with optimizations for audio/graphics
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN --mount=type=cache,target=/app/.next/cache \
-    npm run build && npm prune --omit=dev
+    npm run build
 
 FROM base AS runner
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV LOG_DIR=/app/logs
-ENV DISPLAY=:99
 
-# Set up virtual display for headless WebGL/WebGPU
-RUN mkdir -p "$LOG_DIR" /tmp/.X11-unix \
-    && chmod 1777 /tmp/.X11-unix
+# Create directories
+RUN mkdir -p "$LOG_DIR" && \
+    addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 nextjs
 
-# Copy built application
-COPY --from=builder /app/public ./public
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
+# Copy Next.js standalone output
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+
+# Create server.js if it doesn't exist
+RUN if [ ! -f server.js ]; then \
+    echo "const { createServer } = require('http')" > server.js && \
+    echo "const { parse } = require('url')" >> server.js && \
+    echo "const next = require('next')" >> server.js && \
+    echo "" >> server.js && \
+    echo "const dev = process.env.NODE_ENV !== 'production'" >> server.js && \
+    echo "const hostname = '0.0.0.0'" >> server.js && \
+    echo "const port = process.env.PORT || 3000" >> server.js && \
+    echo "" >> server.js && \
+    echo "const app = next({ dev, hostname, port })" >> server.js && \
+    echo "const handle = app.getRequestHandler()" >> server.js && \
+    echo "" >> server.js && \
+    echo "app.prepare().then(() => {" >> server.js && \
+    echo "  createServer(async (req, res) => {" >> server.js && \
+    echo "    try {" >> server.js && \
+    echo "      const parsedUrl = parse(req.url, true)" >> server.js && \
+    echo "      await handle(req, res, parsedUrl)" >> server.js && \
+    echo "    } catch (err) {" >> server.js && \
+    echo "      console.error('Error occurred handling', req.url, err)" >> server.js && \
+    echo "      res.statusCode = 500" >> server.js && \
+    echo "      res.end('internal server error')" >> server.js && \
+    echo "    }" >> server.js && \
+    echo "  }).listen(port, (err) => {" >> server.js && \
+    echo "    if (err) throw err" >> server.js && \
+    echo "    console.log(\`> Ready on http://\${hostname}:\${port}\`)" >> server.js && \
+    echo "  })" >> server.js && \
+    echo "})" >> server.js; \
+    fi
+
+USER nextjs
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:3000/api/health || exit 1
+    CMD wget --no-verbose --tries=1 --spider http://localhost:3000/api/health || exit 1
 
 EXPOSE 3000
 
-# Start virtual display and application
-CMD ["sh", "-c", "Xvfb :99 -screen 0 1024x768x24 & exec npm run start"]
+CMD ["node", "server.js"]

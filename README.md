@@ -78,10 +78,11 @@
 
 ### 🚀 **Production-Ready Platform**
 
-- **Enterprise Deployment** — Docker containerization with health monitoring
-- **Comprehensive Testing** — 15+ Playwright E2E tests covering all user journeys
-- **Accessibility First** — WCAG 2.1 compliance with screen reader support
-- **Performance Analytics** — Real-time monitoring of FPS, memory, and audio latency
+- **Enterprise Deployment** — Docker containerization with health monitoring and GHCR publishing
+- **Comprehensive Testing** — Unit, E2E, accessibility, and performance test suites
+- **Accessibility First** — WCAG 2.1 compliance with screen reader support  
+- **Performance Monitoring** — Real-time FPS, memory, and audio metrics (toggle with `?perf=1`)
+- **Plugin System** — Extensible architecture for custom instruments, effects, and visuals
 - **Progressive Web App** — Installable with offline capabilities and service worker
 
 ---
@@ -266,6 +267,39 @@ WebGPU Detection → Shader Compilation → Audio Data Binding → Render Loop
 
 ## 🔧 Deployment & DevOps
 
+### **Container Deployment**
+
+#### **GitHub Container Registry (GHCR)**
+
+Pull the latest image:
+```bash
+docker pull ghcr.io/zachyzissou/interactive-music-3d:latest
+```
+
+Run with Docker:
+```bash
+docker run -d \
+  --name oscillo \
+  -p 31415:3000 \
+  -v ./logs:/app/logs \
+  -v ./uploads:/app/uploads \
+  -e NODE_ENV=production \
+  ghcr.io/zachyzissou/interactive-music-3d:latest
+```
+
+Access at: `http://localhost:31415`
+
+#### **Unraid Installation**
+
+**Method 1: User Template (Recommended)**
+1. Copy `unraid/oscillo.xml` to `/boot/config/plugins/dockerMan/templates-user/`
+2. Docker ▸ Add Container ▸ Template: select "Oscillo"
+3. Set Host Port (default 31415), map volumes if desired, then Apply
+
+**Method 2: Manual Setup**
+- Use the Docker command above with Unraid's Docker interface
+- See [docs/unraid.md](docs/unraid.md) for detailed installation guide
+
 ### **Docker Deployment**
 
 **Multi-stage optimized Dockerfile:**
@@ -380,7 +414,26 @@ npm run test:performance  # Performance benchmarks
 
 ### **Testing Architecture**
 
-**1. Smoke Tests (Fast - 2-3 minutes)**
+### **Testing Architecture**
+
+**1. Unit Tests (Vitest - Fast)**
+```bash
+npm run test:unit     # Run all unit tests
+npm run test:watch    # Watch mode for development
+npm run test:ui       # Interactive test UI
+```
+
+**2. Accessibility Tests (Automated)**
+```bash
+npm run test:a11y     # WCAG 2.1 compliance testing
+```
+
+**3. Performance Tests (Comprehensive)**
+```bash
+npm run test:performance  # FPS, memory, bundle size validation
+```
+
+**4. Smoke Tests (Fast - 2-3 minutes)**
 - ✅ Application startup and basic functionality
 - ✅ Critical user paths (start overlay → main experience)
 - ✅ No critical console errors
