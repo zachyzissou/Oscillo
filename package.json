@@ -137,6 +137,10 @@
       "last 1 safari version"
     ]
   },
+  "overrides": {
+    "minimist": "^1.2.8",
+    "static-eval": "^2.1.1"
+  },
   "keywords": [
     "music",
     "3d",
