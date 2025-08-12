@@ -4,10 +4,6 @@
 FROM node:20-alpine AS base
 WORKDIR /app
 
-# Install basic dependencies
-RUN apk add --no-cache libc6-compat && \
-    npm install -g npm@latest
-
 FROM base AS deps
 COPY package.json package-lock.json ./
 RUN --mount=type=cache,target=/root/.npm \
@@ -15,7 +11,7 @@ RUN --mount=type=cache,target=/root/.npm \
 
 FROM base AS builder
 COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm \
+RUN npm config set strict-ssl false && \
     npm ci --legacy-peer-deps
 
 COPY . .
@@ -24,6 +20,7 @@ COPY . .
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
 RUN --mount=type=cache,target=/app/.next/cache \
+    npm config set strict-ssl false && \
     npm run build
 
 FROM base AS runner
