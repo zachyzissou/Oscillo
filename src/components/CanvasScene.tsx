@@ -10,6 +10,7 @@ import SceneLights from './SceneLights'
 import BottomDrawer from './BottomDrawer'
 import ModernStartOverlay from './ui/ModernStartOverlay'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
+import { QUALITY_PROFILES, detectInitialQuality } from '@/lib/quality'
 
 function ResizeHandler() {
   const { camera, gl, viewport } = useThree()
@@ -60,36 +61,35 @@ export default function CanvasScene() {
   const [isInitializing, setIsInitializing] = React.useState(true) // RESTORE INITIALIZATION
   const setPerf = usePerformanceSettings((s) => s.setLevel)
   const perfLevel = usePerformanceSettings((s) => s.level)
+  const profile = QUALITY_PROFILES[perfLevel] ?? QUALITY_PROFILES.medium
   
   React.useEffect(() => {
     let cancelled = false
-    if (rendererRef.current) return
-    
+
     const initializeGPU = async () => {
       try {
         setIsInitializing(true)
         setWebglError(null)
 
-        // Simplified GPU detection
-        const isMobile = /Mobi|Android/i.test(navigator.userAgent)
-        const mem = (navigator as any).deviceMemory || 4
-        const isHeadless = /HeadlessChrome/i.test(navigator.userAgent)
-        setPerf(isMobile || mem < 4 || isHeadless ? 'low' : 'medium')
-        
+        const level = await detectInitialQuality()
         if (!cancelled) {
-          // Simple initialization - skip complex safeguards for now
-          setIsInitializing(false)
+          setPerf(level)
         }
-        
       } catch (error) {
         console.error('GPU initialization failed:', error)
-        setWebglError(`WebGL initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
-        setIsInitializing(false)
+        if (!cancelled) {
+          setPerf('medium')
+          setWebglError(`WebGL initialization failed: ${error instanceof Error ? error.message : 'Unknown error'}`)
+        }
+      } finally {
+        if (!cancelled) {
+          setIsInitializing(false)
+        }
       }
     }
-    
+
     initializeGPU()
-    
+
     return () => {
       cancelled = true
     }
@@ -107,9 +107,9 @@ export default function CanvasScene() {
     
     return {
       className: "absolute inset-0",
-      shadows: !contextLostRef.current && !isSafari, // Disable shadows on Safari for compatibility
+      shadows: profile.shadows && !contextLostRef.current && !isSafari,
       gl: rendererRef.current ?? {
-        antialias: perfLevel !== 'low' && !isSafari, // Conservative antialias for Safari
+        antialias: profile.postprocessing && !isSafari,
         alpha: true,
         powerPreference: (perfLevel === 'high' && !isWebKit) ? 'high-performance' as const : 'default' as const,
         failIfMajorPerformanceCaveat: false,
@@ -125,10 +125,10 @@ export default function CanvasScene() {
       camera: { fov: 75, position: [0, 0, 10] as [number, number, number] },
       style: { width: '100vw', height: '100vh' },
       resize: { scroll: false, debounce: { scroll: 0, resize: 0 } },
-      dpr: Math.min(window.devicePixelRatio || 1, (perfLevel === 'high' && !isWebKit) ? 2 : 1),
+      dpr: profile.dpr,
       performance: {
         min: 0.5,
-        max: (perfLevel === 'high' && !isSafari) ? 1 : 0.8,
+        max: profile.postprocessing && !isSafari ? 1 : 0.8,
         debounce: 200,
       },
       frameloop: contextLostRef.current ? 'never' as const : 'always' as const,
@@ -149,7 +149,7 @@ export default function CanvasScene() {
         // Canvas created and ready for rendering
       },
     }
-  }, [perfLevel, webglError, isInitializing]) // Add error state dependencies
+  }, [perfLevel, profile, webglError, isInitializing]) // Add error state dependencies
 
   // Show error state if WebGL failed
   if (webglError && !isInitializing) {
@@ -204,12 +204,18 @@ export default function CanvasScene() {
             highLevel={0}
             activeShader="metaball"
             glitchIntensity={0.5}
-            enabled={perfLevel !== 'low'}
+            enabled={profile.postprocessing}
             audioSensitivity={{ bass: 1, mid: 1, high: 1 }}
           />
           {/* Post-processing temporarily disabled for stability */}
         </Suspense>
       </Canvas>
+      <div className="pointer-events-none absolute top-4 left-4 text-xs font-mono bg-black/60 text-white px-3 py-2 rounded-md border border-white/10 shadow-lg">
+        <div>Performance: {perfLevel.toUpperCase()}</div>
+        <div className="text-white/70">
+          DPR {profile.dpr[0]}–{profile.dpr[1]} · Shadows {profile.shadows ? 'ON' : 'OFF'}
+        </div>
+      </div>
       <BottomDrawer />
       <ModernStartOverlay />
     </div>

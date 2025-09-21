@@ -56,8 +56,8 @@ test.describe('Oscillo Application - Visual Verification', () => {
     const textContent = await page.textContent('body');
     console.log('Page text content preview:', textContent?.substring(0, 200));
     
-    // Check if there are any elements with "start", "begin", "sonic", "voyage" text
-    const startElements = await page.getByText(/start|begin|sonic|voyage/i).all();
+    // Check if there are any elements with overlay-related text (start, interactive, music)
+    const startElements = await page.getByText(/start|interactive|music/i).all();
     console.log('Found start-related elements:', startElements.length);
     
     if (startElements.length > 0) {
@@ -69,14 +69,14 @@ test.describe('Oscillo Application - Visual Verification', () => {
       }
     }
     
-    // Try to find the specific text from StartOverlay
-    const sonicText = page.getByText("Let's begin your sonic voyage");
-    const sonicExists = await sonicText.count();
-    console.log('Sonic voyage text found:', sonicExists);
+    // Try to find the specific text from ModernStartOverlay
+    const overlayHeading = page.getByText(/interactive 3d music experience/i);
+    const headingCount = await overlayHeading.count();
+    console.log('Overlay heading found:', headingCount);
     
-    if (sonicExists > 0) {
-      const isVisible = await sonicText.isVisible();
-      console.log('Sonic voyage text visible:', isVisible);
+    if (headingCount > 0) {
+      const isVisible = await overlayHeading.isVisible();
+      console.log('Overlay heading visible:', isVisible);
     }
   });
 

@@ -12,6 +12,7 @@ import { usePerformanceSettings, PerfLevel } from '@/store/usePerformanceSetting
 import MagicMelodyButton from './MagicMelodyButton'
 import JamSessionButton from './JamSessionButton'
 import GenerativeMusicEngine from './GenerativeMusicEngine'
+import { GlassPanel, NeonButton } from './ui/ModernUITheme'
 
 export default function BottomDrawer() {
   // Use stable selectors to prevent infinite re-renders
@@ -71,19 +72,37 @@ export default function BottomDrawer() {
   return (
     <div className="pointer-events-none">
       <div
-        className={`fixed bottom-0 left-0 w-full pointer-events-auto transition-transform duration-300 ease-out ${
-          selected ? 'translate-y-0' : 'translate-y-[120px]'
+        className={`fixed bottom-6 left-1/2 z-40 w-full max-w-5xl -translate-x-1/2 pointer-events-auto transition-transform duration-300 ease-out px-4 sm:px-6 ${
+          selected ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}
       >
-        {/* Liquid background with glassmorphism */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-purple-900/50 to-transparent backdrop-blur-lg">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/20 via-pink-500/20 to-blue-500/20 animate-pulse" />
-        </div>
-        
         {selected && obj && (
-          <div className="relative z-10 flex flex-col gap-4 p-6 text-white">
+          <GlassPanel
+            variant="neon"
+            glow
+            className="relative flex flex-col gap-5 overflow-hidden border-white/10 bg-black/70 text-white"
+          >
+            <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-5 py-4">
+              <div>
+                <p className="text-xs uppercase tracking-widest text-white/60">Active Shape</p>
+                <p className="text-lg font-semibold">{obj.type.toUpperCase()} · {obj.id}</p>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-white/70">
+                <span>Performance</span>
+                <select 
+                  value={perfLevel} 
+                  onChange={e => setPerfLevel(e.target.value as PerfLevel)} 
+                  className="rounded bg-white/10 px-2 py-1 text-white outline-none backdrop-blur"
+                  title="Performance Level"
+                >
+                  <option value="low">Eco</option>
+                  <option value="medium">Balanced</option>
+                  <option value="high">Performance</option>
+                </select>
+              </div>
+            </header>
             {/* Mode Selection with Liquid Buttons */}
-            <div className="flex gap-3 justify-center">
+            <div className="flex flex-wrap items-center justify-center gap-3 px-5">
               {objectTypes.map((t) => (
                 <LiquidButton
                   key={t}
@@ -97,19 +116,20 @@ export default function BottomDrawer() {
             </div>
 
             {/* Play/Pause Button */}
-            <div className="flex justify-center">
-              <LiquidButton
+            <div className="flex justify-center px-5">
+              <NeonButton
                 onClick={togglePlay}
-                variant="accent"
-                className="px-8 py-3 text-lg font-bold"
+                variant={playing ? 'secondary' : 'primary'}
+                size="lg"
+                className="min-w-[180px]"
               >
-                {playing ? '⏸️ PAUSE' : '▶️ PLAY'}
-              </LiquidButton>
+                {playing ? 'Pause' : 'Play'}
+              </NeonButton>
             </div>
 
             {/* Enhanced Feature Toggle Row */}
-            <div className="flex items-center justify-between py-2">
-              <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center justify-between gap-4 border-y border-white/10 px-5 py-3 text-sm">
+              <div className="flex items-center gap-4 text-white/80">
                 <label className="flex items-center gap-2 text-sm">
                   <input 
                     type="checkbox" 
@@ -132,19 +152,8 @@ export default function BottomDrawer() {
                   <span className="text-blue-200">🎼 AI Music</span>
                 </label>
               </div>
-              
-              <select 
-                value={perfLevel} 
-                onChange={e => setPerfLevel(e.target.value as PerfLevel)} 
-                className="text-black rounded px-2 py-1 text-xs bg-white/90"
-                title="Performance Level"
-              >
-                <option value="low">Eco Mode</option>
-                <option value="medium">Balanced</option>
-                <option value="high">Performance</option>
-              </select>
             </div>
-            <div className="flex gap-4 overflow-x-auto py-2">
+            <div className="flex gap-4 overflow-x-auto px-5 py-2">
               <Knob label="Vol" min={0} max={1} step={0.01} value={volume} onChange={(e) => setVolume(parseFloat(e.target.value))} />
               {advanced && (
                 <>
@@ -157,7 +166,7 @@ export default function BottomDrawer() {
               <Knob label="Filter" min={20} max={1000} step={10} value={filterFrequency} onChange={(e) => setFilterFrequency(parseFloat(e.target.value))} />
             </div>
             {params && selected && (
-              <div className="flex gap-4 overflow-x-auto pb-2">
+              <div className="flex gap-4 overflow-x-auto px-5 pb-2">
                 <Knob label="Reverb" min={0} max={1} step={0.01} value={params.reverb} onChange={(e) => setEffect(selected, { reverb: parseFloat(e.target.value) })} />
                 <Knob label="Delay" min={0} max={1} step={0.01} value={params.delay} onChange={(e) => setEffect(selected, { delay: parseFloat(e.target.value) })} />
                 <Knob label="Lowpass" min={100} max={20000} step={100} value={params.lowpass} onChange={(e) => setEffect(selected, { lowpass: parseFloat(e.target.value) })} />
@@ -167,22 +176,26 @@ export default function BottomDrawer() {
             
             {/* Generative Music Engine */}
             {showGenerative && (
-              <div className="mt-4">
+              <div className="px-5">
                 <GenerativeMusicEngine isPlaying={playing} />
               </div>
             )}
             
-            <MagicMelodyButton />
-            <JamSessionButton />
-            <div className="flex gap-2">
-              <button onClick={togglePlay} className="px-3 py-1 bg-green-500 rounded">
-                {playing ? 'Pause' : 'Play'}
-              </button>
-              <button onClick={() => selectShape(null)} className="ml-auto px-3 py-1 bg-gray-600 rounded">
-                Close
-              </button>
+            <div className="flex flex-wrap items-center justify-between gap-3 px-5 pb-4">
+              <div className="flex items-center gap-3">
+                <MagicMelodyButton />
+                <JamSessionButton />
+              </div>
+              <div className="flex items-center gap-2">
+                <NeonButton variant="secondary" size="sm" onClick={togglePlay}>
+                  {playing ? 'Pause Playback' : 'Preview Note'}
+                </NeonButton>
+                <NeonButton variant="accent" size="sm" onClick={() => selectShape(null)}>
+                  Close
+                </NeonButton>
+              </div>
             </div>
-          </div>
+          </GlassPanel>
         )}
       </div>
     </div>

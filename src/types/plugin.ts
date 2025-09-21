@@ -120,9 +120,9 @@ export interface PluginContext {
   setState: (key: string, value: any) => void
   
   // Event system
-  on: (event: string, callback: Function) => void
-  off: (event: string, callback: Function) => void
-  emit: (event: string, data?: any) => void
+  on: (event: PluginEvent, callback: Function) => void
+  off: (event: PluginEvent, callback: Function) => void
+  emit: (event: PluginEvent, data?: any) => void
 }
 
 export interface PluginManager {
@@ -141,6 +141,17 @@ export interface PluginManager {
   
   // Context provision
   getContext: () => PluginContext
+  setContext: (context: PluginContext) => void
+  clearContext: () => void
+
+  // State helpers
+  getState: (key: string) => any
+  setState: (key: string, value: any) => void
+
+  // Events
+  on: (event: PluginEvent, callback: Function) => void
+  off: (event: PluginEvent, callback: Function) => void
+  emit: (event: PluginEvent, data?: any) => void
 }
 
 // Plugin events

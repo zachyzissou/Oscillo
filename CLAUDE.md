@@ -41,21 +41,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 app/                     # Next.js App Router
 ├── layout.tsx          # Global layout with error boundaries
 ├── page.tsx            # Main 3D canvas application
-├── ClientLayout.tsx    # Client-side hydration wrapper
-└── PluginLoader.tsx    # Dynamic plugin loading
+└── ClientLayout.tsx    # Client-side hydration wrapper
 
 src/
 ├── components/         # React components
 │   ├── CanvasScene.tsx           # Main 3D scene with WebGL/WebGPU
 │   ├── AudioReactiveShaderBackground.tsx # Audio-driven visual effects
 │   ├── BottomDrawer.tsx          # Main UI drawer
-│   ├── StartOverlay.tsx          # Hydration-safe initialization
+│   ├── ui/ModernStartOverlay.tsx # Hydration-safe initialization
 │   └── ui/                       # Modern UI components
 ├── lib/                # Core utilities
 │   ├── audio.ts                  # Tone.js audio engine
 │   ├── webgpu-renderer.ts        # WebGPU/WebGL abstraction
 │   ├── performance.ts            # Performance monitoring
 │   └── audio/                    # Audio utilities
+├── plugins/             # Runtime plugin system
+│   ├── pluginManager.ts         # Plugin registry & events
+│   └── PluginLoader.tsx         # Initializes plugins after audio gate
 ├── store/              # Zustand state stores (primitives only)
 ├── shaders/            # GLSL/WGSL shader files
 └── types/              # TypeScript definitions
@@ -99,7 +101,7 @@ Effects chain: Reverb → Delay → Chorus → Distortion → Bitcrusher
 - Use `'use client'` directive for interactive components
 - Wrap 3D components in `<Suspense>` for loading states
 - Error boundaries for WebGL context loss recovery
-- Hydration-safe initialization via `StartOverlay`
+- Hydration-safe initialization via `ModernStartOverlay`
 
 ### Audio Development
 - Always check audio context state before operations

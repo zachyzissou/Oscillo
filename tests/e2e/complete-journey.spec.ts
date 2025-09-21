@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { startExperience } from './utils/startExperience';
 
 test.describe('Oscillo Application - Complete Functional Test', () => {
   test('complete user journey with start overlay interaction', async ({ page }) => {
@@ -17,20 +18,16 @@ test.describe('Oscillo Application - Complete Functional Test', () => {
     const startOverlay = page.locator('[data-testid="start-overlay"]');
     await expect(startOverlay).toBeVisible({ timeout: 10000 });
     
-    // Verify the sonic voyage text is present
-    const sonicText = page.getByText(/begin your sonic voyage/i);
-    await expect(sonicText).toBeVisible();
+    // Verify the overlay headline is present
+    const introHeading = page.getByRole('heading', { name: /interactive 3d music experience/i });
+    await expect(introHeading).toBeVisible();
     
     // Take screenshot showing the start overlay
     await page.screenshot({ 
       path: 'test-results/02-start-overlay-visible.png',
       fullPage: true 
     });
-      // Click on the start overlay to begin the experience
-    await startOverlay.click();
-
-    // Wait for the overlay to disappear first
-    await expect(startOverlay).not.toBeVisible({ timeout: 10000 });
+    await startExperience(page)
 
     // Debug: Check application state immediately after overlay disappears
     const debugInfo = await page.evaluate(() => {
@@ -47,38 +44,7 @@ test.describe('Oscillo Application - Complete Functional Test', () => {
     });
     console.log('Debug info after overlay disappears:', debugInfo);
 
-    // Wait for the main content to appear (this indicates the app has started)
-    // In WebKit browsers, audio initialization might fail, so we check for either success or failure state
-    try {
-      await page.waitForSelector('#main-content', { timeout: 15000 });
-      console.log('Main content appeared - app started successfully');
-    } catch (error) {
-      // WebKit browsers might fail audio initialization, check if overlay disappeared
-      const overlayGone = await page.locator('[data-testid="start-overlay"]').isVisible().then(visible => !visible);
-      if (overlayGone) {
-        console.log('Start overlay disappeared but main content not found - checking for WebKit audio issues');
-        // In this case, the app might have partially started but audio failed
-        // Check if we can find any indication the app attempted to start
-        const hasAnyAppState = await page.evaluate(() => {
-          // Check for any sign the app is attempting to run
-          const hasCanvases = document.querySelectorAll('canvas').length > 0;
-          const hasUIElements = document.querySelectorAll('button, input').length > 0;
-          const bodyHasContent = document.body.children.length > 5; // More than just basic structure
-          return hasCanvases || hasUIElements || bodyHasContent;
-        });
-        
-        if (hasAnyAppState) {
-          console.log('WebKit audio failed but app partially loaded - continuing test');
-        } else {
-          throw error; // Re-throw if nothing indicates the app tried to start
-        }
-      } else {
-        throw error; // Re-throw if overlay is still visible
-      }
-    }
-
-    // Give additional time for canvas/scene initialization, especially in Firefox
-    await page.waitForTimeout(4000);
+    await page.waitForSelector('#main-content', { timeout: 15000 });
 
     // Take screenshot after starting
     await page.screenshot({ 
@@ -195,6 +161,7 @@ test.describe('Oscillo Application - Complete Functional Test', () => {
 
   test('performance and accessibility checks', async ({ page }) => {
     await page.goto('/');
+    await startExperience(page, { waitForAudio: false });
     
     // Check for accessibility issues
     const title = await page.title();
@@ -225,13 +192,7 @@ test.describe('Oscillo Application - Complete Functional Test', () => {
   test('audio and interaction features', async ({ page }) => {
     // Enable audio context (required for audio testing)
     await page.goto('/');
-    
-    // Start the application
-    const startOverlay = page.locator('[data-testid="start-overlay"]');
-    if (await startOverlay.isVisible({ timeout: 5000 })) {
-      await startOverlay.click();
-      await page.waitForTimeout(2000);
-    }
+    await startExperience(page, { waitForAudio: false })
     
     // Look for audio control elements
     const volumeControl = page.locator('input[type="range"]').first();

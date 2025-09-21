@@ -5,6 +5,7 @@ import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import * as Tone from 'tone'
 import { useMusicalPalette } from '../store/useMusicalPalette'
+import { getInterval } from '@/lib/music'
 import ModernStartOverlay from './ui/ModernStartOverlay'
 
 // Simple musical object component
@@ -326,20 +327,4 @@ export default function SimpleWorkingCanvas() {
       </div>
     </div>
   )
-}
-
-// Helper function for chord intervals
-function getInterval(note: string, semitones: number): string {
-  const noteMap = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
-  const match = note.match(/^([A-G]#?)(\\d+)$/)
-  if (!match) return note
-  
-  const [, noteName, octaveStr] = match
-  const octave = parseInt(octaveStr)
-  const noteIndex = noteMap.indexOf(noteName)
-  
-  const newNoteIndex = (noteIndex + semitones) % 12
-  const newOctave = octave + Math.floor((noteIndex + semitones) / 12)
-  
-  return `${noteMap[newNoteIndex]}${newOctave}`
 }

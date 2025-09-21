@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { addBody } from "../lib/physics"
+import { disposeAllObjectAudio, disposeObjectAudio } from '../lib/audio'
 
 /**
  * Store of musical object metadata with modern Zustand patterns.
@@ -114,6 +115,8 @@ export const useObjects = create<ObjectState>()(
           console.warn('Failed to save objects to localStorage:', error)
         }
       }
+
+      disposeObjectAudio(id)
     },
 
     updatePosition: (id: string, position: [number, number, number]) => {
@@ -142,6 +145,8 @@ export const useObjects = create<ObjectState>()(
           console.warn('Failed to clear objects from localStorage:', error)
         }
       }
+
+      disposeAllObjectAudio()
     },
 
     getObjectById: (id: string) => {

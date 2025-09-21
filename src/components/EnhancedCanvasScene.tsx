@@ -12,6 +12,7 @@ import { useObjects } from '../store/useObjects'
 import { getAnalyserBands } from '../lib/analyser'
 import PlusButton3D from './PlusButton3D'
 import SingleMusicalObject from './SingleMusicalObject'
+import { QUALITY_PROFILES } from '@/lib/quality'
 
 // Enhanced Musical Object Component
 function EnhancedMusicalObject({ 
@@ -216,6 +217,7 @@ export default function EnhancedCanvasScene() {
   const perfLevel = usePerformanceSettings((s) => s.level)
   const volume = useAudioSettings((s) => s.volume)
   const bassSensitivity = useShaderSettings((s) => s.bassSensitivity)
+  const profile = QUALITY_PROFILES[perfLevel] ?? QUALITY_PROFILES.medium
   
   const audioData = useAudioAnalysis()
   const objects = useObjects((s) => s.objects)
@@ -229,21 +231,22 @@ export default function EnhancedCanvasScene() {
   const canvasProps = React.useMemo(() => {
     return {
       className: "absolute inset-0",
-      shadows: true,
+      shadows: profile.shadows,
       gl: {
-        antialias: true,
+        antialias: profile.postprocessing,
         alpha: false,
         powerPreference: 'high-performance' as const,
         failIfMajorPerformanceCaveat: false,
       },
       camera: { fov: 75, position: [0, 2, 15] as [number, number, number] },
       style: { width: '100vw', height: '100vh' },
+      dpr: profile.dpr,
       onCreated: ({ gl }: { gl: any }) => {
         gl.domElement.setAttribute('data-testid', 'webgl-canvas')
         console.warn('Three.js Canvas created successfully')
       },
     }
-  }, [])
+  }, [profile])
 
   // Always render the canvas - remove blocking conditions
 
@@ -305,9 +308,11 @@ export default function EnhancedCanvasScene() {
       
       {/* Debug info */}
       <div className="absolute bottom-4 left-4 text-white text-sm font-mono bg-black/50 p-2 rounded">
-        Audio: Bass {(audioData.bass * 100).toFixed(0)}% | Mid {(audioData.mid * 100).toFixed(0)}% | Treble {(audioData.treble * 100).toFixed(0)}%
+        Audio: Bass {(audioData.bass * 100).toFixed(0)}% · Mid {(audioData.mid * 100).toFixed(0)}% · Treble {(audioData.treble * 100).toFixed(0)}%
         <br />
-        Performance: {perfLevel} | Volume: {volume}
+        Perf: {perfLevel.toUpperCase()} (DPR {profile.dpr[0]}–{profile.dpr[1]} · Shadows {profile.shadows ? 'ON' : 'OFF'})
+        <br />
+        Volume: {(volume * 100).toFixed(0)}%
       </div>
     </div>
   )

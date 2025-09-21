@@ -1,0 +1,16 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "Running pre-push checks..."
+
+set -e
+
+npm run type-check
+npm run lint
+npm run build
+
+# Prefer a fast test cycle for hooks
+npm run test:unit
+
+echo "Pre-push checks passed."
+

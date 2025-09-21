@@ -1,5 +1,6 @@
 // src/lib/audio.ts
 import * as Tone from 'tone'
+import { useAudioEngine } from '@/store/useAudioEngine'
 import type {
   Chorus,
   FeedbackDelay,
@@ -51,6 +52,7 @@ let beatSynth: MembraneSynth
 // This stays false until a user gesture triggers Tone.start().
 let audioInitialized = false
 let initPromise: Promise<void> | null = null
+let retryTimer: ReturnType<typeof setTimeout> | null = null
 let allowInit = false
 const audioEvents = new EventTarget()
 
@@ -70,11 +72,26 @@ export function enableAudioInit() {
 /**
  * Resume the AudioContext after a user gesture.
  */
-export async function startAudioContext() {
+export async function startAudioContext(): Promise<boolean> {
   enableAudioInit()
-  await initAudioEngine()
-  if (process.env.NODE_ENV !== 'production') {
-    logger.debug('Audio context started')
+  const audioState = useAudioEngine.getState()
+  audioState.setUserInteracted(true)
+  audioState.setIsInitializing(true)
+
+  try {
+    await initAudioEngine()
+    audioState.setAudioContext('running')
+    audioState.setAudioReady(true)
+    if (process.env.NODE_ENV !== 'production') {
+      logger.debug('Audio context started')
+    }
+    return true
+  } catch (error) {
+    audioState.setAudioContext('suspended')
+    audioState.setError(error instanceof Error ? error.message : String(error))
+    throw error
+  } finally {
+    audioState.setIsInitializing(false)
   }
 }
 let masterVolumeNode: Volume
@@ -165,6 +182,39 @@ interface ObjectAudio {
 }
 const objectSynths = new Map<string, ObjectAudio>()
 
+export function disposeObjectAudio(id: string) {
+  const audio = objectSynths.get(id)
+  if (!audio) return
+
+  try {
+    audio.meter.dispose?.()
+  } catch (error) {
+    console.warn('Failed to dispose audio meter:', error)
+  }
+
+  try {
+    audio.panner.disconnect?.()
+  } catch (error) {
+    console.warn('Failed to disconnect panner:', error)
+  }
+
+  try {
+    audio.chain.hp.dispose?.()
+    audio.chain.lp.dispose?.()
+    audio.chain.delay.dispose?.()
+    audio.chain.reverb.dispose?.()
+  } catch (error) {
+    console.warn('Failed to dispose effect chain:', error)
+  }
+
+  returnSynthToPool(audio.synth)
+  objectSynths.delete(id)
+}
+
+export function disposeAllObjectAudio() {
+  Array.from(objectSynths.keys()).forEach(disposeObjectAudio)
+}
+
 interface EffectChain {
   hp: Filter
   lp: Filter
@@ -177,18 +227,25 @@ interface EffectChain {
  * Calls Tone.start(), then creates and configures synths.
  */
 export async function initAudioEngine() {
-  if (audioInitialized || !allowInit) return
-  if (initPromise) return initPromise
-  
-  // Check for Web Audio API support using feature detection (not user agent sniffing)
-  if (!window.AudioContext && !(window as any).webkitAudioContext) {
-    console.error('Web Audio API not supported on this browser')
-    audioInitialized = false
-    audioEvents.dispatchEvent(new Event('init-failed'))
+  if (audioInitialized) {
+    const state = useAudioEngine.getState()
+    state.setAudioReady(true)
+    state.setAudioContext('running')
     return
   }
+  if (!allowInit) return
+  if (initPromise) return initPromise
   
-  // Safari/WebKit compatibility: Use more conservative settings
+  if (!window.AudioContext && !(window as any).webkitAudioContext) {
+    const message = 'Web Audio API not supported on this browser'
+    console.error(message)
+    const state = useAudioEngine.getState()
+    state.setError(message)
+    state.setAudioContext('closed')
+    audioEvents.dispatchEvent(new Event('init-failed'))
+    throw new Error(message)
+  }
+  
   const isWebKit = typeof navigator !== 'undefined' && 
     /WebKit/i.test(navigator.userAgent) && 
     !/Chrome/i.test(navigator.userAgent)
@@ -198,10 +255,9 @@ export async function initAudioEngine() {
   }
   
   initPromise = (async () => {
-    if (audioInitialized) { initPromise = null; return }
-    
+    const state = useAudioEngine.getState()
+    state.incrementInitAttempts()
     try {
-      // Add timeout for CI environments
       const initTimeout = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Audio initialization timeout')), 3000)
       )
@@ -215,14 +271,12 @@ export async function initAudioEngine() {
         initTimeout
       ])
       
-      // Only proceed if effects were successfully initialized
       if (!masterChain) {
         throw new Error('Failed to initialize audio effects chain')
       }
       
       masterVolumeNode = new Tone.Volume({ volume: 0 }).connect(masterChain)
       
-      // Safe volume setting
       try {
         if (masterVolumeNode.volume?.value !== undefined) {
           masterVolumeNode.volume.value = useAudioSettings.getState().volume * 100 - 100
@@ -231,18 +285,15 @@ export async function initAudioEngine() {
         console.warn('Volume initialization error (WebKit compatibility):', volumeError)
       }
       
-      // Single-note synth
       noteSynth = new Tone.Synth().connect(masterVolumeNode)
       noteSynth.oscillator.type = 'sine'
       noteSynth.envelope.attack = NOTE_ATTACK
       noteSynth.envelope.release = NOTE_RELEASE
       
-      // Polyphonic chord synth
       chordSynth = new Tone.PolySynth({ voice: Tone.Synth }).connect(masterVolumeNode)
       chordSynth.set({ oscillator: { type: 'triangle' } })
       chordSynth.set({ envelope: { attack: CHORD_ATTACK, release: CHORD_RELEASE } })
       
-      // Drum synth
       beatSynth = new Tone.MembraneSynth().connect(masterVolumeNode)
       beatSynth.pitchDecay = BEAT_PITCH_DECAY
       beatSynth.envelope.attack = BEAT_ATTACK
@@ -251,15 +302,55 @@ export async function initAudioEngine() {
       beatSynth.envelope.release = BEAT_RELEASE
       
       audioInitialized = true
-      initPromise = null
+      if (retryTimer) {
+        clearTimeout(retryTimer)
+        retryTimer = null
+      }
+      
+      const rawContext = Tone.getContext().rawContext as AudioContext
+      const latency = ((rawContext.baseLatency || 0) + (rawContext.outputLatency || 0)) * 1000
+      const bufferSize = Math.round((rawContext.baseLatency || 0.005) * rawContext.sampleRate) || 256
+      state.setPerformanceMetrics(
+        Number.isFinite(latency) ? latency : 0,
+        rawContext.sampleRate || 44100,
+        bufferSize
+      )
+      state.resetInitAttempts()
+      state.setAudioContext('running')
+      state.setAudioReady(true)
+      state.setError(null)
       audioEvents.dispatchEvent(new Event('init'))
     } catch (error) {
-      console.error('Audio engine initialization failed:', error)
-      // Set up minimal fallback state
+      audioInitialized = false
       initPromise = null
-      // Don't set audioInitialized = true to allow retry
+      const errMessage = error instanceof Error ? error.message : String(error)
+      const latest = useAudioEngine.getState()
+      latest.setAudioReady(false)
+      latest.setAudioContext('suspended')
+      latest.setError(errMessage)
+      disposeAllObjectAudio()
+      console.error('Audio engine initialization failed:', errMessage)
+      if (retryTimer) {
+        clearTimeout(retryTimer)
+        retryTimer = null
+      }
+      if (latest.shouldRetryInit()) {
+        const attempt = latest.initAttempts
+        const delay = Math.min(5000, 500 * Math.pow(2, Math.max(0, attempt - 1)))
+        retryTimer = setTimeout(() => {
+          initAudioEngine().catch((retryError) => {
+            if (process.env.NODE_ENV !== 'production') {
+              logger.error(`Audio engine retry failed: ${String(retryError)}`)
+            }
+          })
+        }, delay)
+      } else {
+        audioEvents.dispatchEvent(new Event('init-failed'))
+      }
+      throw error
     }
   })()
+
   return initPromise
 }
 

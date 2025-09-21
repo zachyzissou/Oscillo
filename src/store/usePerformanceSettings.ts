@@ -8,6 +8,6 @@ interface PerfState {
 }
 
 export const usePerformanceSettings = create<PerfState>((set) => ({
-  level: 'low',
+  level: 'medium',
   setLevel: (lvl) => set({ level: lvl }),
 }))

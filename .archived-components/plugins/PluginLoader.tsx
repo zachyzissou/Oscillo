@@ -1,3 +1,6 @@
+// ARCHIVED (Phase 0): This plugin loader is deferred until Phase 9.
+// Do not import this file in runtime. It creates/uses AudioContext and must
+// be reworked to initialize only after the global audio facade is started.
 'use client'
 import { useEffect, useRef } from 'react'
 import { PluginManager, Plugin, PluginContext } from '@/types/plugin'

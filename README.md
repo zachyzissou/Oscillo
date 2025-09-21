@@ -199,8 +199,7 @@
 app/
 ├── layout.tsx          # Global layout + error boundaries
 ├── page.tsx           # Main application with 3D canvas
-├── ClientLayout.tsx   # Client-side hydration wrapper
-└── PluginLoader.tsx   # Dynamic plugin loading system
+└── ClientLayout.tsx   # Client-side hydration wrapper
 
 src/
 ├── components/
@@ -208,12 +207,15 @@ src/
 │   ├── AudioReactiveShaderBackground.tsx # Audio-driven visuals
 │   ├── SceneLights.tsx          # Three.js lighting setup
 │   ├── BottomDrawer.tsx         # Main UI drawer component
-│   ├── StartOverlay.tsx         # Hydration-safe initialization
+│   ├── ui/ModernStartOverlay.tsx # Hydration-safe initialization
 │   └── ui/
 │       ├── AudioControls.tsx    # Audio parameter controls
 │       ├── AudioAnalyzer.tsx    # Real-time audio visualization
 │       ├── MagentaMusicGenerator.tsx # AI music generation
 │       └── Modern*.tsx          # Glassmorphism UI components
+├── plugins/
+│   ├── pluginManager.ts         # Runtime plugin registry & events
+│   └── PluginLoader.tsx         # Loads plugins after audio gate
 ├── lib/
 │   ├── webgpu-renderer.ts       # WebGPU/WebGL abstraction
 │   ├── audio.ts                 # Tone.js audio engine
@@ -672,6 +674,8 @@ curl http://localhost:3000/api/metrics
 
 ## 🤝 Contributing
 
+For complete contribution guidelines, read `CONTRIBUTING.md` and the repository conventions in `AGENTS.md`.
+
 We welcome contributions from the community! Here's how to get involved:
 
 ### **Development Setup**
@@ -684,10 +688,11 @@ We welcome contributions from the community! Here's how to get involved:
 
 ### **Contribution Guidelines**
 
-- **Code Style** — Follow ESLint and Prettier configurations
+- **Code Style** — Follow ESLint and Prettier configurations; see `AGENTS.md` for naming and structure
 - **Testing** — Add tests for new features and bug fixes
 - **Documentation** — Update README and code comments
 - **Accessibility** — Ensure WCAG 2.1 compliance
+- **Audio init** — Keep gating through `ModernStartOverlay` using `startAudio()` (`src/components/ui/ModernStartOverlay.tsx`)
 - **Performance** — Profile changes and optimize for 60fps
 
 ### **Issue Reporting**

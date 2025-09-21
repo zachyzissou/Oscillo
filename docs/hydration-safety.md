@@ -7,7 +7,7 @@ match what the client produced, triggering the infamous React error #185.
 
 ## Prevention Checklist
 
-1. Wrap any browser-dependent logic (WebGLRenderer, AudioContext, media playback) behind a user gesture. The `StartOverlay` component in `app/page.tsx` is the reference implementation.
+1. Wrap any browser-dependent logic (WebGLRenderer, AudioContext, media playback) behind a user gesture. The `ModernStartOverlay` component (`src/components/ui/ModernStartOverlay.tsx`) is the reference implementation.
 2. Use dynamic imports with `{ ssr: false }` for client-only components.
 3. Keep procedural randomness and DOM modifications out of initial render on the server.
 4. Ensure all components with hooks include the `"use client"` directive.

@@ -55,25 +55,7 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         // Optimize viewport for faster rendering
         viewport: { width: 1280, height: 720 },
-        // Use system chrome if available
-        executablePath: '/usr/bin/google-chrome',
-        // Override launch options for CI
-        launchOptions: {
-          executablePath: '/usr/bin/google-chrome',
-          args: [
-            '--no-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-gpu',
-            '--disable-web-security',
-            '--disable-features=VizDisplayCompositor',
-            '--use-gl=swiftshader',
-            '--single-process',
-            '--no-first-run',
-            '--disable-extensions',
-            '--disable-default-apps',
-            '--headless'
-          ]
-        }
+        channel: 'chromium',
       },
     },
     {
@@ -81,7 +63,8 @@ export default defineConfig({
       use: { 
         ...devices['Pixel 5'],
         // Optimize mobile viewport
-        viewport: { width: 393, height: 851 }
+        viewport: { width: 393, height: 851 },
+        channel: 'chromium',
       },
     },
     // Full browser testing only for staging

@@ -1,4 +1,22 @@
 
+## [Unreleased] – 2025-07-01
+
+### Added
+
+* Modernized BottomDrawer UI with glass-panel and neon controls
+* Plugin runtime restored under `src/plugins/` with context-aware loader
+* Shared Playwright helper `startExperience` to drive overlay dismissal
+
+### Changed
+
+* Audio engine initialization now retries with exponential backoff and reports status through `useAudioEngine`
+* Legacy canvas scenes consume QUALITY_PROFILES and surface the active tier HUD
+* Performance monitor highlights budget violations inside `PerformanceOverlay`
+
+### Fixed
+
+* Playwright specs interact with the ModernStartOverlay reliably across desktop/mobile runs
+
 ## [Unreleased] – 2025-06-24
 
 ### Added

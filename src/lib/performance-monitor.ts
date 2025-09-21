@@ -3,6 +3,7 @@
  * Lightweight Performance Monitoring System
  * Tracks FPS, memory usage, audio latency, and WebGL/GPU performance
  */
+import { isAudioInitialized, getTone } from '@/lib/audio'
 
 export interface PerformanceMetrics {
   fps: number
@@ -30,6 +31,7 @@ class PerformanceMonitor {
   private frameCount = 0
   private startTime = 0
   private isRunning = false
+  private lastBudgetStatus: { passed: boolean; violations: string[] } = { passed: true, violations: [] }
   
   // Budget thresholds
   private budgets: PerformanceBudgets = {
@@ -118,15 +120,21 @@ class PerformanceMonitor {
   }
 
   private getAudioLatency(): number {
-    // Measure audio context latency if available
+    // Never create a new AudioContext here; only read if the app's audio engine is initialized
     try {
-      if (typeof window !== 'undefined' && window.AudioContext) {
-        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-        const latency = audioContext.baseLatency * 1000 + (audioContext.outputLatency || 0) * 1000;
-        return Math.round(latency * 100) / 100;
+      if (typeof window === 'undefined') return 0
+      if (isAudioInitialized()) {
+        const Tone = getTone?.()
+        if (Tone && typeof Tone.getContext === 'function') {
+          const ctx: any = Tone.getContext()?.rawContext
+          if (ctx) {
+            const latency = (ctx.baseLatency || 0) * 1000 + (ctx.outputLatency || 0) * 1000
+            return Math.round(latency * 100) / 100
+          }
+        }
       }
     } catch {
-      return 0
+      // ignore
     }
     return 0
   }
@@ -229,10 +237,16 @@ class PerformanceMonitor {
       violations.push(`Audio latency too high: ${latest.audioLatency}ms > ${this.budgets.maxAudioLatency}ms`)
     }
     
-    return {
+    const status = {
       passed: violations.length === 0,
       violations,
     }
+    this.lastBudgetStatus = status
+    return status
+  }
+
+  getBudgetStatus() {
+    return this.lastBudgetStatus
   }
 
   setBudgets(budgets: Partial<PerformanceBudgets>) {

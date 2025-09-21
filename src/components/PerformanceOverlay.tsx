@@ -13,6 +13,7 @@ export function PerformanceOverlay({
 }: PerformanceOverlayProps) {
   const [metrics, setMetrics] = useState<PerformanceMetrics | null>(null)
   const [averages, setAverages] = useState<Partial<PerformanceMetrics>>({})
+  const [budgetStatus, setBudgetStatus] = useState(performanceMonitor.getBudgetStatus())
 
   useEffect(() => {
     if (!visible) return
@@ -20,6 +21,11 @@ export function PerformanceOverlay({
     const unsubscribe = performanceMonitor.onMetricsUpdate((newMetrics) => {
       setMetrics(newMetrics)
       setAverages(performanceMonitor.getAverageMetrics())
+      const status = performanceMonitor.checkBudgets()
+      setBudgetStatus(status)
+      if (!status.passed) {
+        console.warn('Performance budgets violated', status)
+      }
     })
 
     return unsubscribe
@@ -72,8 +78,17 @@ export function PerformanceOverlay({
             ↓
           </button>
         </div>
-        
+
         <div className="space-y-1">
+          {!budgetStatus.passed && (
+            <div className="flex items-start gap-2 rounded-md border border-red-500/40 bg-red-500/10 px-2 py-2 text-red-300">
+              <span className="font-semibold">Budgets</span>
+              <span className="text-[10px] leading-tight">
+                {budgetStatus.violations.join(' • ')}
+              </span>
+            </div>
+          )}
+
           <div className="flex justify-between">
             <span>FPS:</span>
             <span className={getFPSColor(metrics.fps)}>

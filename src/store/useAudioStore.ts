@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { getTone, isAudioInitialized, startAudioContext } from '../lib/audio'
 
 interface AudioAnalysisData {
   frequencyData: Uint8Array
@@ -53,25 +54,34 @@ export const useAudioStore = create<AudioStoreState>((set, get) => ({
   isInitialized: false,
 
   initializeAudio: async () => {
+    if (typeof window === 'undefined') return
+
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)()
-      const analyser = audioContext.createAnalyser()
-      
+      if (!isAudioInitialized()) {
+        await startAudioContext()
+      }
+
+      const Tone = getTone?.()
+      const ctx = Tone?.getContext()?.rawContext as AudioContext | undefined
+
+      if (!ctx) {
+        throw new Error('Tone.js audio context unavailable')
+      }
+
+      const analyser = ctx.createAnalyser()
       analyser.fftSize = 2048
       analyser.smoothingTimeConstant = 0.8
-      
-      // Connect to destination for monitoring
-      analyser.connect(audioContext.destination)
-      
+
       set({
-        audioContext,
+        audioContext: ctx,
         analyser,
         isInitialized: true
       })
-      
-      // Audio system initialized successfully
+
+      startAnalysisLoop(analyser)
     } catch (error) {
       console.error('Failed to initialize audio:', error)
+      set({ isInitialized: false, analyser: null, audioContext: null })
     }
   },
 
@@ -87,17 +97,24 @@ export const useAudioStore = create<AudioStoreState>((set, get) => ({
 
   connectSource: (source: AudioNode) => {
     const { analyser } = get()
-    if (analyser && source) {
+    if (!analyser || !source) return
+
+    try {
       source.connect(analyser)
       set({ sourceNode: source })
+    } catch (error) {
+      console.warn('Failed to connect audio source to analyser:', error)
     }
   },
 
   dispose: () => {
-    const { audioContext } = get()
-    if (audioContext) {
-      audioContext.close()
+    const { analyser } = get()
+    if (analyser) {
+      try {
+        analyser.disconnect()
+      } catch {/* noop */}
     }
+    stopAnalysisLoop()
     set({
       audioContext: null,
       analyser: null,
@@ -108,6 +125,53 @@ export const useAudioStore = create<AudioStoreState>((set, get) => ({
     })
   }
 }))
+
+let analysisRaf: number | null = null
+let frequencyBuffer: Uint8Array | null = null
+let timeDomainBuffer: Uint8Array | null = null
+
+function startAnalysisLoop(analyser: AnalyserNode) {
+  if (analysisRaf) return
+
+  frequencyBuffer = frequencyBuffer ?? new Uint8Array(analyser.frequencyBinCount)
+  timeDomainBuffer = timeDomainBuffer ?? new Uint8Array(analyser.fftSize)
+
+  const tick = () => {
+    if (!frequencyBuffer || !timeDomainBuffer) return
+
+    analyser.getByteFrequencyData(frequencyBuffer)
+    analyser.getByteTimeDomainData(timeDomainBuffer)
+
+    const features = calculateAudioFeatures(frequencyBuffer, timeDomainBuffer, analyser.context.sampleRate)
+
+    useAudioStore.setState((state) => ({
+      analysisData: {
+        ...state.analysisData,
+        frequencyData: new Uint8Array(frequencyBuffer!),
+        timeDomainData: new Uint8Array(timeDomainBuffer!),
+        volume: features.volume ?? state.analysisData.volume,
+        bassEnergy: features.bassEnergy ?? state.analysisData.bassEnergy,
+        midEnergy: features.midEnergy ?? state.analysisData.midEnergy,
+        trebleEnergy: features.trebleEnergy ?? state.analysisData.trebleEnergy,
+        peakFrequency: features.peakFrequency ?? state.analysisData.peakFrequency,
+        spectralCentroid: features.spectralCentroid ?? state.analysisData.spectralCentroid,
+        rms: features.rms ?? state.analysisData.rms,
+        zcr: features.zcr ?? state.analysisData.zcr,
+      },
+    }))
+
+    analysisRaf = requestAnimationFrame(tick)
+  }
+
+  analysisRaf = requestAnimationFrame(tick)
+}
+
+function stopAnalysisLoop() {
+  if (analysisRaf) {
+    cancelAnimationFrame(analysisRaf)
+    analysisRaf = null
+  }
+}
 
 // Audio analysis utilities
 export const calculateAudioFeatures = (

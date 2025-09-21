@@ -1,9 +1,10 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { GlassPanel, NeonButton } from './ModernUITheme'
-import { Music, Mouse, Keyboard, Smartphone, Volume2, Info } from 'lucide-react'
+import { Music, Volume2, Info } from 'lucide-react'
 import gsap from 'gsap'
-import { startAudioContext } from '@/lib/audio'
+import { startAudio } from '@/lib/audio/startAudio'
+import { useAudioEngine } from '@/store/useAudioEngine'
 
 const shortcuts = [
   { key: 'Space', action: 'Play/Pause' },
@@ -20,6 +21,11 @@ export default function ModernStartOverlay() {
   const [isVisible, setIsVisible] = useState(true)
   const [showHelp, setShowHelp] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
+  const [isInitializingAudio, setIsInitializingAudio] = useState(false)
+
+  const setUserInteracted = useAudioEngine(useCallback((s) => s.setUserInteracted, []))
+  const setAudioContextState = useAudioEngine(useCallback((s) => s.setAudioContext, []))
+  const setInitFlag = useAudioEngine(useCallback((s) => s.setIsInitializing, []))
   
   useEffect(() => {
     // Always show overlay initially in test environments
@@ -51,20 +57,32 @@ export default function ModernStartOverlay() {
   }, [showHelp])
   
   const handleStart = async () => {
+    if (isInitializingAudio) return
+    setUserInteracted(true)
+    setIsInitializingAudio(true)
+    setInitFlag(true)
     try {
       // Initialize audio context with timeout for CI environments
-      const audioTimeout = new Promise((_, reject) => 
+      const audioTimeout = new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Audio initialization timeout')), 5000)
       )
-      
-      await Promise.race([
-        startAudioContext(),
+
+      const success = await Promise.race([
+        startAudio(),
         audioTimeout
       ])
+
+      if (success) {
+        setAudioContextState('running')
+      }
     } catch (error) {
       console.warn('Audio initialization failed (continuing without audio):', error)
       // Continue without audio for CI environments
+      setAudioContextState('suspended')
     }
+
+    setInitFlag(false)
+    setIsInitializingAudio(false)
     
     // Animate out
     const overlay = document.getElementById('start-overlay')
@@ -128,9 +146,10 @@ export default function ModernStartOverlay() {
                   zIndex: 9999,
                   transform: 'translateY(0)'
                 }}
+                disabled={isInitializingAudio}
               >
                 <Volume2 className="w-4 h-4 mr-2 inline" />
-                Start Creating
+                {isInitializingAudio ? 'Starting...' : 'Start Creating'}
               </NeonButton>
               
               <button

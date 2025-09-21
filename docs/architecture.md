@@ -18,8 +18,7 @@ This document provides a comprehensive overview of the Oscillo platform architec
 /app                    # Next.js App Router
 ├── layout.tsx         # Global layout with error boundaries
 ├── page.tsx           # Main application entry point
-├── ClientLayout.tsx   # Client-side hydration wrapper
-└── PluginLoader.tsx   # Dynamic plugin system initialization
+└── ClientLayout.tsx   # Client-side hydration wrapper
 
 /src
 ├── components/        # React components
@@ -32,6 +31,9 @@ This document provides a comprehensive overview of the Oscillo platform architec
 │   ├── webgpu-renderer.ts  # WebGPU/WebGL renderer
 │   ├── performance-monitor.ts  # Real-time performance tracking
 │   └── audio/        # Audio processing utilities
+├── plugins/          # Runtime plugin infrastructure
+│   ├── pluginManager.ts   # Plugin registry & event bus
+│   └── PluginLoader.tsx   # Initializes plugins after audio gating
 ├── store/            # Zustand state management
 ├── shaders/          # GLSL/WGSL shader files
 ├── types/            # TypeScript definitions
