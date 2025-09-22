@@ -28,7 +28,7 @@ unit_tests:
   before_script:
     - npm ci
   script:
-    - npm run test:unit -- --coverage --runInBand
+    - npm run test:unit -- --coverage --maxWorkers=1 --no-file-parallelism
   artifacts:
     when: always
     paths:

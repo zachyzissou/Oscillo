@@ -32,6 +32,18 @@ const parseOverhaulPlan = async () => {
   return phases;
 };
 
+const readRoadmap = async () => {
+  const roadmapPath = path.join(process.cwd(), 'docs', 'ROADMAP.md');
+  try {
+    return await readFile(roadmapPath, 'utf8');
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return '# Roadmap\n\nRoadmap source file not found. Ensure docs/ROADMAP.md exists.';
+    }
+    throw error;
+  }
+};
+
 const renderHomePage = ({ projectUrl, boardUrl, qualityUrl, repoDocsUrl }) => `# Interactive Music 3D Overhaul
 
 Welcome to the delivery command center. Use the links below to jump straight into active work, quality gates, and documentation.
@@ -145,6 +157,7 @@ const syncWiki = async () => {
   const phases = await parseOverhaulPlan();
   const project = await client.request('GET', `/projects/${config.projectId}`);
   const existingPages = await client.collect(`/projects/${config.projectId}/wikis`);
+  const roadmapContent = await readRoadmap();
 
   const baseProjectUrl = project.web_url;
   const boardUrl = `${baseProjectUrl}/-/boards`;
@@ -154,6 +167,7 @@ const syncWiki = async () => {
   const pages = [
     { title: 'Home', content: renderHomePage({ projectUrl: baseProjectUrl, boardUrl, qualityUrl, repoDocsUrl: docsUrl }) },
     { title: 'Overhaul Plan', content: renderOverhaulPage(phases) },
+    { title: 'Master Roadmap', content: roadmapContent },
     { title: 'Automation & Operations', content: renderAutomationPage() },
     { title: 'Metrics Dashboard', content: renderMetricsPage() },
   ];

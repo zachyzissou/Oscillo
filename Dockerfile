@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Install basic dependencies
 RUN apk add --no-cache libc6-compat && \
-    npm install -g npm@latest
+    npm install -g npm@10
 
 FROM base AS deps
 COPY package.json package-lock.json ./

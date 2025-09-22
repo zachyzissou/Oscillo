@@ -1,7 +1,24 @@
-/** @type {import('tailwindcss').Config} */
-import { fontFamily } from 'tailwindcss/defaultTheme'
+import type { Config } from 'tailwindcss'
+import defaultTheme from 'tailwindcss/defaultTheme'
 import forms from '@tailwindcss/forms'
 import typography from '@tailwindcss/typography'
+import plugin from 'tailwindcss/plugin'
+
+const neonUtilities = plugin(({ addUtilities }) => {
+  addUtilities({
+    '.text-shadow-neon': {
+      textShadow: '0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor',
+    },
+    '.backdrop-blur-glass': {
+      backdropFilter: 'blur(20px) saturate(180%)',
+    },
+    '.glass-morphism': {
+      background: 'rgba(255, 255, 255, 0.1)',
+      backdropFilter: 'blur(20px) saturate(180%)',
+      border: '1px solid rgba(255, 255, 255, 0.18)',
+    },
+  })
+})
 
 export default {
   content: [
@@ -9,7 +26,7 @@ export default {
     './src/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
   ],
-  darkMode: ['class'],
+  darkMode: 'class',
   theme: {
     container: {
       center: true,
@@ -20,7 +37,6 @@ export default {
     },
     extend: {
       colors: {
-        // Modern glassmorphism palette
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -65,7 +81,6 @@ export default {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
         },
-        // Neon/Cyber theme
         neon: {
           cyan: '#00ffff',
           pink: '#ff00ff',
@@ -87,24 +102,24 @@ export default {
           secondary: '#3b82f6',
           warning: '#f59e0b',
           danger: '#ef4444',
-        }
+        },
       },
       fontFamily: {
-        sans: ['var(--font-geist-sans)', ...fontFamily.sans],
-        mono: ['var(--font-geist-mono)', ...fontFamily.mono],
-        display: ['var(--font-orbitron)', ...fontFamily.sans],
+        sans: ['var(--font-geist-sans)', ...defaultTheme.fontFamily.sans],
+        mono: ['var(--font-geist-mono)', ...defaultTheme.fontFamily.mono],
+        display: ['var(--font-orbitron)', ...defaultTheme.fontFamily.sans],
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'float': 'float 6s ease-in-out infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
+        float: 'float 6s ease-in-out infinite',
+        glow: 'glow 2s ease-in-out infinite alternate',
         'pulse-neon': 'pulse-neon 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
         'gradient-x': 'gradient-x 15s ease infinite',
         'gradient-y': 'gradient-y 15s ease infinite',
         'gradient-xy': 'gradient-xy 15s ease infinite',
-        'liquid': 'liquid 10s ease-in-out infinite',
-        'shimmer': 'shimmer 2.5s linear infinite',
+        liquid: 'liquid 10s ease-in-out infinite',
+        shimmer: 'shimmer 2.5s linear infinite',
         'spin-slow': 'spin 3s linear infinite',
         'bounce-slow': 'bounce 3s ease-in-out infinite',
       },
@@ -122,11 +137,11 @@ export default {
           '50%': { transform: 'translateY(-20px)' },
         },
         glow: {
-          'from': {
-            'text-shadow': '0 0 20px #4ade80, 0 0 30px #4ade80, 0 0 40px #4ade80',
+          from: {
+            textShadow: '0 0 20px #4ade80, 0 0 30px #4ade80, 0 0 40px #4ade80',
           },
-          'to': {
-            'text-shadow': '0 0 10px #4ade80, 0 0 20px #4ade80, 0 0 30px #4ade80',
+          to: {
+            textShadow: '0 0 10px #4ade80, 0 0 20px #4ade80, 0 0 30px #4ade80',
           },
         },
         'pulse-neon': {
@@ -135,46 +150,46 @@ export default {
             boxShadow: '0 0 20px rgba(74, 222, 128, 0.5)',
           },
           '50%': {
-            opacity: '.8',
+            opacity: '0.8',
             boxShadow: '0 0 40px rgba(74, 222, 128, 0.8)',
           },
         },
         'gradient-x': {
           '0%, 100%': {
-            'background-size': '200% 200%',
-            'background-position': 'left center'
+            backgroundSize: '200% 200%',
+            backgroundPosition: 'left center',
           },
           '50%': {
-            'background-size': '200% 200%',
-            'background-position': 'right center'
+            backgroundSize: '200% 200%',
+            backgroundPosition: 'right center',
           },
         },
         'gradient-y': {
           '0%, 100%': {
-            'background-size': '400% 400%',
-            'background-position': 'center top'
+            backgroundSize: '400% 400%',
+            backgroundPosition: 'center top',
           },
           '50%': {
-            'background-size': '200% 200%',
-            'background-position': 'center bottom'
+            backgroundSize: '200% 200%',
+            backgroundPosition: 'center bottom',
           },
         },
         'gradient-xy': {
           '0%, 100%': {
-            'background-size': '400% 400%',
-            'background-position': 'left center'
+            backgroundSize: '400% 400%',
+            backgroundPosition: 'left center',
           },
           '25%': {
-            'background-size': '400% 400%',
-            'background-position': 'right center'
+            backgroundSize: '400% 400%',
+            backgroundPosition: 'right center',
           },
           '50%': {
-            'background-size': '400% 400%',
-            'background-position': 'center bottom'
+            backgroundSize: '400% 400%',
+            backgroundPosition: 'center bottom',
           },
           '75%': {
-            'background-size': '400% 400%',
-            'background-position': 'center top'
+            backgroundSize: '400% 400%',
+            backgroundPosition: 'center top',
           },
         },
         liquid: {
@@ -203,12 +218,12 @@ export default {
         `,
       },
       backgroundSize: {
-        'grid': '20px 20px',
+        grid: '20px 20px',
       },
       boxShadow: {
-        'neon': '0 0 20px rgba(74, 222, 128, 0.5)',
+        neon: '0 0 20px rgba(74, 222, 128, 0.5)',
         'neon-lg': '0 0 40px rgba(74, 222, 128, 0.8)',
-        'glass': '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+        glass: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
       },
     },
   },
@@ -217,21 +232,6 @@ export default {
       strategy: 'class',
     }),
     typography,
-    function({ addUtilities }) {
-      const newUtilities = {
-        '.text-shadow-neon': {
-          textShadow: '0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor',
-        },
-        '.backdrop-blur-glass': {
-          backdropFilter: 'blur(20px) saturate(180%)',
-        },
-        '.glass-morphism': {
-          background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          border: '1px solid rgba(255, 255, 255, 0.18)',
-        },
-      }
-      addUtilities(newUtilities)
-    },
+    neonUtilities,
   ],
-}
+} satisfies Config

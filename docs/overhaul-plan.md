@@ -24,13 +24,15 @@ This document captures the agreed roadmap for the Interactive Music 3D overhaul.
 - Run `npm outdated --long`, `depcheck`, `npm audit`; categorize upgrades vs. removals.
 - Remove redundant stacks (duplicate Playwright packages, unused Jest tooling) and document third-party license review.
 
-**Quality gates**: CI fails on unsupported Node version; dependency changelog committed; audit warnings triaged.
+**Quality gates**: CI fails on unsupported Node version; dependency changelog committed (`docs/dependencies/2025-09-22-phase2.md`) with companion license review (`docs/dependencies/2025-09-22-license-review.md`); audit warnings triaged with backlog items opened.
 
 ### Phase 3 – Config & Tooling Modernization
 - Refactor `next.config.js` to drop legacy webpack loaders, rely on Next 15/Turbopack defaults, and isolate PWA config.
 - Decide Tailwind strategy (complete v4 migration or revert to stable v3) and configure PostCSS/Tailwind accordingly.
 - Harden lint and formatting rules; update `.eslintrc`, `prettier`, optional Stylelint.
 - Normalize environment variable docs (`.env.example`, docs/SECURITY.md references).
+
+_Status 2025-09-22_: Legacy raw/null loaders were removed from `next.config.js`; shader and audio assets now rely on Webpack asset modules, Tailwind v4 is locked in with a typed `tailwind.config.ts`, and the Vite/Vitest toolchain is on 7.1/3.2 to clear esbuild advisories (CI now uses `--maxWorkers=1 --no-file-parallelism`).
 
 **Quality gates**: `npm run lint:check` passes with new rules; dev server hot reload stable; config changes documented.
 

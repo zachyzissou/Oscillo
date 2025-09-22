@@ -43,7 +43,7 @@ Run `npm run gitlab:wiki` to regenerate GitLab wiki pages (`Home`, `Overhaul Pla
 ### CI/CD
 The repository ships a `.gitlab-ci.yml` with the following stages:
 - `lint_and_types`: runs `npm run lint:check` + `npm run type-check`.
-- `unit_tests`: executes `npm run test:unit -- --coverage --runInBand` and publishes Cobertura coverage.
+- `unit_tests`: executes `npm run test:unit -- --coverage --maxWorkers=1 --no-file-parallelism` and publishes Cobertura coverage.
 - `playwright_smoke` / `playwright_performance`: powered by the official Playwright image to run smoke/perf suites and collect artifacts.
 - `record_metrics`: manual placeholder for attaching Lighthouse or metrics bundles once available.
 

@@ -5,6 +5,22 @@ echo "Running pre-push checks..."
 
 set -e
 
+# Version enforcement
+REQUIRED_NODE_MAJOR=20
+REQUIRED_NPM_MAJOR=10
+
+node_major=$(node -v | sed "s/v\([0-9]*\).*/\1/")
+if [ "$node_major" -lt "$REQUIRED_NODE_MAJOR" ]; then
+  echo "Node $REQUIRED_NODE_MAJOR+ required. Current $(node -v)."
+  exit 1
+fi
+
+npm_major=$(npm -v | sed "s/\([0-9]*\).*/\1/")
+if [ "$npm_major" -lt "$REQUIRED_NPM_MAJOR" ]; then
+  echo "npm $REQUIRED_NPM_MAJOR+ required. Current $(npm -v)."
+  exit 1
+fi
+
 npm run type-check
 npm run lint
 npm run build
@@ -13,4 +29,3 @@ npm run build
 npm run test:unit
 
 echo "Pre-push checks passed."
-

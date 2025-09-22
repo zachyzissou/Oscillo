@@ -9,9 +9,9 @@ import { getAnalyserBands } from './analyser'
 import { logger } from './logger'
 
 // WebGPU shader source imports
-import vertexShaderSource from '../shaders/vertex.wgsl?raw'
-import fragmentShaderSource from '../shaders/fragment.wgsl?raw'
-import particleComputeSource from '../shaders/particle.wgsl?raw'
+import vertexShaderSource from '../shaders/vertex.wgsl'
+import fragmentShaderSource from '../shaders/fragment.wgsl'
+import particleComputeSource from '../shaders/particle.wgsl'
 
 // WebGPU type declarations (until @webgpu/types is available)
 declare global {

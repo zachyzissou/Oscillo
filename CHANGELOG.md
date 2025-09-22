@@ -1,5 +1,17 @@
 
-## [Unreleased] – 2025-07-01
+## [Unreleased] - 2025-09-22
+
+### Changed
+
+- Converted Tailwind configuration to TypeScript (`tailwind.config.ts`) and formalized the neon/glass design system utilities for Tailwind v4.
+- Upgraded the Vite/Vitest toolchain (`vite@7.1.7`, `vitest@3.2.4`, `@vitejs/plugin-react@5.0.3`) with updated CI flags to replace the deprecated `--runInBand`.
+
+### Documentation
+
+- Recorded the Tailwind v4 decision and config modernization in `docs/overhaul-plan.md` and `docs/ROADMAP.md`.
+- Logged the Vite/Vitest upgrade and CLI changes in `docs/dependencies/2025-09-22-vite-vitest-upgrade.md` and GitLab integration docs.
+
+## [Unreleased] - 2025-07-01
 
 ### Added
 

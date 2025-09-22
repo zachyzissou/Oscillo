@@ -7,21 +7,10 @@ const withBundleAnalyzer = bundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
 })
 
+const shaderTest = /\.(wgsl|glsl|vert|frag)$/i
+const audioTest = /\.(mp3|wav|ogg)$/i
+
 const nextConfig = {
-  // Turbopack configuration (now stable in Next.js 15)
-  turbopack: {
-    rules: {
-      '*.wgsl': {
-        loaders: ['raw-loader'],
-        as: '*.js',
-      },
-      '*.glsl': {
-        loaders: ['raw-loader'], 
-        as: '*.js',
-      },
-    },
-  },
-  
   // Enable experimental features for better performance
   experimental: {
     webpackBuildWorker: true,
@@ -37,7 +26,7 @@ const nextConfig = {
   // ESLint configuration
   eslint: {
     ignoreDuringBuilds: false,
-    dirs: ['app', 'src']
+    dirs: ['app', 'src', 'tests'],
   },
 
   // Image optimization
@@ -100,26 +89,18 @@ const nextConfig = {
   ...(process.env.NODE_ENV === 'production' && !process.env.CI ? { output: 'standalone' } : {}),
 
   // Webpack configuration for WebGPU and shader support
-  webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
-    // Handle shader files
+  webpack: (config, { dev, isServer }) => {
     config.module.rules.push(
       {
-        test: /\.(wgsl|glsl|vert|frag)$/,
-        use: 'raw-loader',
+        test: shaderTest,
+        type: 'asset/source',
       },
       {
-        test: /\.(mp3|wav|ogg)$/,
-        use: {
-          loader: 'file-loader',
-          options: {
-            publicPath: '/_next/static/sounds/',
-            outputPath: 'static/sounds/',
-          },
+        test: audioTest,
+        type: 'asset/resource',
+        generator: {
+          filename: 'static/sounds/[name].[contenthash][ext]',
         },
-      },
-      {
-        test: /\.js\.map$/,
-        use: 'null-loader'
       }
     )
 
@@ -135,11 +116,6 @@ const nextConfig = {
 
     // Optimization for Three.js
     if (!dev && !isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        'three/examples/jsm': 'three/examples/jsm',
-      }
-      
       // Enhanced bundle splitting for client-side
       config.optimization.splitChunks = {
         chunks: 'all',
@@ -184,8 +160,8 @@ const nextConfig = {
             name: 'ui',
             priority: 10,
             chunks: 'all',
-            enforce: true
-          }
+            enforce: true,
+          },
         }
       }
     }
