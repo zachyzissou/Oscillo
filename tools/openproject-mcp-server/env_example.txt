@@ -1,0 +1,19 @@
+# OpenProject Configuration
+# Copy this file to .env and fill in your values
+
+# Required: Your OpenProject instance URL
+OPENPROJECT_URL=https://your-instance.openproject.com
+
+# Required: Your OpenProject API key
+# Get it from: User Profile -> Access tokens -> Create new token
+OPENPROJECT_API_KEY=your-api-key-here
+
+# Optional: HTTP proxy URL (leave empty for direct connection)
+# Example: http://proxy.company.com:8080
+OPENPROJECT_PROXY=
+
+# Optional: Log level (DEBUG, INFO, WARNING, ERROR)
+LOG_LEVEL=INFO
+
+# Optional: Test connection on startup (true/false)
+TEST_CONNECTION_ON_STARTUP=false

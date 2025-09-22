@@ -42,7 +42,7 @@ test.describe('Performance Tests', () => {
       await page.waitForTimeout(1000) // Check every second
     }
     
-    expect(metrics.length).toBeGreaterThan(5)
+    expect(metrics.length).toBeGreaterThan(25)
 
     // Calculate average FPS
     const avgFPS = metrics.reduce((sum, m) => sum + m.fps, 0) / metrics.length
@@ -50,8 +50,8 @@ test.describe('Performance Tests', () => {
 
     console.log(`Average FPS: ${avgFPS.toFixed(2)}`)
     console.log(`Minimum FPS: ${minFPS}`)
-    expect(avgFPS).toBeGreaterThan(0)
-    expect(minFPS).toBeGreaterThanOrEqual(0)
+    expect(avgFPS).toBeGreaterThan(30)
+    expect(minFPS).toBeGreaterThan(15)
 
     // Export performance report
     const report = {
@@ -257,3 +257,4 @@ test.describe('Performance Tests', () => {
     }
   })
 })
+

@@ -28,7 +28,18 @@
     "security:audit": "npm audit --audit-level moderate",
     "security:fix": "npm audit fix",
     "prepare": "husky install",
-    "jam-server": "node server/jam-server.js"
+    "jam-server": "node server/jam-server.js",
+    "openproject:sync": "node scripts/openproject-sync.mjs",
+    "openproject:build": "node scripts/openproject-build.mjs",
+    "openproject:bootstrap": "node scripts/openproject-bootstrap.mjs",
+    "openproject:enrich": "node scripts/openproject-enrich.mjs",
+    "openproject:dashboard": "node scripts/openproject-dashboard.mjs",
+    "openproject:mcp": "python tools/openproject-mcp-server/openproject-mcp.py",
+    "gitlab:sync": "node scripts/gitlab-sync.mjs",
+    "gitlab:wiki": "node scripts/gitlab-wiki.mjs",
+    "gitlab:boards": "node scripts/gitlab-boards.mjs",
+    "gitlab:automation": "node scripts/gitlab-automation.mjs",
+    "gitlab:metrics": "node scripts/gitlab-metrics.mjs"
   },
   "dependencies": {
     "@dimforge/rapier3d-compat": "^0.18.0",

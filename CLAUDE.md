@@ -1,152 +1,93 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when collaborating on Interactive Music 3D. Follow the overhaul plan documented in `docs/overhaul-plan.md` and keep quality gates in mind for every change.
+
+## Working Agreements
+- Sync task tracking with OpenProject (http://192.168.4.225:5683/projects/oscillo/); see docs/integrations/openproject.md for API usage.
+- Stay aligned with the 10-phase overhaul roadmap; reference it in planning and PR descriptions.
+- Preserve a green baseline: always run `npm run type-check`, `npm run lint:check`, and scoped tests for touched areas.
+- Prefer incremental, feature-flagged changes. Document assumptions and metrics before/after significant refactors.
+- Defer to documentation in `docs/` (audio, performance, architecture) and update it when behavior changes.
+
+## Environment & Tooling
+- Required runtime: Node 20.x+, npm 10+. CI enforces these versions.
+- Install dependencies with `npm install`; avoid legacy flags unless noted.
+- Playwright browsers must be installed via `npx playwright install` before running E2E tests locally.
 
 ## Development Commands
+- `npm run dev` – start Next.js dev server at `http://localhost:3000` (Turbopack).
+- `npm run build` – production build.
+- `npm start` – serve production output.
+- `npm run lint` – ESLint with autofix.
+- `npm run lint:check` – ESLint without fixes.
+- `npm run type-check` – TypeScript check (`tsc --noEmit`).
 
-### Essential Commands
-- `npm run dev` - Start development server on port 3000 with hot reload
-- `npm run build` - Production build 
-- `npm run start` - Start production server
-- `npm run lint` - ESLint code checking
-- `npm run lint:fix` - Auto-fix ESLint issues
-- `npm run type-check` - TypeScript type checking without emit
+## Testing Commands
+- `npm test` / `npm run test:unit` – Vitest unit suites.
+- `npm run test:watch` – Vitest watch mode.
+- `npm run test:e2e` – Playwright suite (chromium + mobile profile by default).
+- `npm run test:smoke` – targeted Playwright smoke flow.
+- `npm run test:performance` – desktop FPS performance test (long-running; ensure extended timeout).
+- `npm run test:visual` – Playwright visual regression (requires reference snapshots).
+- `npm run test:a11y` – Accessibility sweeps via Playwright + axe.
 
-### Testing Commands  
-- `npm run test:smoke` - Fast essential functionality tests (2-3 minutes)
-- `npm run test:e2e` - Full E2E test suite with Playwright (15-20 minutes)
-- `npm run test:visual` - Visual regression tests with screenshot comparison
-- `npm run test:performance` - Performance benchmarks and metrics
-- `npm run test:headed` - Run tests with browser UI visible for debugging
+## Debug & Diagnostics
+- `npx playwright show-report` – open last Playwright report.
+- `npm run build:analyze` – bundle analyzer (Next.js analyzer plugin).
+- `npm run security:audit` – `npm audit --audit-level moderate`.
 
-### Debugging Commands
-- `npx playwright test --debug` - Debug E2E tests with browser tools
-- `npx playwright show-report` - View latest test report
-- `npm run build:analyze` - Bundle size analysis with webpack-bundle-analyzer
+## Architecture Snapshot
+- **Next.js 15 (App Router)** for hybrid server/client rendering.
+- **React 19** concurrent features.
+- **Three.js 0.178**, **@react-three/fiber/drei/postprocessing** for 3D scene.
+- **Tone.js 15**, **Magenta.js** for audio synthesis/AI composition.
+- **Zustand 5** for state (selector-based patterns, no heavy objects in stores).
+- **Tailwind CSS** for styling (migration path defined in overhaul plan).
 
-## Architecture Overview
-
-### Core Tech Stack
-- **Next.js 15** with App Router - Server and client components
-- **React 19** - Latest React features with concurrent rendering  
-- **Three.js ^0.178** - 3D rendering with WebGPU support
-- **Zustand** - Lightweight state management (primitives only)
-- **Tone.js** - Web Audio API synthesis and effects
-- **Magenta.js** - AI music generation
-- **GSAP ^3.12** - Animation engine (replaces Framer Motion)
-- **Tailwind CSS** - Utility-first styling
-
-### Project Structure
 ```
-app/                     # Next.js App Router
-├── layout.tsx          # Global layout with error boundaries
-├── page.tsx            # Main 3D canvas application
-└── ClientLayout.tsx    # Client-side hydration wrapper
-
+app/                    # App Router entrypoints, layouts, API routes
 src/
-├── components/         # React components
-│   ├── CanvasScene.tsx           # Main 3D scene with WebGL/WebGPU
-│   ├── AudioReactiveShaderBackground.tsx # Audio-driven visual effects
-│   ├── BottomDrawer.tsx          # Main UI drawer
-│   ├── ui/ModernStartOverlay.tsx # Hydration-safe initialization
-│   └── ui/                       # Modern UI components
-├── lib/                # Core utilities
-│   ├── audio.ts                  # Tone.js audio engine
-│   ├── webgpu-renderer.ts        # WebGPU/WebGL abstraction
-│   ├── performance.ts            # Performance monitoring
-│   └── audio/                    # Audio utilities
-├── plugins/             # Runtime plugin system
-│   ├── pluginManager.ts         # Plugin registry & events
-│   └── PluginLoader.tsx         # Initializes plugins after audio gate
-├── store/              # Zustand state stores (primitives only)
-├── shaders/            # GLSL/WGSL shader files
-└── types/              # TypeScript definitions
+  components/          # UI, R3F objects, HUD layers
+  lib/                 # Audio engine, utilities, events, logging
+  plugins/             # Runtime plugin framework and loader
+  store/               # Zustand stores (primitives + derived selectors)
+  shaders/             # GLSL/WGSL assets
+  types/               # Shared TypeScript definitions
 ```
 
-### State Management with Zustand
+## State Management Principles
+- Stores expose `getState` selectors and action methods only; never store Three.js meshes, Tone nodes, DOM refs, or React components.
+- Use IDs to reference runtime objects kept in service layers (audio, scene managers).
+- Keep state mutations immutable (immer middleware preferred) and type actions explicitly.
 
-**CRITICAL**: Zustand stores must only contain primitives (strings, numbers, booleans) and plain arrays/objects. Never store:
-- Three.js objects (meshes, materials, geometries)
-- Tone.js instances (synths, effects, transport)
-- DOM nodes or React refs
-- Functions (except store actions)
+## Audio & Plugin Guidance
+- Audio initialization must flow through the centralized facade (`startAudioContext`, `initAudioEngine`).
+- Do not instantiate `AudioContext` or load Tone at module scope. Gate on user gesture and ModernStartOverlay dismissal.
+- Plugin API must be accessed via `PluginManager`; ensure errors are caught and surfaced.
+- When modifying presets/effects, update schema definitions and persistence rules in `docs/audio-init.md`.
 
-Use IDs to reference complex objects managed elsewhere. See `docs/store-guidelines.md` for details.
+## Rendering & Performance
+- Major scene work happens in `ImmersiveMusicalUniverse` and visual submodules—plan to decompose per Phase 5/7 tasks.
+- Maintain adaptive quality controls (AdaptiveDpr, detect-gpu) and monitor `performanceMonitor` output.
+- Benchmark changes using Playwright performance suite; adjust thresholds, not relax, unless approved.
 
-### Audio Architecture
-The audio system uses Tone.js for synthesis with a multi-stage pipeline:
-```
-AudioContext → AnalyserNode → FFT Analysis → Visual Reactivity
-           ↓
-Tone.js Synths → Effect Chain → Master Output
-```
+## Testing Expectations
+- Augment unit tests when touching lib/store modules; aim for deterministic tests (mock Web Audio / R3F where necessary).
+- For Playwright, use provided fixtures (`tests/e2e/utils`) and mark long tests `test.slow()` to respect CI limits.
+- Visual tests require updated baselines reviewed by design owners.
 
-Effects chain: Reverb → Delay → Chorus → Distortion → Bitcrusher
+## Common Issues & Mitigations
+- **Audio gated**: ensure `startExperience` helper or overlay triggers `startAudioContext`.
+- **Context loss**: use error boundaries and effect cleanup; see `docs/performance.md`.
+- **Build failures**: clear `.next`, ensure Node 20, rerun `npm install`; check `tsconfig` excludes before disabling checks.
+- **Mobile perf**: rely on adaptive DPR, limit post-processing effects, and validate touch targets.
 
-### 3D Rendering Pipeline
-- WebGPU detection with WebGL fallback
-- WGSL shaders (metaball, voronoi, water, glitch effects)
-- Audio-reactive uniforms updated at 60fps
-- Adaptive quality based on device performance
+## Documentation & Communication
+- Update `docs/overhaul-plan.md` when scope or sequencing changes.
+- Log significant decisions as ADRs or in existing docs (`docs/architecture.md`).
+- Coordinate with maintainers before changing global config, deployment, or telemetry behavior.
 
-### Performance Considerations
-- Target 60fps on desktop, 30fps on mobile
-- Dynamic LOD (Level of Detail) scaling
-- Memory management with automatic cleanup
-- Bundle size target: <3MB total, <500KB initial load
-
-## Key Development Patterns
-
-### Component Architecture
-- Use `'use client'` directive for interactive components
-- Wrap 3D components in `<Suspense>` for loading states
-- Error boundaries for WebGL context loss recovery
-- Hydration-safe initialization via `ModernStartOverlay`
-
-### Audio Development
-- Always check audio context state before operations
-- Use `startAudio()` from `src/lib/audio/startAudio.ts` for initialization
-- Implement exponential backoff for WebGL context restoration
-- Monitor performance with `usePerformance` store
-
-### Shader Development
-- Shaders located in `src/shaders/` with TypeScript exports
-- Use `webgpu-renderer.ts` for cross-platform compatibility
-- Audio uniforms updated via `useAudioStore`
-- Fallback shaders for lower-end devices
-
-### Testing Strategy
-- Smoke tests for CI (essential functionality only)
-- Full E2E suite for staging deployments
-- Visual regression testing with Playwright
-- Performance benchmarks for frame rate validation
-
-## Common Issues & Solutions
-
-### Audio Problems
-- User interaction required before audio can start
-- Check Web Audio API compatibility in browser
-- Safari requires special handling via `webkitAudioFix.ts`
-
-### WebGL/WebGPU Issues  
-- Context loss recovery implemented with exponential backoff
-- Automatic fallback from WebGPU to WebGL
-- GPU performance detection for quality scaling
-
-### Build Issues
-- Use `--legacy-peer-deps` for npm install due to Three.js peer dependencies
-- TypeScript paths configured for `@/*` imports to `src/*`
-- Bundle analysis available via `npm run build:analyze`
-
-### Mobile Performance
-- Touch interactions optimized via `mobileOptimizations.ts`
-- Reduced shader complexity on mobile devices
-- Adaptive frame rate targeting
-
-## Deployment Notes
-
-- Production builds use Next.js standalone output
-- Docker configuration in `Dockerfile` and `docker-compose.yml`
-- Health checks available at `/api/health` endpoints
-- PWA manifest for installable app experience
-- Service worker for offline functionality
+## Deployment Reminders
+- Production deploy uses Next.js standalone output; Dockerfile expects Node 20 image.
+- Service worker (next-pwa) is opt-in—confirm behavior in staging before enabling in prod.
+- `/api/health` should remain fast and dependency-free.
