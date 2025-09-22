@@ -33,7 +33,10 @@ unit_tests:
     when: always
     paths:
       - coverage/
-    reports:\n      coverage_report:\n        coverage_format: cobertura\n        path: coverage/cobertura-coverage.xml
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage/cobertura-coverage.xml
     expire_in: 7 days
   needs:
     - lint_and_types
@@ -75,4 +78,3 @@ record_metrics:
   when: manual
   needs:
     - unit_tests
-

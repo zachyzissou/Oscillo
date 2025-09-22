@@ -58,7 +58,8 @@
       "@types/three",
       "@types/web",
       "node"
-    ]
+    ],
+    "allowJs": true
   },
   "include": [
     "next-env.d.ts",
