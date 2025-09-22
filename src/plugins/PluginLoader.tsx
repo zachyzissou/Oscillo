@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import pluginManager from './pluginManager'
+import pluginManager from './PluginManager'
 import { useAudioEngine } from '@/store/useAudioEngine'
 import { useAudioStore } from '@/store/useAudioStore'
 import { getTone } from '@/lib/audio'

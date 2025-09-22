@@ -1,61 +1,41 @@
 # Repository Guidelines
 
-## Project Structure & Module Organization
+## Overhaul Focus & Workflow
+- Follow the 10-phase roadmap in `docs/overhaul-plan.md`; update it when scope or sequencing changes.
+- Maintain a green baseline: run `npm run type-check`, `npm run lint:check`, and relevant tests before pushing.
+- Capture before/after metrics (bundle size, FPS, memory) for performance-sensitive work and record them in `/docs/metrics/`.
+- Use feature flags for in-progress refactors; document toggles and fallback paths in PR descriptions.
 
-- App entry in `app/` (Next.js). Core code in `src/`:
-  - `src/components/` UI, R3F objects, HUD.
-  - `src/lib/` audio (Tone.js), physics (Rapier), utils.
-  - `src/config/` constants, types, feature flags.
-  - `src/shaders/` GLSL/TSL assets.
-  - `public/` static files, `public/sw.js` service worker.
-  - Tests in `tests/` (unit, e2e, visual, a11y). Server helpers in `server/`.
+## Project Structure
+- `app/` contains the Next.js App Router entry, layouts, and API routes.
+- Core implementation lives in `src/`: components (UI + R3F), lib (audio, utilities, logging), store (Zustand), plugins, shaders, and types.
+- Static assets and the service worker belong in `public/`; server helpers and WS services live in `server/`.
+- Tests reside under `tests/` (unit, e2e, perf, visual, a11y). Additional docs are in `docs/`.
 
-## Build, Test, and Development Commands
+## Build, Test, and QA Commands
+- `npm run dev` (Turbopack), `npm run build`, `npm start`.
+- Linting: `npm run lint` (with fixes), `npm run lint:check` (verify only).
+- Types: `npm run type-check`.
+- Unit tests: `npm test` / `npm run test:unit`; watch via `npm run test:watch`.
+- Playwright: `npm run test:smoke`, `npm run test:e2e`, `npm run test:performance`, `npm run test:visual`, `npm run test:a11y`.
+- Diagnostics: `npm run build:analyze`, `npm run security:audit`, `npx playwright show-report`.
 
-- `npm run dev` Start local dev server at `http://localhost:3000`.
-- `npm run build` Create production build (Next.js).
-- `npm start` Serve production build.
-- `npm run type-check` TypeScript check (`tsc --noEmit`).
-- `npm run lint` ESLint with autofix; `npm run lint:check` without fixes.
-- `npm test` Unit tests (Vitest). `npm run test:watch` watch mode.
-- `npm run test:e2e` Playwright e2e; `npm run test:a11y` accessibility; `npm run test:visual` visual.
+## Coding Standards
+- TypeScript + React 19. Components/classes use PascalCase; hooks start with `use` and require `'use client'` for browser APIs.
+- Store only primitives/serializable data in Zustand; manage complex objects via services.
+- Prefer small, focused modules; refactor oversized files per Phase 5/7 objectives.
+- Prettier + ESLint enforce formatting; configure additional rules before modifying repo-wide settings.
 
-## Coding Style & Naming Conventions
+## Testing Expectations
+- Write Vitest coverage for libraries, stores, and hooks touched by your changes.
+- Extend Playwright suites when altering core flows (ModernStartOverlay, audio gating, performance overlays).
+- Mark long-running Playwright tests `test.slow()` and align thresholds with perf metrics.
+- CI requirements: `npm run type-check && npm run lint && npm run build && npm test` (plus targeted suites for branch protections).
 
-- TypeScript, React 19, Next.js 15. Prettier + ESLint (see `eslint.config.js`, `.prettierrc.js`).
-- Components/Classes: PascalCase (`ProceduralButton.tsx`). Files: kebab-case or PascalCase for components.
-- Hooks start with `use`. Client components using hooks must begin with `"use client"`.
-- Co-locate styles and small helpers with components; shaders in `src/shaders/`.
-
-## Testing Guidelines
-
-- Unit: Vitest + Testing Library. E2E/visual/a11y: Playwright.
-- Name tests `*.test.ts(x)` or `*.spec.ts(x)` under `tests/` (e.g., `tests/unit/foo.test.ts`).
-- Prioritize core flows: load, ModernStartOverlay, audio init, interaction, mobile.
-- CI expectation: `npm run type-check && npm run lint && npm run build && npm test` must pass.
-
-## Commit & Pull Request Guidelines
-
-- Branch: `feature/<task>`, `fix/<scope>`, or `chore/<scope>`.
-- Commit messages: present tense, concise subject; include scope when useful.
-- PRs: clear description, linked issues, before/after screenshots or short video for UI/3D changes, notes on perf/mobile impact.
-- Ensure no paid/licensed assets; include docs for new flags/config.
-
-## Security & Configuration Tips
-
-- Initialize Tone.js/audio only after user gesture; avoid SSR `AudioContext` usage.
-- Guard browser-only code with dynamic import or `"use client"` and run effects after ModernStartOverlay dismissal.
-- Store secrets via env vars; never commit keys. Validate mobile perf (use AdaptiveDpr/LOD where appropriate).
-
-## Development Checklist
-
-- Type-check, lint, build, and unit tests pass locally
-- Client-only code guarded; audio init gated by user gesture
-- No paid/licensed assets; shaders and assets live under `src/shaders/` or `public/`
-- Include screenshots/video for UI/3D changes; note performance/mobile impact
-
-## SSR/Hydration Safety
-
-- Do not create `AudioContext` or import Tone at module scope in runtime code.
-- Use `dynamic(..., { ssr: false })` for client-only scenes and include `"use client"` in components with hooks.
-- Browser APIs (window/document) belong in effects, not during SSR.
+## Collaboration & Delivery
+- Track overhaul work in OpenProject: http://192.168.4.225:5683/projects/oscillo/ (credentials & API usage in docs/integrations/openproject.md).
+- Branch naming: `feature/<task>`, `fix/<scope>`, `chore/<scope>`.
+- Commits: concise present-tense messages (e.g., `feat(scene): add adaptive lights`).
+- PRs: include scope summary, linked issues, screenshots/video for visual changes, performance comparison when applicable, and doc updates.
+- Keep secrets/env config out of repo; use `.env.example` as source of truth.
+- Coordinate with maintainers before modifying deployment, telemetry, or feature flags.
