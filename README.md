@@ -731,3 +731,24 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Experience the future of interactive music creation at [oscillo.app](https://oscillo.app)**
 
 *Built with ❤️ by the Oscillo team*
+
+
+## 🔗 Related Projects
+
+### Sister Projects
+- [Global Documentation](http://192.168.4.225:9080/root/global-docs) - Central documentation hub
+- [Obsidian+GPT Project](http://192.168.4.225:9080/claude/obsidian-gpt-project) - Knowledge management system
+- [omnireader](http://192.168.4.225:9080/claude/omnireader) - Advanced content processing
+- [Terminal Grounds](http://192.168.4.225:9080/claude/terminal-grounds) - PvPvE extraction shooter
+- [oscillo](http://192.168.4.225:9080/codex/oscillo) - Interactive music visualization
+- [The Stanton Times](http://192.168.4.225:9080/claude/the-stanton-times) - Star Citizen news automation
+
+### GitHub Mirrors
+- [omnireader on GitHub](https://github.com/zachyzissou/omnireader)
+- [oscillo on GitHub](https://github.com/zachyzissou/interactive-music-3d)
+- [Terminal Grounds on GitHub](https://github.com/zachyzissou/Bloom)
+
+### Resources
+- [GitLab Instance](http://192.168.4.225:9080)
+- [Documentation Hub](http://192.168.4.225:9080/root/global-docs/-/pages)
+- [Project Wiki](http://192.168.4.225:9080/codex/oscillo/-/wikis/home) (replace codex/oscillo with the actual project path)
