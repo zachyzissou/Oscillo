@@ -732,23 +732,24 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 *Built with ❤️ by the Oscillo team*
 
+## 🔗 Sister Projects
 
-## 🔗 Related Projects
+### Documentation Hub
+- **[Global Documentation](http://192.168.4.225:9080/zachgonser/global-docs)** - Central knowledge base and documentation hub
 
-### Sister Projects
-- [Global Documentation](http://192.168.4.225:9080/root/global-docs) - Central documentation hub
-- [Obsidian+GPT Project](http://192.168.4.225:9080/claude/obsidian-gpt-project) - Knowledge management system
-- [omnireader](http://192.168.4.225:9080/claude/omnireader) - Advanced content processing
-- [Terminal Grounds](http://192.168.4.225:9080/claude/terminal-grounds) - PvPvE extraction shooter
-- [oscillo](http://192.168.4.225:9080/codex/oscillo) - Interactive music visualization
-- [The Stanton Times](http://192.168.4.225:9080/claude/the-stanton-times) - Star Citizen news automation
+### Related Projects
+- **[Terminal Grounds](http://192.168.4.225:9080/claude/terminal-grounds)** - Territorial warfare extraction shooter with Unreal Engine 5
+- **[omnireader](http://192.168.4.225:9080/claude/omnireader)** - Intelligent content aggregation and processing platform
+- **[The Stanton Times](http://192.168.4.225:9080/claude/the-stanton-times)** - AI-powered Star Citizen news automation
+- **[Obsidian+GPT Project](http://192.168.4.225:9080/claude/obsidian-gpt-project)** - ChatGPT conversation knowledge management
+- **[slurpnet-plex-automation](http://192.168.4.225:9080/claude/slurpnet-plex-automation)** - Automated Plex media management
 
 ### GitHub Mirrors
-- [omnireader on GitHub](https://github.com/zachyzissou/omnireader)
-- [oscillo on GitHub](https://github.com/zachyzissou/interactive-music-3d)
-- [Terminal Grounds on GitHub](https://github.com/zachyzissou/Bloom)
+- **[oscillo (Interactive Music 3D)](https://github.com/zachyzissou/interactive-music-3d)** - Main repository mirror
+- **[omnireader](https://github.com/zachyzissou/omnireader)** - Content processing mirror
+- **[Terminal Grounds (Bloom)](https://github.com/zachyzissou/Bloom)** - Game development mirror
 
 ### Resources
-- [GitLab Instance](http://192.168.4.225:9080)
-- [Documentation Hub](http://192.168.4.225:9080/root/global-docs/-/pages)
-- [Project Wiki](http://192.168.4.225:9080/codex/oscillo/-/wikis/home) (replace codex/oscillo with the actual project path)
+- **[GitLab Instance](http://192.168.4.225:9080)** - Primary development platform
+- **[Documentation Hub](http://192.168.4.225:9080/zachgonser/global-docs/-/wikis/Documentation-Hub)** - Central documentation portal
+- **[Project Wiki](http://192.168.4.225:9080/codex/oscillo/-/wikis/home)** - Oscillo-specific documentation
