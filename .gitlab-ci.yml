@@ -1,1 +1,41 @@
-q«¶j¦*^–)Þzw(uçmÆ
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  NODE_VERSION: "18"
+
+before_script:
+  - echo "Starting pipeline for oscillo project"
+
+build:
+  stage: build
+  image: node:${NODE_VERSION}
+  script:
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 hour
+  only:
+    - main
+    - develop
+
+test:
+  stage: test
+  image: node:${NODE_VERSION}
+  script:
+    - npm ci
+    - npm run test
+  only:
+    - main
+    - develop
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploy stage ready for configuration"
+  only:
+    - main
