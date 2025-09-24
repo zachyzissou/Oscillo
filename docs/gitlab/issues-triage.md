@@ -40,10 +40,10 @@
   - Refreshed README and deployment docs to instruct contributors to run the version guard before pipeline smoke tests.
 
 ## Immediate Focus Queue
-1. **Issue #100 - Audiobook MP3 -> M4B pipeline migration**
-   - Retrieve the referenced conversation transcript archive.
-   - Outline tooling parity (FFmpeg scripts, Tdarr, mp3tom4b) and decide hosting destination within `docs/`.
-   - Produce repeatable automation scripts, then document validation steps.
+1. **Issue #1 - capture baseline metrics**
+   - `npm run build:analyze` recorded bundle stats; report stored in `.next/analyze/`.
+   - Lighthouse/Playwright runs blocked by corporate TLS MITM (self-signed cert); follow-up to rerun once Chromium download is permitted.
+   - Documented interim results in `docs/metrics/2025-09-24-baseline.md`.
 2. **Issue #95 - Unraid drive detection troubleshooting**
    - Audit existing Unraid/HBA notes under `docs/unraid.md` and extend with Smart Array coverage.
    - Build a command checklist (`smartctl`, `ssacli`, metadata clearing) with expected outputs for verification.
