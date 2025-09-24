@@ -1,40 +1,33 @@
 stages:
   - mirror
 
-variables:
-  GIT_STRATEGY: clone
-  GIT_DEPTH: 0
-
 mirror-to-github:
   stage: mirror
-  image: alpine/git:latest
+  image: alpine:latest
   before_script:
-    - apk add --no-cache git openssh-client
-    - git --version
+    - apk add --no-cache git curl jq
   script:
-    - echo "Starting GitHub mirror process..."
     - git config --global user.email "gitlab@gitlabmaster.local"
     - git config --global user.name "GitLab CI"
     
-    # Debug information
-    - echo "Current branch:" && git branch -a
-    - echo "Current commit:" && git rev-parse HEAD
-    
-    # Set up GitHub remote
+    # Check if repo exists, create if not
     - |
-      if [ -z "$GITHUB_TOKEN" ]; then
-        echo "ERROR: GITHUB_TOKEN variable not set!"
-        exit 1
+      echo "Checking if GitHub repo exists..."
+      REPO_CHECK=$(curl -s -o /dev/null -w "%{http_code}"         -H "Authorization: token ${GITHUB_TOKEN}"         https://api.github.com/repos/zachyzissou/interactive-music-3d)
+      
+      if [ "$REPO_CHECK" = "404" ]; then
+        echo "Repository doesn't exist. Creating it..."
+        curl -X POST -H "Authorization: token ${GITHUB_TOKEN}"           -H "Content-Type: application/json"           -d '{"name":"interactive-music-3d","description":"Oscillo - Interactive Music Visualizer","private":false}'           https://api.github.com/user/repos
+        echo "Repository created!"
+        sleep 2
+      else
+        echo "Repository exists (HTTP $REPO_CHECK)"
       fi
-    - echo "Adding GitHub remote..."
-    - git remote remove github 2>/dev/null || true
-    - git remote add github https://x-access-token:${GITHUB_TOKEN}@github.com/zachyzissou/interactive-music-3d.git
-    - git remote -v
     
-    # Push to GitHub
-    - echo "Pushing to GitHub main branch..."
-    - git push github HEAD:main --force -v
+    # Now push to GitHub
+    - echo "Pushing to GitHub..."
+    - git remote add github https://${GITHUB_TOKEN}@github.com/zachyzissou/interactive-music-3d.git || true
+    - git push github HEAD:main --force
     - echo "✓ Successfully mirrored to GitHub!"
   only:
     - main
-  allow_failure: false
