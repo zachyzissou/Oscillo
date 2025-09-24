@@ -1,26 +1,57 @@
 stages:
+  - build
   - test
   - deploy
   - mirror
 
-# Existing test stage (if any)
-test:
-  stage: test
+variables:
+  NODE_VERSION: "18"
+
+before_script:
+  - echo "Starting pipeline for oscillo project"
+
+build:
+  stage: build
+  image: node:${NODE_VERSION}
   script:
-    - echo "Running tests..."
-    - echo "Tests passed!"
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 hour
   only:
     - main
-    - master
+    - develop
+
+test:
+  stage: test
+  image: node:${NODE_VERSION}
+  script:
+    - npm ci
+    - npm run test
+  only:
+    - main
+    - develop
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploy stage ready for configuration"
+  only:
+    - main
 
 # GitHub Mirror Job
 mirror-to-github:
   stage: mirror
   image: alpine/git:latest
   script:
+    - apk add --no-cache git
     - git config --global user.email "gitlab@gitlabmaster.local"
     - git config --global user.name "GitLab CI"
     - git remote add github https://${GITHUB_TOKEN}@github.com/zachyzissou/interactive-music-3d.git || true
+    - git fetch origin
+    - git checkout main || git checkout master
     - git push github HEAD:main --force
   only:
     - main
