@@ -8,6 +8,10 @@
 [![WebGPU](https://img.shields.io/badge/WebGPU-enabled-purple)](README.md)
 [![AI Music](https://img.shields.io/badge/Magenta.js-integrated-orange)](README.md)
 
+## Project Links
+
+- Live tracking board (GitLab): http://192.168.4.225:9080/codex/oscillo/-/boards
+
 ## 🚀 Major Platform Transformation (January 2025)
 
 ### ⚡ **Tech Stack Modernization**
