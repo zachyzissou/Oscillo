@@ -111,6 +111,54 @@ docker images | grep interactive-music-3d
 netstat -tulpn | grep 31415
 ```
 
+### Hardware: Drives Not Detected (HP Smart Array / H240)
+
+Some HP Smart Array controllers (H240/H241) hide disks from Unraid until the card runs in HBA mode and legacy RAID metadata is cleared. Follow this workflow when drives disappear or report incorrect capacity:
+
+1. **Identify the controller slot**
+   ```bash
+   ssacli controller all show status
+   ssacli controller slot=1 show config
+   ```
+   Replace `slot=1` with the value shown in the status output. Install `ssacli` via NerdPack or HPE utilities if it is missing.
+
+2. **Switch to HBA mode** (requires full power cycle)
+   ```bash
+   ssacli controller slot=1 modify hbamode=on forced
+   ```
+   After running the command, shut the system down completely, disable Smart Array RAID features in BIOS, then boot back into Unraid.
+
+3. **Purge RAID metadata on each disk**
+   ```bash
+   # Replace /dev/sdX with the actual device name for each drive
+   sgdisk --zap-all /dev/sdX
+   dd if=/dev/zero of=/dev/sdX bs=1M count=10
+   wipefs -a /dev/sdX
+   ```
+   Run the trio of commands sequentially per disk to remove HP-specific headers and hidden partitions.
+
+4. **Verify cabling/backplane lanes**
+   - Ensure SAS disks connect to SAS lanes; SATA disks must sit on SATA-compatible ports.
+   - Reseat mini-SAS/SFF-8087 cables and inspect for bent pins. HPE shelves often have multiple expander inputs—use the port recommended for HBA mode.
+
+5. **Rescan from Unraid without rebooting**
+   ```bash
+   echo '- - -' | tee /sys/class/scsi_host/host*/scan
+   ```
+   Refresh the **Main** tab; disks should enumerate with the correct model and size once metadata is gone.
+
+6. **Confirm firmware & SMART visibility**
+   ```bash
+   ssacli controller slot=1 show detail | grep -i firmware
+   smartctl -a /dev/sdX | head
+   ```
+   Keep controller firmware ≥7.00. If SMART output is missing, repeat the HBA conversion and metadata wipe.
+
+7. **Escalation checklist**
+   - Swap mini-SAS cables between ports to isolate faulty connectors.
+   - Test suspect drives on a direct SATA port to rule out disk failure.
+   - Record actions and results in GitLab issue #95 for future reference.
+
 ### Application Not Loading
 1. **Check browser compatibility**
    - Chrome 113+, Firefox 121+, Safari 18+

@@ -35,19 +35,16 @@
 - **Issue #2 - document environment assumptions**
   - Added `docs/environment-assumptions.md` covering Node/npm, Playwright cache guidance, and Docker base image.
   - Linked the new reference from contributor docs (`README.md`, `AGENTS.md`, `CLAUDE.md`) and Phase 1 status.
-- **Issue #6 - enforce Node 20.17 / npm 10.8 across environments**
-  - Updated `.nvmrc`, Dockerfile, and `scripts/check-node.js` to pin Node 20.17.0 + npm 10.8 minimums.
-  - Refreshed README and deployment docs to instruct contributors to run the version guard before pipeline smoke tests.
+- **Issue #95 - Unraid drive detection troubleshooting**
+  - Documented Smart Array/H240 recovery steps (HBA mode switch, metadata wipe, rescans) in `docs/unraid.md`.
+  - Added an escalation checklist for future hardware follow-ups.
 
 ## Immediate Focus Queue
 1. **Issue #1 - capture baseline metrics**
    - `npm run build:analyze` recorded bundle stats; report stored in `.next/analyze/`.
    - Lighthouse/Playwright runs blocked by corporate TLS MITM (self-signed cert); follow-up to rerun once Chromium download is permitted.
    - Documented interim results in `docs/metrics/2025-09-24-baseline.md`.
-2. **Issue #95 - Unraid drive detection troubleshooting**
-   - Audit existing Unraid/HBA notes under `docs/unraid.md` and extend with Smart Array coverage.
-   - Build a command checklist (`smartctl`, `ssacli`, metadata clearing) with expected outputs for verification.
-3. **Issue #93 - n8n Movie Clip Twitter Bot migration**
+2. **Issue #93 - n8n Movie Clip Twitter Bot migration**
    - Inventory current n8n workflows in GitLab artifacts (if any) and recreate as JSON exports under `docs/automation/`.
    - Validate Twitter API credentials flow and document scheduling/monitoring.
 
