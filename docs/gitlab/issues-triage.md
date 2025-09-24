@@ -41,6 +41,9 @@
 - **Issue #3 - create shared tracking board**
   - Ran `npm run gitlab:boards` to ensure the Phase Delivery board and sprint milestones exist.
   - Added `docs/tracking-board.md` with board usage guidelines, current milestone schedule, and owner/risk expectations.
+- **Issue #7 - dependency audit snapshot**
+  - Captured `npm outdated --long` results in `docs/dependencies/2025-09-24-outdated.md` with prioritized upgrade plan.
+  - Recorded `depcheck` findings (noting false positives due to archived components / Next.js dynamic imports).
 
 ## Immediate Focus Queue
 1. **Issue #1 - capture baseline metrics**
