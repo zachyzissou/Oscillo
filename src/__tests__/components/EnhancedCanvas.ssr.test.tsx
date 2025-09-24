@@ -11,8 +11,8 @@ describe('EnhancedCanvas SSR safety', () => {
     globalThis.navigator = undefined
 
     try {
-      const module = await import('@/components/EnhancedCanvas')
-      expect(module).toHaveProperty('default')
+      const imported = await import('@/components/EnhancedCanvas')
+      expect(imported).toHaveProperty('default')
     } finally {
       globalThis.window = originalWindow
       globalThis.navigator = originalNavigator

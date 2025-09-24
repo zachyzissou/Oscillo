@@ -1,15 +1,19 @@
 
 ## [Unreleased] - 2025-09-22
 
+### Added
+
+- Structured logging via Pino with environment-controlled transports (server runtime + jam server).
+- Web Vitals telemetry endpoint and consent-driven toggle (`app/api/metrics/web-vitals`, `useTelemetryConsent`).
+- Deployment pipeline smoke script (`scripts/pipeline-smoke.sh`) and logging/comment automation helper (`scripts/gitlab-comment.mjs`).
+- Security and ops checklists (`docs/security-checklist.md`, `docs/metrics/README.md`).
+
 ### Changed
 
-- Converted Tailwind configuration to TypeScript (`tailwind.config.ts`) and formalized the neon/glass design system utilities for Tailwind v4.
-- Upgraded the Vite/Vitest toolchain (`vite@7.1.7`, `vitest@3.2.4`, `@vitejs/plugin-react@5.0.3`) with updated CI flags to replace the deprecated `--runInBand`.
-
-### Documentation
-
-- Recorded the Tailwind v4 decision and config modernization in `docs/overhaul-plan.md` and `docs/ROADMAP.md`.
-- Logged the Vite/Vitest upgrade and CLI changes in `docs/dependencies/2025-09-22-vite-vitest-upgrade.md` and GitLab integration docs.
+- Hardened WebSocket auth, service-worker gating, and CSP headers (`next.config.js`, `server/jam-server.js`, `src/lib/jamSession.ts`, `src/lib/registerServiceWorker.ts`).
+- Refreshed README, CLAUDE.md, CONTRIBUTING.md, AGENTS.md with new operational guidance.
+- Updated deployment runbook, logging strategy, overhaul plan, and security docs to reflect the new workflow.
+- Removed unused Radix UI/audio helper dependencies (see `docs/dependencies/2025-09-24-stack-cleanup.md`).
 
 ## [Unreleased] - 2025-07-01
 
