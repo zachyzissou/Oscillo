@@ -11,6 +11,7 @@
 ## Project Links
 
 - Live tracking board (GitLab): http://192.168.4.225:9080/codex/oscillo/-/boards
+- Tracking board handbook: `docs/tracking-board.md`
 
 ## 🚀 Major Platform Transformation (January 2025)
 

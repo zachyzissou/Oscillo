@@ -17,7 +17,7 @@ This document captures the agreed roadmap for the Interactive Music 3D overhaul.
 - Note environment assumptions: Node/npm versions, Playwright browser cache, Docker base image.
 - Create shared tracking board with owners, due dates, risk/mitigation log, and feature flag inventory.
 
-_Status 2025-09-24_: Environment assumptions documented in `docs/environment-assumptions.md` and linked from contributor guides. Baseline metrics + tracking board still pending.
+_Status 2025-09-24_: Environment assumptions documented in `docs/environment-assumptions.md`; Phase Delivery board synced (usage captured in `docs/tracking-board.md`). Baseline metrics capture still pending full Lighthouse/Playwright run.
 
 **Quality gates**: metrics recorded in `/docs/metrics/YYYY-MM-DD.md`; tracking board link added to README or docs index.
 

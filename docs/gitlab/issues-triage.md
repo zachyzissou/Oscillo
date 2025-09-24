@@ -38,6 +38,9 @@
 - **Issue #95 - Unraid drive detection troubleshooting**
   - Documented Smart Array/H240 recovery steps (HBA mode switch, metadata wipe, rescans) in `docs/unraid.md`.
   - Added an escalation checklist for future hardware follow-ups.
+- **Issue #3 - create shared tracking board**
+  - Ran `npm run gitlab:boards` to ensure the Phase Delivery board and sprint milestones exist.
+  - Added `docs/tracking-board.md` with board usage guidelines, current milestone schedule, and owner/risk expectations.
 
 ## Immediate Focus Queue
 1. **Issue #1 - capture baseline metrics**
