@@ -41,6 +41,9 @@
 - **Issue #7 - dependency audit snapshot**
   - Captured `npm outdated --long` results in `docs/dependencies/2025-09-24-outdated.md` with prioritized upgrade plan.
   - Recorded `depcheck` findings (noting false positives due to archived components / Next.js dynamic imports).
+- **Issue #9 - CI fails on unsupported Node version**
+  - Added `node-version-guard` job to `.gitlab-ci.yml` (uses `node:20.17.0`, runs `node scripts/check-node.js`).
+  - Ensures pipeline enforces the documented runtime and surfaces drift immediately.
 
 ## Immediate Focus Queue
 1. **Issue #8 - remove redundant stacks**

@@ -1,5 +1,16 @@
 stages:
+  - validate
   - mirror
+
+node-version-guard:
+  stage: validate
+  image: node:20.17.0
+  script:
+    - node --version
+    - npm --version
+    - node scripts/check-node.js
+  only:
+    - main
 
 mirror-to-github:
   stage: mirror

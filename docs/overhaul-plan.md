@@ -26,7 +26,7 @@ _Status 2025-09-24_: Environment assumptions documented in `docs/environment-ass
 - Run `npm outdated --long`, `depcheck`, `npm audit`; categorize upgrades vs. removals.
 - Remove redundant stacks (duplicate Playwright packages, unused Jest tooling) and document third-party license review.
 
-_Status 2025-09-24_: `.nvmrc`, Docker base images, and the runtime guard (`scripts/check-node.js`) now pin Node 20.17.0 / npm 10.8+. README + deployment docs instruct contributors to adopt the same versions, with a pre-flight check added to `docs/DEPLOYMENT.md`.
+_Status 2025-09-24_: `.nvmrc`, Docker base images, the runtime guard (`scripts/check-node.js`), and GitLab CI (`node-version-guard` job) all pin Node 20.17.0 / npm 10.8+. README + deployment docs instruct contributors to adopt the same versions, with a pre-flight check added to `docs/DEPLOYMENT.md`.
 
 **Quality gates**: CI fails on unsupported Node version; dependency changelog committed (`docs/dependencies/2025-09-22-phase2.md`) with companion license review (`docs/dependencies/2025-09-22-license-review.md`); audit warnings triaged with backlog items opened.
 
