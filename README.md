@@ -165,9 +165,6 @@ Environment defaults live in **`.env.example`**. Copy it to `.env.local` (or the
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `JAM_SERVER_TOKEN` | _(blank)_ | Required by the jam WebSocket server for authenticated sessions |
-| `NEXT_PUBLIC_JAM_TOKEN` | _(blank)_ | Client-side token that must match `JAM_SERVER_TOKEN` |
-| `NEXT_PUBLIC_JAM_SERVER_URL` | `ws://localhost:31415` | Override when the jam server runs on a non-localhost host/port |
 | `NEXT_PUBLIC_ENABLE_PWA` | `false` | Toggle service worker registration; keep disabled until PWA is vetted |
 | `NEXT_PUBLIC_WEB_VITALS_ENDPOINT` | _(blank)_ | Optional client override for Web Vitals ingestion route |
 | `ANALYTICS_FORWARD_URL` | _(blank)_ | Optional server-to-server forwarding target for Web Vitals metrics |

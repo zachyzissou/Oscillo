@@ -77,24 +77,6 @@
       <Label>Write Log File</Label>
     </Variable>
     <Variable>
-      <Name>JAM_SERVER_TOKEN</Name>
-      <Value></Value>
-      <Mode></Mode>
-      <Label>Jam WS Token</Label>
-    </Variable>
-    <Variable>
-      <Name>NEXT_PUBLIC_JAM_TOKEN</Name>
-      <Value></Value>
-      <Mode></Mode>
-      <Label>Client Jam Token</Label>
-    </Variable>
-    <Variable>
-      <Name>NEXT_PUBLIC_JAM_SERVER_URL</Name>
-      <Value>ws://[IP]:31415</Value>
-      <Mode></Mode>
-      <Label>Jam WS URL</Label>
-    </Variable>
-    <Variable>
       <Name>NEXT_PUBLIC_ENABLE_PWA</Name>
       <Value>false</Value>
       <Mode></Mode>
@@ -140,9 +122,6 @@
   <Config Name="Log Level" Target="LOG_LEVEL" Default="info" Mode="" Description="Pino log level" Type="Variable" Display="advanced" Required="false" Mask="false">info</Config>
   <Config Name="Pretty Console Logs" Target="LOG_PRETTY" Default="false" Mode="" Description="Enable colorized console output" Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
   <Config Name="Write Log File" Target="LOG_TO_FILE" Default="true" Mode="" Description="Persist log file under LOG_DIR" Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
-  <Config Name="Jam Server Token" Target="JAM_SERVER_TOKEN" Default="" Mode="" Description="Token required by jam WebSocket server" Type="Variable" Display="always" Required="false" Mask="true"></Config>
-  <Config Name="Client Jam Token" Target="NEXT_PUBLIC_JAM_TOKEN" Default="" Mode="" Description="Token injected into client to auth with jam server" Type="Variable" Display="always" Required="false" Mask="true"></Config>
-  <Config Name="Jam Server URL" Target="NEXT_PUBLIC_JAM_SERVER_URL" Default="ws://[IP]:31415" Mode="" Description="Override WebSocket URL if not using localhost" Type="Variable" Display="always" Required="false" Mask="false">ws://[IP]:31415</Config>
   <Config Name="Enable PWA" Target="NEXT_PUBLIC_ENABLE_PWA" Default="false" Mode="" Description="Enable service worker in the container" Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
   <Config Name="Web Vitals Endpoint" Target="NEXT_PUBLIC_WEB_VITALS_ENDPOINT" Default="" Mode="" Description="Override client telemetry endpoint" Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
   <Config Name="Analytics Forward URL" Target="ANALYTICS_FORWARD_URL" Default="" Mode="" Description="Server-side telemetry forwarding" Type="Variable" Display="advanced" Required="false" Mask="false"></Config>

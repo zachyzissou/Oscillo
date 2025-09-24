@@ -24,7 +24,6 @@ These are the baseline expectations for local development, CI, and production en
 - Scripts under `scripts/gitlab-*.mjs` read GitLab connection details from `.env.local` (`GITLAB_URL`, `GITLAB_PROJECT_ID`, `GITLAB_TOKEN`).
 
 ## Optional Services
-- Jam WebSocket server tokens (`JAM_SERVER_TOKEN`, `NEXT_PUBLIC_JAM_TOKEN`, `NEXT_PUBLIC_JAM_SERVER_URL`) must be configured for collaborative sessions; defaults are blank.
 - Web Vitals forwarding (`NEXT_PUBLIC_WEB_VITALS_ENDPOINT`, `ANALYTICS_FORWARD_URL`, `ANALYTICS_FORWARD_TOKEN`) remains disabled unless explicitly set.
 
 Keep this file updated whenever runtime versions or tooling expectations change.

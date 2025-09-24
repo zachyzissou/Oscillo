@@ -15,9 +15,22 @@ export const useJam = create<JamState>((set, get) => ({
   peers: {},
   start: () => {
     const id = nanoid(6);
-    const socket = new WebSocket('ws://localhost:3030');
+    const serverUrl = (() => {
+      if (typeof window === 'undefined') {
+        return 'ws://localhost:3030';
+      }
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const host = window.location.hostname || 'localhost';
+      return `${protocol}//${host}:3030`;
+    })();
+    const socket = new WebSocket(serverUrl);
     socket.addEventListener('open', () => {
-      socket.send(JSON.stringify({ type: 'join', id }));
+      socket.send(
+        JSON.stringify({
+          type: 'join',
+          id,
+        })
+      );
     });
     socket.addEventListener('message', (event) => {
       const data = JSON.parse(event.data as string);
@@ -48,4 +61,3 @@ export const useJam = create<JamState>((set, get) => ({
     Object.values(get().peers).forEach(p => p.send(JSON.stringify(data)));
   },
 }));
-

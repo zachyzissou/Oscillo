@@ -1,5 +1,6 @@
 const { WebSocketServer } = require('ws');
 const { logger } = require('./logger');
+
 const wss = new WebSocketServer({ port: 3030 });
 const sessions = new Map();
 function broadcast(sessionId, msg, except) {
@@ -8,14 +9,19 @@ function broadcast(sessionId, msg, except) {
 }
 wss.on('connection', (ws) => {
   let sessionId = null;
+
   ws.on('message', (data) => {
     try {
       const { type, id, payload } = JSON.parse(data);
+
       if (type === 'join') {
         sessionId = id;
         if (!sessions.has(id)) sessions.set(id, []);
         sessions.get(id).push(ws);
-      } else if (sessionId) {
+        return;
+      }
+
+      if (sessionId) {
         broadcast(sessionId, data, ws);
       }
     } catch (err) {

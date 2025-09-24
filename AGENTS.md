@@ -36,6 +36,6 @@
 - Keep secrets out of version control; derive new `.env` entries from `.env.example` and store real values locally.
 - Self-hosted integrations require entries in `NO_PROXY`; log adjustments in `docs/integrations/`.
 - Prefer `npm run gitlab:automation` over manual token edits and record outcomes in the linked tracking task.
-- Secure jam sessions by setting `JAM_SERVER_TOKEN` on the Node service and matching `NEXT_PUBLIC_JAM_TOKEN`/`NEXT_PUBLIC_JAM_SERVER_URL` in the client.
+- Jam collaboration currently runs without token authentication; keep the service behind trusted networks until UI-based auth is added.
 - Web Vitals telemetry stays disabled until users opt in; configure endpoints with `NEXT_PUBLIC_WEB_VITALS_ENDPOINT` (client) and `ANALYTICS_FORWARD_URL`/`ANALYTICS_FORWARD_TOKEN` (server) when needed.
 - Structured logging defaults to JSON Pino output; tune with `LOG_LEVEL`, `LOG_PRETTY`, and `LOG_TO_FILE` per environment.

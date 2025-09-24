@@ -69,13 +69,14 @@ and are not directly exposed to user input. The application includes:
    `;
    ```
 
-1. **Protect Real-time Collaboration**
-   - Configure `JAM_SERVER_TOKEN` on the WebSocket server and `NEXT_PUBLIC_JAM_TOKEN` (plus `NEXT_PUBLIC_JAM_SERVER_URL` if the host differs) for the client runtime.
-   - Unauthorized peers receive close code `4401`; monitor logs for repeated failures.
-
 1. **Service Worker Opt-in**
    - Set `NEXT_PUBLIC_ENABLE_PWA=false` in staging/test environments to skip service worker registration.
    - Only enable PWA in production once the `sw.js` behavior has been verified.
+
+1. **Jam Collaboration Surface**
+   - The bundled jam WebSocket server currently accepts connections without authentication tokens.
+   - Restrict access via network policy (VPN, firewall) until UI-based access controls are implemented.
+   - Monitor `server/jam-server.js` logs for unexpected connection churn or abuse.
 
 1. **Web Vitals Telemetry (Opt-in Only)**
    - Consent is stored in `localStorage` under `oscillo.analytics-consent` and managed via the in-app toggle.
@@ -93,9 +94,6 @@ All supported keys are documented in `.env.example`. Copy that file to `.env.loc
 
 | Variable | Scope | Purpose |
 |----------|-------|---------|
-| `JAM_SERVER_TOKEN` | Server | Auth token required by the jam WebSocket bridge (`server/jam-server.js`) |
-| `NEXT_PUBLIC_JAM_TOKEN` | Client | Client-side token that must match `JAM_SERVER_TOKEN` for browser sessions |
-| `NEXT_PUBLIC_JAM_SERVER_URL` | Client | Override WebSocket host when the jam server is not on `ws://localhost:31415` |
 | `NEXT_PUBLIC_ENABLE_PWA` | Client | Enable service worker registration after PWA review is complete |
 | `NEXT_PUBLIC_WEB_VITALS_ENDPOINT` | Client | Optional override for sending Web Vitals to an external endpoint |
 | `ANALYTICS_FORWARD_URL` | Server | Optional forwarding URL for server-side Web Vitals relays |

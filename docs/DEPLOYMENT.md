@@ -77,7 +77,6 @@ Document all outputs, image tags, and verification steps in the release issue so
 
 - Import `unraid/oscillo.xml` via the Unraid Docker template manager (Apps → Add Container → Template → Add by URL/path).
 - Update the `Repository` tag if you publish non-`latest` images (e.g. `ghcr.io/zachgonser/oscillo:main`).
-- Configure the jam WebSocket tokens (`JAM_SERVER_TOKEN`, `NEXT_PUBLIC_JAM_TOKEN`) and optional telemetry/logging variables as needed for your environment.
 - Bind-mount `/app/logs` and `/app/uploads` to persistent locations under `/mnt/user/appdata/`.
 
 ## Immediate Deployment Steps
