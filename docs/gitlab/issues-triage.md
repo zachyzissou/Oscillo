@@ -35,9 +35,6 @@
 - **Issue #2 - document environment assumptions**
   - Added `docs/environment-assumptions.md` covering Node/npm, Playwright cache guidance, and Docker base image.
   - Linked the new reference from contributor docs (`README.md`, `AGENTS.md`, `CLAUDE.md`) and Phase 1 status.
-- **Issue #95 - Unraid drive detection troubleshooting**
-  - Documented Smart Array/H240 recovery steps (HBA mode switch, metadata wipe, rescans) in `docs/unraid.md`.
-  - Added an escalation checklist for future hardware follow-ups.
 - **Issue #3 - create shared tracking board**
   - Ran `npm run gitlab:boards` to ensure the Phase Delivery board and sprint milestones exist.
   - Added `docs/tracking-board.md` with board usage guidelines, current milestone schedule, and owner/risk expectations.
@@ -46,15 +43,12 @@
   - Recorded `depcheck` findings (noting false positives due to archived components / Next.js dynamic imports).
 
 ## Immediate Focus Queue
-1. **Issue #1 - capture baseline metrics**
-   - `npm run build:analyze` recorded bundle stats; report stored in `.next/analyze/`.
-   - Lighthouse/Playwright runs blocked by corporate TLS MITM (self-signed cert); follow-up to rerun once Chromium download is permitted.
-   - Documented interim results in `docs/metrics/2025-09-24-baseline.md`.
+1. **Issue #8 - remove redundant stacks**
+   - Evaluate duplicate Playwright/Jest tooling (`depcheck` notes) and clean archived components if possible.
+   - Ensure license review docs are updated alongside removals.
 2. **Issue #93 - n8n Movie Clip Twitter Bot migration**
    - Inventory current n8n workflows in GitLab artifacts (if any) and recreate as JSON exports under `docs/automation/`.
    - Validate Twitter API credentials flow and document scheduling/monitoring.
-
-Next working session will dive into issue #100 discovery (locate source material, map deliverables) before implementation.
 
 - **Issue #126 - GHCR manifest unknown when pulling Unraid template image** (priority::low)
   - Logged after Unraid pull continued to fail against `ghcr.io/zachyzissou/interactive-music-3d:latest`.
