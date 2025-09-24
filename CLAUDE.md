@@ -10,7 +10,7 @@ Guidance for Claude Code when collaborating on Interactive Music 3D. Follow the 
 - Defer to documentation in `docs/` (audio, performance, architecture) and update it when behavior changes.
 
 ## Environment & Tooling
-- Required runtime: Node 20.17.0 (LTS) with npm 10.8+. CI enforces these versions via `scripts/check-node.js`.
+- Required runtime: Node 20.17.0 (LTS) with npm 10.8+. CI enforces these versions via `scripts/check-node.js` (see `docs/environment-assumptions.md`).
 - Install dependencies with `npm install`; avoid legacy flags unless noted.
 - Playwright browsers must be installed via `npx playwright install` before running E2E tests locally.
 

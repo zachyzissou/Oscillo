@@ -180,6 +180,7 @@ Environment defaults live in **`.env.example`**. Copy it to `.env.local` (or the
 | `GITLAB_TOKEN` | _(blank)_ | Personal access token (`read_api`/`write_api`) for GitLab automation scripts |
 
 See `docs/SECURITY.md`, `docs/logging-strategy.md`, and `docs/DEPLOYMENT.md` for per-environment guidance and hardening steps.
+For a complete list of tooling expectations, refer to `docs/environment-assumptions.md`.
 
 ### **Operational Checklists**
 

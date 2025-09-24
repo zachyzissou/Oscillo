@@ -32,6 +32,12 @@
 - **Issue #6 - enforce Node 20.17 / npm 10.8 across environments**
   - Updated `.nvmrc`, Dockerfile, and `scripts/check-node.js` to pin Node 20.17.0 + npm 10.8 minimums.
   - Refreshed README and deployment docs to instruct contributors to run the version guard before pipeline smoke tests.
+- **Issue #2 - document environment assumptions**
+  - Added `docs/environment-assumptions.md` covering Node/npm, Playwright cache guidance, and Docker base image.
+  - Linked the new reference from contributor docs (`README.md`, `AGENTS.md`, `CLAUDE.md`) and Phase 1 status.
+- **Issue #6 - enforce Node 20.17 / npm 10.8 across environments**
+  - Updated `.nvmrc`, Dockerfile, and `scripts/check-node.js` to pin Node 20.17.0 + npm 10.8 minimums.
+  - Refreshed README and deployment docs to instruct contributors to run the version guard before pipeline smoke tests.
 
 ## Immediate Focus Queue
 1. **Issue #100 - Audiobook MP3 -> M4B pipeline migration**
