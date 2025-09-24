@@ -1,16 +1,40 @@
 stages:
   - mirror
 
-# GitHub Mirror - simplified, no tags required
+variables:
+  GIT_STRATEGY: clone
+  GIT_DEPTH: 0
+
 mirror-to-github:
   stage: mirror
   image: alpine/git:latest
+  before_script:
+    - apk add --no-cache git openssh-client
+    - git --version
   script:
-    - apk add --no-cache git
+    - echo "Starting GitHub mirror process..."
     - git config --global user.email "gitlab@gitlabmaster.local"
     - git config --global user.name "GitLab CI"
-    - git remote add github https://${GITHUB_TOKEN}@github.com/zachyzissou/interactive-music-3d.git || true
-    - git push github HEAD:main --force
-    - echo "✓ Successfully mirrored to GitHub"
+    
+    # Debug information
+    - echo "Current branch:" && git branch -a
+    - echo "Current commit:" && git rev-parse HEAD
+    
+    # Set up GitHub remote
+    - |
+      if [ -z "$GITHUB_TOKEN" ]; then
+        echo "ERROR: GITHUB_TOKEN variable not set!"
+        exit 1
+      fi
+    - echo "Adding GitHub remote..."
+    - git remote remove github 2>/dev/null || true
+    - git remote add github https://x-access-token:${GITHUB_TOKEN}@github.com/zachyzissou/interactive-music-3d.git
+    - git remote -v
+    
+    # Push to GitHub
+    - echo "Pushing to GitHub main branch..."
+    - git push github HEAD:main --force -v
+    - echo "✓ Successfully mirrored to GitHub!"
   only:
     - main
+  allow_failure: false
