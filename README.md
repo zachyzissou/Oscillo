@@ -160,8 +160,34 @@
 
 ### **Environment Configuration**
 
-- No `.env` required for basic functionality
-- Optional: Set `LOG_DIR` for custom logging directory
+Environment defaults live in **`.env.example`**. Copy it to `.env.local` (or the deployment secret store) and adjust as needed.
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `JAM_SERVER_TOKEN` | _(blank)_ | Required by the jam WebSocket server for authenticated sessions |
+| `NEXT_PUBLIC_JAM_TOKEN` | _(blank)_ | Client-side token that must match `JAM_SERVER_TOKEN` |
+| `NEXT_PUBLIC_JAM_SERVER_URL` | `ws://localhost:31415` | Override when the jam server runs on a non-localhost host/port |
+| `NEXT_PUBLIC_ENABLE_PWA` | `false` | Toggle service worker registration; keep disabled until PWA is vetted |
+| `NEXT_PUBLIC_WEB_VITALS_ENDPOINT` | _(blank)_ | Optional client override for Web Vitals ingestion route |
+| `ANALYTICS_FORWARD_URL` | _(blank)_ | Optional server-to-server forwarding target for Web Vitals metrics |
+| `ANALYTICS_FORWARD_TOKEN` | _(blank)_ | Bearer token paired with `ANALYTICS_FORWARD_URL` when required |
+| `LOG_DIR` | `./logs` | Directory where server-side log files are written |
+| `LOG_FILE` | `app.log` | Log filename when `LOG_TO_FILE=true` |
+| `LOG_LEVEL` | `info` | Structured logging level (`info`, `debug`, `error`, etc.) |
+| `LOG_TO_FILE` | `true` | Persist logs to disk; set `false` when shipping logs via stdout collectors |
+| `LOG_PRETTY` | `false` | Pretty-print logs locally; leave `false` in production for JSON ingestion |
+| `GITLAB_URL` / `GITLAB_PROJECT_ID` | `http://192.168.4.225:9080` / `2` | Used by automation scripts to interact with the self-hosted GitLab |
+| `GITLAB_TOKEN` | _(blank)_ | Personal access token (`read_api`/`write_api`) for GitLab automation scripts |
+
+See `docs/SECURITY.md`, `docs/logging-strategy.md`, and `docs/DEPLOYMENT.md` for per-environment guidance and hardening steps.
+
+### **Operational Checklists**
+
+- `docs/security-checklist.md` — release security runbook and WS auth verification
+- `docs/DEPLOYMENT.md` — build/publish/rollback workflow
+- `docs/metrics/README.md` — template for capturing performance/bundle deltas per phase
+- `docs/design-system.md` — canonical design tokens and theming guidelines
+- `unraid/oscillo.xml` — Unraid Docker template referencing `ghcr.io/zachgonser/oscillo:latest`
 - Docker: See `docker-compose.yml` for container deployment
 
 ---

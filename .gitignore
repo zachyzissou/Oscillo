@@ -7,6 +7,7 @@ node_modules/
 
 # Environment variables
 .env*
+!.env.example
 
 # Lock files
 package-lock.json
@@ -23,6 +24,8 @@ coverage/
 .nyc_output/
 dist/
 out/
+artifacts/
+logs/
 
 # PWA build artifacts
 public/sw.js

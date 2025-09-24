@@ -26,6 +26,9 @@
 - **Issue #5 - tracking board link added to README**
   - Added "Project Links" section with direct board URL so contributors can jump from the repo to the live backlog.
   - Context recorded here; ready for closure once mirrored on GitLab.
+- **Issue #15 - normalize environment variable docs**
+  - Added `.env.example` with canonical defaults and expanded README + `docs/SECURITY.md` tables.
+  - Updated `docs/overhaul-plan.md` Phase 3 status to reflect completion; ready to close once merged.
 
 ## Immediate Focus Queue
 1. **Issue #100 - Audiobook MP3 -> M4B pipeline migration**
@@ -40,3 +43,7 @@
    - Validate Twitter API credentials flow and document scheduling/monitoring.
 
 Next working session will dive into issue #100 discovery (locate source material, map deliverables) before implementation.
+
+- **Issue #126 - GHCR manifest unknown when pulling Unraid template image** (priority::low)
+  - Logged after Unraid pull continued to fail against `ghcr.io/zachyzissou/interactive-music-3d:latest`.
+  - Follow-up: confirm image publication status/visibility and adjust template once the tag is accessible.

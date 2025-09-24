@@ -32,7 +32,7 @@ This document captures the agreed roadmap for the Interactive Music 3D overhaul.
 - Harden lint and formatting rules; update `.eslintrc`, `prettier`, optional Stylelint.
 - Normalize environment variable docs (`.env.example`, docs/SECURITY.md references).
 
-_Status 2025-09-22_: Legacy raw/null loaders were removed from `next.config.js`; shader and audio assets now rely on Webpack asset modules, Tailwind v4 is locked in with a typed `tailwind.config.ts`, and the Vite/Vitest toolchain is on 7.1/3.2 to clear esbuild advisories (CI now uses `--maxWorkers=1 --no-file-parallelism`).
+_Status 2025-09-24_: Legacy raw/null loaders were removed from `next.config.js`; shader and audio assets now rely on Webpack asset modules, Tailwind v4 is locked in with a typed `tailwind.config.ts`, the Vite/Vitest toolchain is on 7.1/3.2 to clear esbuild advisories (CI now uses `--maxWorkers=1 --no-file-parallelism`), and environment variable documentation has been consolidated into `.env.example` with corresponding updates to README and `docs/SECURITY.md`.
 
 **Quality gates**: `npm run lint:check` passes with new rules; dev server hot reload stable; config changes documented.
 
@@ -76,13 +76,15 @@ _Status 2025-09-22_: Legacy raw/null loaders were removed from `next.config.js`;
 - Introduce structured logging (Pino or equivalent) with environment-controlled transports.
 - Add Web Vitals telemetry and optional analytics behind consent; update SECURITY.md with data handling notes.
 - Harden security posture: headers audit, WebSocket auth, dependency vulnerability remediation, SW behavior review.
-- Review deployment workflows and rollback plan.
+- Review deployment workflows and rollback plan (see `docs/DEPLOYMENT.md` and `docs/security-checklist.md`).
+- Keep logging/ingestion practices current in `docs/logging-strategy.md`.
 
 **Quality gates**: Logging strategy documented; security checklist updated; deploy pipeline tested end-to-end.
 
 ### Phase 10 – Documentation, Design System, Release Readiness
 - Refresh README, AGENTS, CLAUDE, CONTRIBUTING, and roadmap docs to reflect new practices.
 - Establish design tokens/theme alignment, optionally Storybook docs for UI components.
+- Maintain the shared token catalog (`docs/design-system.md`) and ensure Tailwind + runtime themes stay in sync.
 - Final regression checklist executed (unit, e2e, visual, perf, a11y); release automation (changesets/semantic-release) configured.
 
 **Quality gates**: Documentation PR merged; release checklist completed; semantic versioning workflow validated.
