@@ -1,6 +1,85 @@
 
 # Deployment & DevOps Guide
 
+## Pipeline Validation Runbook
+
+Follow this sequence to exercise the full release path and gather artifacts for the deploy quality gate.
+
+1. **Pre-flight checks**
+   ```bash
+   nvm use 20.17.0            # ensure LTS runtime
+   npm --version              # should report >= 10.8.0
+   node scripts/check-node.js # hard stop if versions drift
+   npm install                # if dependencies are not yet installed
+   ./scripts/pipeline-smoke.sh
+   ```
+   This records lint/type-check/test/build logs under `artifacts/pipeline/` for later attachment.
+
+2. **Build production image**
+   ```bash
+   export IMAGE_REGISTRY=registry.internal/oscillo
+   export IMAGE_TAG=$(date +%Y%m%d-%H%M)
+
+   docker build \
+     --build-arg NEXT_TELEMETRY_DISABLED=1 \
+     -t "$IMAGE_REGISTRY/interactive-music-3d:$IMAGE_TAG" \
+     .
+   ```
+
+3. **Smoke test the container locally**
+   ```bash
+   docker run --rm -p 3000:3000 \
+     -e NODE_ENV=production \
+     "$IMAGE_REGISTRY/interactive-music-3d:$IMAGE_TAG"
+
+   curl -f http://localhost:3000/api/health
+   ```
+
+4. **Publish artifact**
+   ```bash
+   docker push "$IMAGE_REGISTRY/interactive-music-3d:$IMAGE_TAG"
+   docker tag "$IMAGE_REGISTRY/interactive-music-3d:$IMAGE_TAG" \
+     "$IMAGE_REGISTRY/interactive-music-3d:latest"
+   docker push "$IMAGE_REGISTRY/interactive-music-3d:latest"
+   ```
+
+5. **Deploy**
+   - For Docker Compose environments:
+     ```bash
+     IMAGE_TAG=$IMAGE_TAG docker compose pull interactive-music-3d
+     IMAGE_TAG=$IMAGE_TAG docker compose up -d interactive-music-3d
+     ```
+   - For Kubernetes:
+     ```bash
+     kubectl set image deployment/oscillo web="$IMAGE_REGISTRY/interactive-music-3d:$IMAGE_TAG"
+     kubectl rollout status deployment/oscillo
+     ```
+
+6. **Post-deploy verification**
+   ```bash
+   curl -f https://app.oscillo.example/api/health
+   curl -I https://app.oscillo.example | tee artifacts/pipeline/headers.txt
+   ```
+   Inspect logs for unauthorized WS attempts and ensure metrics forwarding continues to succeed.
+
+7. **Rollback plan**
+   ```bash
+   # Restore previously working image (recorded in release notes)
+   PREV_TAG=20250112-1530
+   kubectl set image deployment/oscillo web="$IMAGE_REGISTRY/interactive-music-3d:$PREV_TAG"
+   # or docker compose
+   IMAGE_TAG=$PREV_TAG docker compose up -d interactive-music-3d
+   ```
+
+Document all outputs, image tags, and verification steps in the release issue so the quality gate can be audited later.
+
+## Unraid Template
+
+- Import `unraid/oscillo.xml` via the Unraid Docker template manager (Apps → Add Container → Template → Add by URL/path).
+- Update the `Repository` tag if you publish non-`latest` images (e.g. `ghcr.io/zachgonser/oscillo:main`).
+- Configure the jam WebSocket tokens (`JAM_SERVER_TOKEN`, `NEXT_PUBLIC_JAM_TOKEN`) and optional telemetry/logging variables as needed for your environment.
+- Bind-mount `/app/logs` and `/app/uploads` to persistent locations under `/mnt/user/appdata/`.
+
 ## Immediate Deployment Steps
 
 ### 1. Security Patches (CRITICAL - Deploy Immediately)

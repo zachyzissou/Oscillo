@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-const REQUIRED_NODE = '20.0.0';
-const REQUIRED_NPM = '10.0.0';
+const REQUIRED_NODE = '20.17.0';
+const REQUIRED_NPM = '10.8.0';
 
 const parseVersion = (version) => {
   if (!version) return [];

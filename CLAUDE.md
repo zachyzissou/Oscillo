@@ -5,12 +5,12 @@ Guidance for Claude Code when collaborating on Interactive Music 3D. Follow the 
 ## Working Agreements
 - Sync task tracking with OpenProject (http://192.168.4.225:5683/projects/oscillo/); see docs/integrations/openproject.md for API usage.
 - Stay aligned with the 10-phase overhaul roadmap; reference it in planning and PR descriptions.
-- Preserve a green baseline: always run `npm run type-check`, `npm run lint:check`, and scoped tests for touched areas.
+- Preserve a green baseline: always run `npm run type-check`, `npm run lint:check`, and scoped tests for touched areas. For full release validation use `./scripts/pipeline-smoke.sh` (lint → type-check → tests → build).
 - Prefer incremental, feature-flagged changes. Document assumptions and metrics before/after significant refactors.
 - Defer to documentation in `docs/` (audio, performance, architecture) and update it when behavior changes.
 
 ## Environment & Tooling
-- Required runtime: Node 20.x+, npm 10+. CI enforces these versions.
+- Required runtime: Node 20.17.0 (LTS) with npm 10.8+. CI enforces these versions via `scripts/check-node.js`.
 - Install dependencies with `npm install`; avoid legacy flags unless noted.
 - Playwright browsers must be installed via `npx playwright install` before running E2E tests locally.
 
@@ -21,6 +21,7 @@ Guidance for Claude Code when collaborating on Interactive Music 3D. Follow the 
 - `npm run lint` – ESLint with autofix.
 - `npm run lint:check` – ESLint without fixes.
 - `npm run type-check` – TypeScript check (`tsc --noEmit`).
+- `./scripts/pipeline-smoke.sh` – Runs lint → type-check → tests → build and captures logs.
 
 ## Testing Commands
 - `npm test` / `npm run test:unit` – Vitest unit suites.
@@ -85,7 +86,7 @@ src/
 ## Documentation & Communication
 - Update `docs/overhaul-plan.md` when scope or sequencing changes.
 - Log significant decisions as ADRs or in existing docs (`docs/architecture.md`).
-- Coordinate with maintainers before changing global config, deployment, or telemetry behavior.
+- Coordinate with maintainers before changing global config, deployment, telemetry, or logging behavior. Reference `docs/logging-strategy.md`, `docs/security-checklist.md`, and `docs/DEPLOYMENT.md` when adjusting ops workflows.
 
 ## Deployment Reminders
 - Production deploy uses Next.js standalone output; Dockerfile expects Node 20 image.

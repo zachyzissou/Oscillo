@@ -29,6 +29,9 @@
 - **Issue #15 - normalize environment variable docs**
   - Added `.env.example` with canonical defaults and expanded README + `docs/SECURITY.md` tables.
   - Updated `docs/overhaul-plan.md` Phase 3 status to reflect completion; ready to close once merged.
+- **Issue #6 - enforce Node 20.17 / npm 10.8 across environments**
+  - Updated `.nvmrc`, Dockerfile, and `scripts/check-node.js` to pin Node 20.17.0 + npm 10.8 minimums.
+  - Refreshed README and deployment docs to instruct contributors to run the version guard before pipeline smoke tests.
 
 ## Immediate Focus Queue
 1. **Issue #100 - Audiobook MP3 -> M4B pipeline migration**

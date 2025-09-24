@@ -95,7 +95,7 @@
 
 ### **Prerequisites**
 
-- Node.js **20.x** LTS (recommended: 20.11.0+)
+- Node.js **20.17.0** LTS (npm 10.8+)
 - npm **10.x** or yarn **4.x**
 - Modern browser with WebGL 2.0 support
 - For WebGPU features: Chrome 113+, Firefox 121+, or Safari 18+
@@ -338,19 +338,19 @@ Access at: `http://localhost:31415`
 
 ```dockerfile
 # Dependencies stage
-FROM node:20-alpine AS deps
+FROM node:20.17.0-alpine AS deps
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci --only=production
 
 # Build stage  
-FROM node:20-alpine AS builder
+FROM node:20.17.0-alpine AS builder
 WORKDIR /app
 COPY . .
 RUN npm ci && npm run build
 
 # Production stage
-FROM node:20-alpine AS runner
+FROM node:20.17.0-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=builder /app/.next/standalone ./
@@ -399,7 +399,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '20.17.0'
       - run: npm ci
       - run: npm run lint
       - run: npm run build
