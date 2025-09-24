@@ -59,10 +59,70 @@
       <Label>Log Directory</Label>
     </Variable>
     <Variable>
+      <Name>LOG_LEVEL</Name>
+      <Value>info</Value>
+      <Mode></Mode>
+      <Label>Log Level</Label>
+    </Variable>
+    <Variable>
+      <Name>LOG_PRETTY</Name>
+      <Value>false</Value>
+      <Mode></Mode>
+      <Label>Pretty Console Logs</Label>
+    </Variable>
+    <Variable>
+      <Name>LOG_TO_FILE</Name>
+      <Value>true</Value>
+      <Mode></Mode>
+      <Label>Write Log File</Label>
+    </Variable>
+    <Variable>
+      <Name>JAM_SERVER_TOKEN</Name>
+      <Value></Value>
+      <Mode></Mode>
+      <Label>Jam WS Token</Label>
+    </Variable>
+    <Variable>
+      <Name>NEXT_PUBLIC_JAM_TOKEN</Name>
+      <Value></Value>
+      <Mode></Mode>
+      <Label>Client Jam Token</Label>
+    </Variable>
+    <Variable>
+      <Name>NEXT_PUBLIC_JAM_SERVER_URL</Name>
+      <Value>ws://[IP]:31415</Value>
+      <Mode></Mode>
+      <Label>Jam WS URL</Label>
+    </Variable>
+    <Variable>
+      <Name>NEXT_PUBLIC_ENABLE_PWA</Name>
+      <Value>false</Value>
+      <Mode></Mode>
+      <Label>Enable PWA</Label>
+    </Variable>
+    <Variable>
+      <Name>NEXT_PUBLIC_WEB_VITALS_ENDPOINT</Name>
+      <Value></Value>
+      <Mode></Mode>
+      <Label>Web Vitals Endpoint</Label>
+    </Variable>
+    <Variable>
+      <Name>ANALYTICS_FORWARD_URL</Name>
+      <Value></Value>
+      <Mode></Mode>
+      <Label>Telemetry Forward URL</Label>
+    </Variable>
+    <Variable>
+      <Name>ANALYTICS_FORWARD_TOKEN</Name>
+      <Value></Value>
+      <Mode></Mode>
+      <Label>Telemetry Forward Token</Label>
+    </Variable>
+    <Variable>
       <Name>NEXT_TELEMETRY_DISABLED</Name>
       <Value>1</Value>
       <Mode></Mode>
-      <Label>Disable Telemetry</Label>
+      <Label>Disable Next.js Telemetry</Label>
     </Variable>
     <Variable>
       <Name>TZ</Name>
@@ -76,7 +136,17 @@
   <Config Name="Logs Directory" Target="/app/logs" Default="/mnt/user/appdata/oscillo/logs" Mode="rw" Description="Directory for application logs" Type="Path" Display="always" Required="false" Mask="false">/mnt/user/appdata/oscillo/logs</Config>
   <Config Name="Uploads Directory" Target="/app/uploads" Default="/mnt/user/appdata/oscillo/uploads" Mode="rw" Description="Directory for user uploads and exports" Type="Path" Display="always" Required="false" Mask="false">/mnt/user/appdata/oscillo/uploads</Config>
   <Config Name="Node Environment" Target="NODE_ENV" Default="production" Mode="" Description="Node.js environment mode" Type="Variable" Display="advanced" Required="false" Mask="false">production</Config>
-  <Config Name="Log Directory" Target="LOG_DIR" Default="/app/logs" Mode="" Description="Internal log directory path" Type="Variable" Display="advanced" Required="false" Mask="false">/app/logs</Config>
-  <Config Name="Disable Telemetry" Target="NEXT_TELEMETRY_DISABLED" Default="1" Mode="" Description="Disable Next.js telemetry" Type="Variable" Display="advanced" Required="false" Mask="false">1</Config>
+  <Config Name="Log Directory Var" Target="LOG_DIR" Default="/app/logs" Mode="" Description="Internal log directory path" Type="Variable" Display="advanced" Required="false" Mask="false">/app/logs</Config>
+  <Config Name="Log Level" Target="LOG_LEVEL" Default="info" Mode="" Description="Pino log level" Type="Variable" Display="advanced" Required="false" Mask="false">info</Config>
+  <Config Name="Pretty Console Logs" Target="LOG_PRETTY" Default="false" Mode="" Description="Enable colorized console output" Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="Write Log File" Target="LOG_TO_FILE" Default="true" Mode="" Description="Persist log file under LOG_DIR" Type="Variable" Display="advanced" Required="false" Mask="false">true</Config>
+  <Config Name="Jam Server Token" Target="JAM_SERVER_TOKEN" Default="" Mode="" Description="Token required by jam WebSocket server" Type="Variable" Display="always" Required="false" Mask="true"></Config>
+  <Config Name="Client Jam Token" Target="NEXT_PUBLIC_JAM_TOKEN" Default="" Mode="" Description="Token injected into client to auth with jam server" Type="Variable" Display="always" Required="false" Mask="true"></Config>
+  <Config Name="Jam Server URL" Target="NEXT_PUBLIC_JAM_SERVER_URL" Default="ws://[IP]:31415" Mode="" Description="Override WebSocket URL if not using localhost" Type="Variable" Display="always" Required="false" Mask="false">ws://[IP]:31415</Config>
+  <Config Name="Enable PWA" Target="NEXT_PUBLIC_ENABLE_PWA" Default="false" Mode="" Description="Enable service worker in the container" Type="Variable" Display="advanced" Required="false" Mask="false">false</Config>
+  <Config Name="Web Vitals Endpoint" Target="NEXT_PUBLIC_WEB_VITALS_ENDPOINT" Default="" Mode="" Description="Override client telemetry endpoint" Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="Analytics Forward URL" Target="ANALYTICS_FORWARD_URL" Default="" Mode="" Description="Server-side telemetry forwarding" Type="Variable" Display="advanced" Required="false" Mask="false"></Config>
+  <Config Name="Analytics Forward Token" Target="ANALYTICS_FORWARD_TOKEN" Default="" Mode="" Description="Bearer token for telemetry forwarding" Type="Variable" Display="advanced" Required="false" Mask="true"></Config>
+  <Config Name="Disable Next.js Telemetry" Target="NEXT_TELEMETRY_DISABLED" Default="1" Mode="" Description="Disable Next.js telemetry" Type="Variable" Display="advanced" Required="false" Mask="false">1</Config>
   <Config Name="Timezone" Target="TZ" Default="America/New_York" Mode="" Description="Container timezone" Type="Variable" Display="always" Required="false" Mask="false">America/New_York</Config>
 </Container>
