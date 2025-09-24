@@ -5,6 +5,7 @@ import { Physics } from '@react-three/rapier'
 import { PerspectiveCamera, AdaptiveDpr, Stars, KeyboardControls } from '@react-three/drei'
 import { usePerformanceSettings } from '../store/usePerformanceSettings'
 import { useThemeSettings } from '../store/useThemeSettings'
+import { applyThemeTokens } from '@/lib/theme-tokens'
 
 // Enhanced components
 import SceneLights from './SceneLights'
@@ -41,6 +42,10 @@ function SceneContents() {
   const { feedbacks } = useInteractionFeedback()
   
   const themeConfig = getCurrentConfig()
+
+  React.useEffect(() => {
+    applyThemeTokens(themeConfig)
+  }, [themeConfig])
 
   return (
     <AdaptiveQualityManager>
@@ -122,15 +127,20 @@ export default function EnhancedCanvas() {
   const [isInitialized, setIsInitialized] = React.useState(true)
 
   const canvasProps = React.useMemo(() => {
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-      navigator.userAgent
-    )
+    const hasWindow = typeof window !== 'undefined'
+    const userAgent = hasWindow && typeof window.navigator !== 'undefined'
+      ? window.navigator.userAgent
+      : ''
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+    const devicePixelRatio = hasWindow && typeof window.devicePixelRatio === 'number'
+      ? window.devicePixelRatio
+      : 1
 
     return {
       className: "absolute inset-0",
       shadows: perfLevel !== 'low' && !contextLost,
       gl: {
-        antialias: perfLevel !== 'low' && !isMobile,
+        antialias: perfLevel !== 'low' && hasWindow && !isMobile,
         alpha: true,
         powerPreference: perfLevel === 'high' ? 'high-performance' as const : 'default' as const,
         failIfMajorPerformanceCaveat: false,
@@ -140,7 +150,7 @@ export default function EnhancedCanvas() {
       },
       camera: false,
       style: { width: '100vw', height: '100vh' },
-      dpr: Math.min(window.devicePixelRatio || 1, perfLevel === 'high' ? 2 : 1),
+      dpr: Math.min(devicePixelRatio || 1, perfLevel === 'high' ? 2 : 1),
       performance: {
         min: 0.5,
         max: perfLevel === 'high' ? 1 : 0.8,
@@ -163,7 +173,11 @@ export default function EnhancedCanvas() {
             The 3D graphics context has been lost. This usually happens when the GPU is overloaded.
           </p>
           <button 
-            onClick={() => window.location.reload()} 
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.location.reload()
+              }
+            }} 
             className="bg-gradient-to-r from-red-500 to-pink-500 text-white px-6 py-3 rounded-lg font-medium hover:shadow-lg transition-all duration-300"
           >
             Reload Application
