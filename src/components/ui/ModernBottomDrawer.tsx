@@ -5,6 +5,7 @@ import { useAudioSettings } from '@/store/useAudioSettings'
 import { useSelectedShape } from '@/store/useSelectedShape'
 import { usePerformanceSettings } from '@/store/usePerformanceSettings'
 import { triggerSound } from '@/lib/soundTriggers'
+import { useTelemetryConsent } from '@/store/useTelemetryConsent'
 import { GlassPanel, NeonButton, NeonSlider, NeonToggle, Tooltip } from './ModernUITheme'
 import { Music, Volume2, Sliders, Cpu, Sparkles, Grid3X3, Headphones, Mic } from 'lucide-react'
 import gsap from 'gsap'
@@ -39,6 +40,12 @@ export default function ModernBottomDrawer() {
   // Performance settings
   const perfLevel = usePerformanceSettings(s => s.level)
   const setPerfLevel = usePerformanceSettings(s => s.setLevel)
+
+  const telemetryHydrate = useTelemetryConsent((s) => s.hydrate)
+  const telemetryHydrated = useTelemetryConsent((s) => s.hydrated)
+  const analyticsEnabled = useTelemetryConsent((s) => s.analyticsEnabled)
+  const allowAnalytics = useTelemetryConsent((s) => s.allowAnalytics)
+  const denyAnalytics = useTelemetryConsent((s) => s.denyAnalytics)
   
   // Animate drawer on selection change
   useEffect(() => {
@@ -58,6 +65,10 @@ export default function ModernBottomDrawer() {
       }
     }
   }, [selected])
+
+  useEffect(() => {
+    telemetryHydrate()
+  }, [telemetryHydrate])
   
   const handlePlay = async () => {
     if (!selectedObject) return
@@ -301,9 +312,13 @@ export default function ModernBottomDrawer() {
                     color="#00ffff"
                   />
                   <NeonToggle
-                    label="Auto-save Session"
-                    checked={true}
-                    onChange={() => {}}
+                    label="Share anonymous telemetry"
+                    checked={analyticsEnabled}
+                    disabled={!telemetryHydrated}
+                    onChange={(value) => {
+                      if (value) allowAnalytics()
+                      else denyAnalytics()
+                    }}
                     color="#00ff00"
                   />
                   <NeonToggle

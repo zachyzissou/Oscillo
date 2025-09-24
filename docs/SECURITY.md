@@ -131,7 +131,10 @@ Keep tokens and host-specific values out of source control. When provisioning Un
 
 ### Error Tracking
 
-* Implement structured logging
+* Structured logging is provided by Pino (`src/lib/logger.server.ts` / `server/logger.js`) with JSON payloads shipped to stdout and optional file targets (`${LOG_DIR}/${LOG_FILE}`, defaulting to `<project>/logs/app.log`).
+* Enforce `LOG_LEVEL`, `LOG_PRETTY`, and `LOG_TO_FILE` defaults via deployment manifests so production retains immutable audit trails.
+* Content Security Policy is applied globally (see `next.config.js`); adjust `connect-src` if you expose additional APIs.
+* Jam sessions enforce origin allow lists (`JAM_ALLOWED_ORIGINS`) and optional tokens (`JAM_SERVER_TOKEN` / `NEXT_PUBLIC_JAM_TOKEN`). Keep tokens secret and rotate periodically in multi-user deployments.
 * Monitor for security events
 * Set up alerts for suspicious activity
 

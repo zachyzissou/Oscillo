@@ -63,6 +63,8 @@ To change the host port, modify the port mapping in the template or docker run c
 | `NODE_ENV` | `production` | Node.js environment |
 | `LOG_DIR` | `/app/logs` | Log directory path |
 | `NEXT_TELEMETRY_DISABLED` | `1` | Disable Next.js telemetry |
+| `JAM_SERVER_TOKEN` | _(blank)_ | Optional shared secret for Jam WebSockets |
+| `JAM_ALLOWED_ORIGINS` | `http://localhost:3000,https://localhost:3000` | Comma-separated list of allowed WebSocket origins |
 | `TZ` | `America/New_York` | Container timezone |
 
 ## 🔧 Advanced Configuration
@@ -90,6 +92,7 @@ The application uses these network features:
 - **SharedArrayBuffer**: Requires specific headers (automatically configured)
 - **WebGPU**: Modern browser required for best performance
 - **WebGL**: Fallback for older hardware
+- **Jam Sessions**: WebSocket server listens on port 3030; set `JAM_ALLOWED_ORIGINS` and optionally `JAM_SERVER_TOKEN` to restrict access when exposed outside your LAN.
 
 ### Storage Considerations
 

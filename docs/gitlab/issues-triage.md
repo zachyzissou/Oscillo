@@ -6,6 +6,25 @@
 - For each issue, capture context, define a work log entry, implement the fix, then document closure notes before marking the ticket resolved.
 - Maintain this file as the running log so Unraid/GitLab history stays aligned with repository state.
 
+## Automation Sweep (Run `npm run gitlab:automation`)
+- Adds quality-gate reminder comments to issues missing automation notes.
+- Flags overdue tasks with the `attention::overdue` label.
+- Assigns unowned tasks to the project owner as a fallback.
+
+### Latest Run (2025-09-24)
+| Metric | Count |
+|--------|-------|
+| Quality notes added | 0 |
+| Overdue tasks flagged | 0 |
+| Unassigned tasks auto-assigned | 0 |
+
+Logs: see `artifacts/gitlab/automation-2025-09-24.json`.
+
+## Manual Follow-Up
+- Review newly flagged `attention::overdue` issues and reset due dates or re-plan as needed.
+- For quality-gate issues, ensure pipeline logs (lint/type/test/build) and metrics artifacts are linked.
+- Confirm jam security updates (`JAM_ALLOWED_ORIGINS`, `JAM_SERVER_TOKEN`) are documented per issue #52.
+
 ## Backlog Snapshot (top priority items)
 | IID | Title | Priority | Category |
 | --- | --- | --- | --- |
@@ -56,6 +75,6 @@
    - Inventory current n8n workflows in GitLab artifacts (if any) and recreate as JSON exports under `docs/automation/`.
    - Validate Twitter API credentials flow and document scheduling/monitoring.
 
-- **Issue #126 - GHCR manifest unknown when pulling Unraid template image** (priority::low)
+- **Issue #126 - GHCR manifest unknown when pulling unraid/oscillo template image** (priority::low)
   - Logged after Unraid pull continued to fail against `ghcr.io/zachyzissou/interactive-music-3d:latest`.
   - Follow-up: confirm image publication status/visibility and adjust template once the tag is accessible.

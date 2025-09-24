@@ -9,6 +9,7 @@ This guide summarizes how to develop, test, and propose changes. For a concise r
 - Install: `npm ci --legacy-peer-deps`
 - Develop: `npm run dev` → http://localhost:3000
 - Validate: `npm run type-check && npm run lint && npm run build && npm test`
+- Release smoke: `./scripts/pipeline-smoke.sh` (runs lint → type-check → tests → build and writes logs to `artifacts/pipeline/`)
 
 ## Branching & Commits
 
@@ -21,6 +22,7 @@ This guide summarizes how to develop, test, and propose changes. For a concise r
 - Keep PRs focused and small; link issues.
 - Include: clear description, before/after screenshots or a short video for UI/3D changes, notes on performance/mobile impact.
 - CI must pass: types, lint, build, unit/e2e (where applicable).
+- Document any new environment variables (.env.example) and update deployment/security docs when adjusting telemetry, logging, or jam-session behavior.
 
 ## Code Style
 
@@ -32,13 +34,14 @@ This guide summarizes how to develop, test, and propose changes. For a concise r
 ## Testing
 
 - Unit: Vitest + Testing Library (`npm run test:unit`).
-- E2E/visual/a11y: Playwright (`npm run test:e2e`, `npm run test:visual`, `npm run test:a11y`).
+- E2E/visual/a11y: Playwright (`npm run test:e2e`, `npm run test:visual`, `npm run test:a11y`). Use `npm run test:smoke` for quick regression coverage.
 - Name tests `*.test.ts(x)` or `*.spec.ts(x)` under `tests/`.
 
 ## Platform-Specific Notes
 
 - Audio init: Initialize Tone.js only after a user gesture; avoid SSR `AudioContext` usage.
 - Hydration safety: Guard browser-only code with dynamic import or `"use client"`; delay renderer/effects until `ModernStartOverlay` dismisses the audio gate.
+- Jam sessions: respect `JAM_ALLOWED_ORIGINS`/`JAM_SERVER_TOKEN` on the server and mirror clients via `NEXT_PUBLIC_JAM_*` when enabling token auth.
 - Performance: Prefer AdaptiveDpr/LOD, avoid heavy allocations in render loops.
 
 For full repository structure, commands, and conventions, read AGENTS.md.

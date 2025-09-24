@@ -77,9 +77,9 @@ _Status 2025-09-24_: Legacy raw/null loaders were removed from `next.config.js`;
 **Quality gates**: CI pipeline time reduced or stable; coverage reports published; flakes tracked and minimized.
 
 ### Phase 9 – Observability, Security, & Ops
-- Introduce structured logging (Pino or equivalent) with environment-controlled transports.
-- Add Web Vitals telemetry and optional analytics behind consent; update SECURITY.md with data handling notes.
-- Harden security posture: headers audit, WebSocket auth, dependency vulnerability remediation, SW behavior review.
+- Introduce structured logging (Pino) with environment-controlled transports. *(Completed 2025-09-24)*
+- Add Web Vitals telemetry and optional analytics behind consent; update SECURITY.md with data handling notes. *(Completed 2025-09-24)*
+- Harden security posture: headers audit, WebSocket auth, dependency vulnerability remediation, SW behavior review. *(Completed 2025-09-24)*
 - Review deployment workflows and rollback plan (see `docs/DEPLOYMENT.md` and `docs/security-checklist.md`).
 - Keep logging/ingestion practices current in `docs/logging-strategy.md`.
 

@@ -25,5 +25,6 @@ These are the baseline expectations for local development, CI, and production en
 
 ## Optional Services
 - Web Vitals forwarding (`NEXT_PUBLIC_WEB_VITALS_ENDPOINT`, `ANALYTICS_FORWARD_URL`, `ANALYTICS_FORWARD_TOKEN`) remains disabled unless explicitly set.
+- Jam sessions expose a WebSocket server (`JAM_SERVER_PORT`, default 3030). Set `JAM_ALLOWED_ORIGINS` and `JAM_SERVER_TOKEN`/`NEXT_PUBLIC_JAM_TOKEN` when operating beyond localhost.
 
 Keep this file updated whenever runtime versions or tooling expectations change.

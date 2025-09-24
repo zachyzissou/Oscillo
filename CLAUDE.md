@@ -5,13 +5,14 @@ Guidance for Claude Code when collaborating on Interactive Music 3D. Follow the 
 ## Working Agreements
 - Sync task tracking with OpenProject (http://192.168.4.225:5683/projects/oscillo/); see docs/integrations/openproject.md for API usage.
 - Stay aligned with the 10-phase overhaul roadmap; reference it in planning and PR descriptions.
-- Preserve a green baseline: always run `npm run type-check`, `npm run lint:check`, and scoped tests for touched areas. For full release validation use `./scripts/pipeline-smoke.sh` (lint → type-check → tests → build).
+- Preserve a green baseline: always run `npm run type-check`, `npm run lint:check`, and scoped tests for touched areas. For full release validation use `./scripts/pipeline-smoke.sh` (lint → type-check → tests → build) and attach the logs (`artifacts/pipeline/`).
 - Prefer incremental, feature-flagged changes. Document assumptions and metrics before/after significant refactors.
 - Defer to documentation in `docs/` (audio, performance, architecture) and update it when behavior changes.
 
 ## Environment & Tooling
 - Required runtime: Node 20.17.0 (LTS) with npm 10.8+. CI enforces these versions via `scripts/check-node.js` (see `docs/environment-assumptions.md`).
 - Install dependencies with `npm install`; avoid legacy flags unless noted.
+- Keep `.env.example` synced—new envs exist for telemetry (`ANALYTICS_FORWARD_*`) and jam sessions (`JAM_*`, `NEXT_PUBLIC_JAM_*`). Non-local work must never rely on default tokens/origins.
 - Playwright browsers must be installed via `npx playwright install` before running E2E tests locally.
 
 ## Development Commands
@@ -86,7 +87,7 @@ src/
 ## Documentation & Communication
 - Update `docs/overhaul-plan.md` when scope or sequencing changes.
 - Log significant decisions as ADRs or in existing docs (`docs/architecture.md`).
-- Coordinate with maintainers before changing global config, deployment, telemetry, or logging behavior. Reference `docs/logging-strategy.md`, `docs/security-checklist.md`, and `docs/DEPLOYMENT.md` when adjusting ops workflows.
+- Coordinate with maintainers before changing global config, deployment, telemetry, or logging behavior. Reference `docs/logging-strategy.md`, `docs/security-checklist.md`, and `docs/DEPLOYMENT.md` when adjusting ops workflows. Confirm CSP and jam auth updates continue to satisfy those docs after any change.
 
 ## Deployment Reminders
 - Production deploy uses Next.js standalone output; Dockerfile expects Node 20 image.

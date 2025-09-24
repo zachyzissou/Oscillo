@@ -38,4 +38,6 @@
 - Prefer `npm run gitlab:automation` over manual token edits and record outcomes in the linked tracking task.
 - Jam collaboration currently runs without token authentication; keep the service behind trusted networks until UI-based auth is added.
 - Web Vitals telemetry stays disabled until users opt in; configure endpoints with `NEXT_PUBLIC_WEB_VITALS_ENDPOINT` (client) and `ANALYTICS_FORWARD_URL`/`ANALYTICS_FORWARD_TOKEN` (server) when needed.
-- Structured logging defaults to JSON Pino output; tune with `LOG_LEVEL`, `LOG_PRETTY`, and `LOG_TO_FILE` per environment.
+- Structured logging defaults to JSON Pino output; tune with `LOG_LEVEL`, `LOG_PRETTY`, and `LOG_TO_FILE` per environment. File sinks write to `${LOG_DIR}/${LOG_FILE}` (defaults to `./logs/app.log` locally, `/app/logs/app.log` in containers).
+- Jam collaboration now supports token + origin enforcement; set `JAM_SERVER_TOKEN`, `JAM_ALLOWED_ORIGINS`, and mirror `NEXT_PUBLIC_JAM_TOKEN` when running outside localhost. Do not expose the WebSocket endpoint without one of those controls.
+- Always run `./scripts/pipeline-smoke.sh` before tagging a release and attach the generated logs under `artifacts/pipeline/` to the release issue.

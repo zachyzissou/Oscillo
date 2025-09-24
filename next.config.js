@@ -10,6 +10,34 @@ const withBundleAnalyzer = bundleAnalyzer({
 const shaderTest = /\.(wgsl|glsl|vert|frag)$/i
 const audioTest = /\.(mp3|wav|ogg)$/i
 
+const csp = [
+  "default-src 'self'", // load everything from same origin by default
+  "base-uri 'self'",
+  "frame-ancestors 'none'",
+  "object-src 'none'",
+  "font-src 'self' data:",
+  "img-src 'self' data: blob:",
+  "media-src 'self' data: blob:",
+  "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline'",
+  "connect-src 'self' https: ws: wss:",
+  "worker-src 'self' blob:",
+  'upgrade-insecure-requests',
+].join('; ')
+
+const securityHeaders = [
+  { key: 'Content-Security-Policy', value: csp },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()' },
+  { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
+  { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
+  { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
+  { key: 'Cross-Origin-Resource-Policy', value: 'cross-origin' },
+  { key: 'X-XSS-Protection', value: '1; mode=block' },
+]
+
 const nextConfig = {
   // Enable experimental features for better performance
   experimental: {
@@ -40,32 +68,7 @@ const nextConfig = {
     return [
       {
         source: '/(.*)',
-        headers: [
-          // Security headers
-          { key: 'X-Frame-Options', value: 'DENY' },
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'origin-when-cross-origin' },
-          { key: 'X-XSS-Protection', value: '1; mode=block' },
-          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains' },
-          // WebGPU and SharedArrayBuffer headers
-          {
-            key: 'Cross-Origin-Embedder-Policy',
-            value: 'require-corp',
-          },
-          {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin',
-          },
-          {
-            key: 'Cross-Origin-Resource-Policy',
-            value: 'cross-origin',
-          },
-          // WebGPU security headers
-          {
-            key: 'Permissions-Policy',
-            value: 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()',
-          },
-        ],
+        headers: securityHeaders,
       },
     ]
   },

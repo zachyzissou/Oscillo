@@ -1,4 +1,4 @@
-const { test: baseTest, expect, chromium } = require('@playwright/test');
+const { chromium } = require('@playwright/test');
 const { spawn } = require('child_process');
 
 (async () => {

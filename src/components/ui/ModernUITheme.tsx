@@ -223,7 +223,8 @@ export const NeonToggle = forwardRef<HTMLInputElement, {
   checked: boolean
   onChange: (checked: boolean) => void
   color?: string
-}>(({ label, checked, onChange, color = '#00ffff' }, ref) => {
+  disabled?: boolean
+}>(({ label, checked, onChange, color = '#00ffff', disabled = false }, ref) => {
   const toggleRef = useRef<HTMLDivElement>(null)
   
   useEffect(() => {
@@ -238,12 +239,15 @@ export const NeonToggle = forwardRef<HTMLInputElement, {
   }, [checked, color])
 
   return (
-    <label className="flex items-center space-x-3 cursor-pointer">
+    <label
+      className={`flex items-center space-x-3 ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+    >
       <input
         ref={ref}
         type="checkbox"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
+        disabled={disabled}
         className="sr-only"
       />
       <div className="relative w-12 h-6 bg-white/10 rounded-full backdrop-blur-sm">

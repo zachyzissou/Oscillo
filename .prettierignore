@@ -1,0 +1,8 @@
+node_modules
+.next
+out
+dist
+coverage
+artifacts
+public/sw.js
+public/workbox-*.js

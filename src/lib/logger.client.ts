@@ -1,6 +1,13 @@
-export const logger = {
-  info: (msg: string) => console.warn(`INFO: ${msg}`),
-  debug: (msg: string) => console.warn(`DEBUG: ${msg}`),
-  warn: (msg: string) => console.warn(msg),
-  error: (msg: string) => console.error(msg),
+type BrowserLogger = {
+  info: (...args: unknown[]) => void
+  warn: (...args: unknown[]) => void
+  error: (...args: unknown[]) => void
+  debug: (...args: unknown[]) => void
+}
+
+export const logger: BrowserLogger = {
+  info: (...args: unknown[]) => console.info('[oscillo]', ...args),
+  warn: (...args: unknown[]) => console.warn('[oscillo]', ...args),
+  error: (...args: unknown[]) => console.error('[oscillo]', ...args),
+  debug: (...args: unknown[]) => console.debug('[oscillo]', ...args),
 }

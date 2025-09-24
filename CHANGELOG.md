@@ -1,19 +1,20 @@
 
-## [Unreleased] - 2025-09-22
+## [Unreleased] – 2025-09-24
 
-### Added
+### Phase 9 – Observability & Security
+- Structured logging via Pino with environment-aware transports (`src/lib/logger.server.ts`, `server/logger.js`).
+- CSP + permissions headers consolidated in `next.config.js`; jam WebSocket now enforces origin allow-lists and optional shared-token auth (`server/jam-server.js`, `src/lib/jamSession.ts`).
+- Telemetry consent funnel implemented (`app/reportWebVitals.ts`, `app/api/metrics/web-vitals/route.ts`, `src/store/useTelemetryConsent.ts`).
+- Docs updated: logging strategy, security checklist, deployment runbook, release checklist.
 
-- Structured logging via Pino with environment-controlled transports (server runtime + jam server).
-- Web Vitals telemetry endpoint and consent-driven toggle (`app/api/metrics/web-vitals`, `useTelemetryConsent`).
-- Deployment pipeline smoke script (`scripts/pipeline-smoke.sh`) and logging/comment automation helper (`scripts/gitlab-comment.mjs`).
-- Security and ops checklists (`docs/security-checklist.md`, `docs/metrics/README.md`).
+### Phase 10 – Release Readiness
+- Added `docs/release-checklist.md` and refreshed `docs/metrics/README.md` for regression evidence capture.
+- Introduced Changesets workflow (`@changesets/cli`, `.changeset/`) and `npm run release:prepare` to codify tagging/version steps.
+- Contributor docs (README, CLAUDE, AGENTS, CONTRIBUTING) now reference smoke scripts, telemetry envs, and jam auth requirements.
 
-### Changed
-
-- Hardened WebSocket auth, service-worker gating, and CSP headers (`next.config.js`, `server/jam-server.js`, `src/lib/jamSession.ts`, `src/lib/registerServiceWorker.ts`).
-- Refreshed README, CLAUDE.md, CONTRIBUTING.md, AGENTS.md with new operational guidance.
-- Updated deployment runbook, logging strategy, overhaul plan, and security docs to reflect the new workflow.
-- Removed unused Radix UI/audio helper dependencies (see `docs/dependencies/2025-09-24-stack-cleanup.md`).
+### Design System
+- Theme palette refactor with surface/contrast tokens and synced Tailwind utilities (`src/lib/theme-tokens.ts`, `src/styles/globals.css`, `tailwind.config.ts`).
+- Added Vitest coverage for theme token application (`src/__tests__/themeTokens.test.ts`).
 
 ## [Unreleased] - 2025-07-01
 

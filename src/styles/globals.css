@@ -8,6 +8,49 @@
   --motion-easing: ease-in-out;
   --focus-ring: 0 0 0 2px #3b82f6;
   --focus-ring-offset: 2px;
+
+  /* Design tokens (defaults to Ethereal theme) */
+  --background: 240 27% 8%;
+  --foreground: 220 100% 97%;
+  --surface: 240 30% 12%;
+  --surface-contrast: 220 100% 97%;
+  --card: var(--surface);
+  --card-foreground: var(--surface-contrast);
+  --popover: var(--surface);
+  --popover-foreground: var(--surface-contrast);
+  --border: 229 30% 17%;
+  --input: 232 41% 7%;
+  --primary: 223 100% 77%;
+  --primary-foreground: 222 47% 11%;
+  --secondary: 257 100% 77%;
+  --secondary-foreground: 222 47% 11%;
+  --accent: 137 100% 77%;
+  --accent-foreground: 222 47% 11%;
+  --muted: 223 47% 20%;
+  --muted-foreground: 215 20% 72%;
+  --ring: var(--primary);
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 96%;
+  --radius: 1rem;
+
+  --neon-cyan: 180 100% 50%;
+  --neon-pink: 300 100% 50%;
+  --neon-green: 142 69% 58%;
+  --neon-purple: 277 100% 50%;
+  --neon-orange: 24 100% 50%;
+  --neon-blue: 217 91% 60%;
+  --neon-violet: 258 90% 66%;
+
+  --glass-white: rgba(255, 255, 255, 0.08);
+  --glass-dark: rgba(15, 15, 35, 0.28);
+  --glass-backdrop: rgba(15, 15, 35, 0.72);
+
+  --oscillo-bg: 240 40% 10%;
+  --oscillo-surface: 240 28% 14%;
+  --oscillo-accent: 142 69% 58%;
+  --oscillo-secondary: 217 91% 60%;
+  --oscillo-warning: 38 92% 50%;
+  --oscillo-danger: 0 84% 60%;
 }
 
 /* Accessibility-aware motion */

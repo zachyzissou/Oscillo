@@ -17,11 +17,15 @@ export const useJam = create<JamState>((set, get) => ({
     const id = nanoid(6);
     const serverUrl = (() => {
       if (typeof window === 'undefined') {
-        return 'ws://localhost:3030';
+        return process.env.NEXT_PUBLIC_JAM_SERVER_URL || 'ws://localhost:3030';
+      }
+      if (process.env.NEXT_PUBLIC_JAM_SERVER_URL) {
+        return process.env.NEXT_PUBLIC_JAM_SERVER_URL;
       }
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.hostname || 'localhost';
-      return `${protocol}//${host}:3030`;
+      const port = process.env.NEXT_PUBLIC_JAM_SERVER_PORT || '3030';
+      return `${protocol}//${host}:${port}`;
     })();
     const socket = new WebSocket(serverUrl);
     socket.addEventListener('open', () => {
@@ -29,11 +33,17 @@ export const useJam = create<JamState>((set, get) => ({
         JSON.stringify({
           type: 'join',
           id,
+          token: process.env.NEXT_PUBLIC_JAM_TOKEN,
         })
       );
     });
     socket.addEventListener('message', (event) => {
       const data = JSON.parse(event.data as string);
+      if (data.type === 'error') {
+        logger.warn(`jam session error: ${data.reason || 'unknown error'}`);
+        socket.close();
+        return;
+      }
       if (data.type === 'signal' && data.from) {
         let peer = get().peers[data.from];
         if (!peer) {
