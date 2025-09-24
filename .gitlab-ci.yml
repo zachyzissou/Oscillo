@@ -1,38 +1,9 @@
 stages:
-  - build-and-test
   - mirror
 
-variables:
-  NODE_VERSION: "18"
-  GIT_DEPTH: 0
-
-# Build job
-build:
-  stage: build-and-test
-  image: node:${NODE_VERSION}
-  script:
-    - npm ci || echo "npm ci failed, continuing..."
-    - npm run build || echo "Build failed, continuing..."
-  only:
-    - main
-    - develop
-  allow_failure: true
-
-# Test job  
-test:
-  stage: build-and-test
-  image: node:${NODE_VERSION}
-  script:
-    - npm ci || echo "npm ci failed, continuing..."
-    - npm run test || echo "Tests failed, continuing..."
-  only:
-    - main
-    - develop
-  allow_failure: true
-
-# GitHub Mirror - runs in parallel, not dependent on other jobs
+# GitHub Mirror - simplified, no tags required
 mirror-to-github:
-  stage: build-and-test  # Run in first stage so it starts immediately
+  stage: mirror
   image: alpine/git:latest
   script:
     - apk add --no-cache git
@@ -40,9 +11,6 @@ mirror-to-github:
     - git config --global user.name "GitLab CI"
     - git remote add github https://${GITHUB_TOKEN}@github.com/zachyzissou/interactive-music-3d.git || true
     - git push github HEAD:main --force
-    - echo "✓ Pushed to GitHub successfully"
+    - echo "✓ Successfully mirrored to GitHub"
   only:
     - main
-  tags:
-    - docker
-    - unraid
