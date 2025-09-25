@@ -6,10 +6,12 @@ import * as THREE from 'three'
 import { extend } from '@react-three/fiber'
 import { playNote, playChord, playBeat } from '@/lib/audio'
 import { useMusicalPalette } from '../store/useMusicalPalette'
-import ModernStartOverlay from './ui/ModernStartOverlay'
+import { useAudioEngine } from '../store/useAudioEngine'
+import SimpleStartOverlay from './ui/SimpleStartOverlay'
 import QualityManager from '@/components/visual/QualityManager'
 import { usePerformanceSettings } from '@/store/usePerformanceSettings'
 import { QUALITY_PROFILES } from '@/lib/quality'
+import AudioDebugPanel from './AudioDebugPanel'
 
 import { performanceMonitor } from '@/lib/performance-monitor'
 
@@ -145,7 +147,8 @@ SimplePostProcessing.displayName = 'SimplePostProcessing'
 // Main immersive canvas
 export default function ImmersiveMusicalUniverse() {
   const { key, scale, tempo } = useMusicalPalette()
-  
+  const hasUserInteracted = useAudioEngine((state) => state.userInteracted)
+
   // Setup performance monitoring
   useEffect(() => {
     // Expose performance monitor globally for tests
@@ -178,15 +181,17 @@ export default function ImmersiveMusicalUniverse() {
   }), [profile, perfLevel])
   
   return (
-    <div style={{ 
-      width: '100vw', 
-      height: '100vh', 
-      position: 'fixed', 
-      top: 0, 
+    <div style={{
+      width: '100vw',
+      height: '100vh',
+      position: 'fixed',
+      top: 0,
       left: 0,
-      backgroundColor: '#000011'
+      backgroundColor: '#000011',
+      zIndex: 1
     }}>
-      <Canvas {...canvasSettings}>
+      {hasUserInteracted ? (
+        <Canvas {...canvasSettings}>
         <AdaptiveDpr pixelated />
         <color attach="background" args={['#000011']} />
         <fog attach="fog" args={['#000033', 20, 60]} />
@@ -265,20 +270,34 @@ export default function ImmersiveMusicalUniverse() {
         {/* Simple glow effects */}
         <SimplePostProcessing />
       </Canvas>
+      ) : (
+        <div style={{
+          width: '100%',
+          height: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #000011 0%, #001122 100%)'
+        }}>
+          {/* Placeholder while waiting for user interaction */}
+        </div>
+      )}
       
-      <ModernStartOverlay />
+      <SimpleStartOverlay />
       <QualityManager />
       <PluginLoader />
-      
-      {/* Enhanced UI overlay */}
-      <div style={{
+      <AudioDebugPanel />
+
+      {/* Enhanced UI overlay - only show after interaction */}
+      {hasUserInteracted && (
+        <div style={{
         position: 'fixed',
         top: '20px',
         right: '20px',
         color: 'white',
         fontFamily: 'system-ui, sans-serif',
         fontSize: '16px',
-        zIndex: 1000,
+        zIndex: 10,
         textShadow: '0 0 10px rgba(255,255,255,0.3)',
         background: 'rgba(0,0,0,0.3)',
         backdropFilter: 'blur(10px)',
@@ -295,6 +314,7 @@ export default function ImmersiveMusicalUniverse() {
           Drag to explore • Scroll to zoom
         </div>
       </div>
+      )}
     </div>
   )
 }

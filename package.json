@@ -17,6 +17,7 @@
     "format": "prettier --write \"app/**/*.{js,jsx,ts,tsx,md}\" \"src/**/*.{js,jsx,ts,tsx,css,scss,json}\" \"docs/**/*.md\" \"scripts/**/*.{js,ts,mjs}\" \"tests/**/*.{js,ts,tsx}\"",
     "format:check": "prettier --check \"app/**/*.{js,jsx,ts,tsx,md}\" \"src/**/*.{js,jsx,ts,tsx,css,scss,json}\" \"docs/**/*.md\" \"scripts/**/*.{js,ts,mjs}\" \"tests/**/*.{js,ts,tsx}\"",
     "type-check": "tsc --noEmit",
+    "ts-prune": "ts-prune --project tsconfig.json",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:unit": "vitest run",
@@ -58,6 +59,7 @@
     "@react-three/postprocessing": "^3.0.4",
     "@react-three/rapier": "^2.1.0",
     "@tailwindcss/forms": "^0.5.10",
+    "@tailwindcss/postcss": "^4.1.13",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^24.5.2",
     "@types/react": "^19.1.13",
@@ -119,6 +121,7 @@
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.9",
     "ts-node": "^10.9.2",
+    "ts-prune": "^0.10.3",
     "vite": "^7.1.7",
     "vitest": "^3.2.4",
     "webpack-bundle-analyzer": "^4.10.2"

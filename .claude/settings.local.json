@@ -59,7 +59,15 @@
       "Bash(npx eslint:*)",
       "Bash(git rm:*)",
       "Bash(git rebase:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npm run lint:check:*)",
+      "Bash(npm run ts-prune:*)",
+      "Bash(npx ts-prune:*)",
+      "Bash(findstr:*)",
+      "Bash(netstat:*)",
+      "Bash(BASE_URL=http://localhost:3001 npx playwright test tests/e2e/audio-gating.spec.ts --project=chromium --reporter=list)",
+      "Bash(node:*)",
+      "Bash(npm run:*)"
     ],
     "deny": []
   }

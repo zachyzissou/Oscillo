@@ -23,24 +23,37 @@ export default function ModernStartOverlay() {
   const [hasInteracted, setHasInteracted] = useState(false)
   const [isInitializingAudio, setIsInitializingAudio] = useState(false)
 
+  console.log('[ModernStartOverlay] Component mounted, initial state:', {
+    isVisible,
+    showHelp,
+    hasInteracted,
+    NODE_ENV: process.env.NODE_ENV
+  })
+
   const setUserInteracted = useAudioEngine(useCallback((s) => s.setUserInteracted, []))
   const setAudioContextState = useAudioEngine(useCallback((s) => s.setAudioContext, []))
   const setInitFlag = useAudioEngine(useCallback((s) => s.setIsInitializing, []))
   
   useEffect(() => {
-    // Always show overlay initially in test environments
-    const isTestEnvironment = typeof window !== 'undefined' && 
-      (window.location.hostname === 'localhost' || 
-       window.navigator.userAgent.includes('HeadlessChrome') ||
-       process.env.NODE_ENV === 'test')
-    
-    if (!isTestEnvironment) {
+    // For development, always show the overlay initially
+    // You can clear localStorage if needed
+    const isDevelopment = process.env.NODE_ENV === 'development'
+    const hasSeenOverlay = localStorage.getItem('hasSeenOverlay')
+
+    console.log('[ModernStartOverlay] useEffect check:', {
+      isDevelopment,
+      hasSeenOverlay,
+      willHide: !isDevelopment && hasSeenOverlay === 'true'
+    })
+
+    if (!isDevelopment) {
       // Check if user has seen overlay before (only in production)
-      const hasSeenOverlay = localStorage.getItem('hasSeenOverlay')
       if (hasSeenOverlay === 'true') {
+        console.log('[ModernStartOverlay] Hiding overlay (production + hasSeenOverlay)')
         setIsVisible(false)
       }
     }
+    // In development, always show the overlay
     
     // Keyboard shortcut handler
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -101,13 +114,26 @@ export default function ModernStartOverlay() {
     }
   }
   
-  if (!isVisible && !showHelp) return null
+  console.log('[ModernStartOverlay] Render check:', {
+    isVisible,
+    showHelp,
+    willRenderNull: !isVisible && !showHelp
+  })
+
+  if (!isVisible && !showHelp) {
+    console.log('[ModernStartOverlay] Returning null - component not rendered')
+    return null
+  }
   
   return (
     <div
       id="start-overlay"
       data-testid="start-overlay"
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      className="fixed inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+      style={{
+        zIndex: 99999,
+        pointerEvents: 'auto'
+      }}
       onClick={(e) => {
         if (e.target === e.currentTarget && hasInteracted) {
           setShowHelp(false)
@@ -139,13 +165,8 @@ export default function ModernStartOverlay() {
                 variant="primary"
                 size="lg"
                 onClick={handleStart}
-                className="min-w-[180px] relative z-50"
+                className="min-w-[180px]"
                 data-testid="start-button"
-                style={{ 
-                  position: 'relative',
-                  zIndex: 9999,
-                  transform: 'translateY(0)'
-                }}
                 disabled={isInitializingAudio}
               >
                 <Volume2 className="w-4 h-4 mr-2 inline" />

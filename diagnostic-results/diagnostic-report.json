@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-09-25T19:18:52.477Z",
+  "pageTitle": "Oscillo - Interactive Music 3D",
+  "overlay": {
+    "exists": true,
+    "visible": true
+  },
+  "localStorage": {
+    "hasSeenOverlay": null,
+    "allKeys": []
+  },
+  "elements": {
+    "Canvas": 0,
+    "Audio Debug Panel": 1,
+    "Three.js container": 1,
+    "React root": 0,
+    "Start overlay divs": 1
+  },
+  "consoleLogs": 618,
+  "pageErrors": [],
+  "htmlLength": 19588
+}

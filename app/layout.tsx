@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import ClientLayout from './ClientLayout'
+import '@/styles/globals.css'
 
 export const metadata: Metadata = {
   title: 'Oscillo - Interactive Music 3D',

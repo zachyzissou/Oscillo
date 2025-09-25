@@ -59,7 +59,11 @@
       "@types/web",
       "node"
     ],
-    "allowJs": true
+    "allowJs": false,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true
   },
   "include": [
     "next-env.d.ts",
