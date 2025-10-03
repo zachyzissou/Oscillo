@@ -1,0 +1,396 @@
+/* Tactical UI Design System - Hybrid aesthetic from reference screenshots */
+
+:root {
+  /* Color Palette - Neon Accents on Dark */
+  --tactical-bg-primary: #000000;
+  --tactical-bg-secondary: #0a0a0f;
+  --tactical-bg-tertiary: #14141a;
+  --tactical-bg-panel: rgba(10, 10, 15, 0.85);
+
+  /* Neon Accent Colors */
+  --neon-green: #00ff41;
+  --neon-cyan: #00ffff;
+  --neon-yellow: #ffff00;
+  --neon-red: #ff0041;
+  --neon-orange: #ff6b00;
+  --neon-blue: #0066ff;
+  --neon-purple: #9d00ff;
+
+  /* Status Colors */
+  --status-success: var(--neon-green);
+  --status-warning: var(--neon-yellow);
+  --status-error: var(--neon-red);
+  --status-info: var(--neon-cyan);
+  --status-active: var(--neon-orange);
+
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --text-tertiary: #606060;
+  --text-dim: #404040;
+  --text-neon: var(--neon-cyan);
+
+  /* Border & Frame */
+  --border-primary: rgba(0, 255, 255, 0.3);
+  --border-secondary: rgba(255, 255, 255, 0.1);
+  --border-neon: rgba(0, 255, 255, 0.6);
+  --bracket-size: 16px;
+  --bracket-thickness: 2px;
+
+  /* Spacing Scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* Typography */
+  --font-mono: 'Courier New', 'Consolas', monospace;
+  --font-display: 'Arial', sans-serif;
+
+  --font-size-xs: 10px;
+  --font-size-sm: 12px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 32px;
+
+  /* Effects */
+  --glow-sm: 0 0 4px currentColor;
+  --glow-md: 0 0 8px currentColor;
+  --glow-lg: 0 0 12px currentColor;
+  --shadow-tactical: 0 4px 16px rgba(0, 0, 0, 0.5);
+
+  /* Animations */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 400ms ease;
+}
+
+/* Base Typography */
+.tactical-text-mono {
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+}
+
+.tactical-text-display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.tactical-text-neon {
+  color: var(--text-neon);
+  text-shadow: var(--glow-sm);
+}
+
+/* Corner Brackets */
+.corner-brackets {
+  position: relative;
+}
+
+.corner-brackets::before,
+.corner-brackets::after {
+  content: '';
+  position: absolute;
+  width: var(--bracket-size);
+  height: var(--bracket-size);
+  border: var(--bracket-thickness) solid var(--border-neon);
+}
+
+.corner-brackets::before {
+  top: 0;
+  left: 0;
+  border-right: none;
+  border-bottom: none;
+}
+
+.corner-brackets::after {
+  top: 0;
+  right: 0;
+  border-left: none;
+  border-bottom: none;
+}
+
+.corner-brackets-bottom::before,
+.corner-brackets-bottom::after {
+  content: '';
+  position: absolute;
+  width: var(--bracket-size);
+  height: var(--bracket-size);
+  border: var(--bracket-thickness) solid var(--border-neon);
+}
+
+.corner-brackets-bottom::before {
+  bottom: 0;
+  left: 0;
+  border-right: none;
+  border-top: none;
+}
+
+.corner-brackets-bottom::after {
+  bottom: 0;
+  right: 0;
+  border-left: none;
+  border-top: none;
+}
+
+/* Tactical Panel */
+.tactical-panel {
+  background: var(--tactical-bg-panel);
+  border: 1px solid var(--border-primary);
+  backdrop-filter: blur(8px);
+  padding: var(--space-md);
+}
+
+.tactical-panel-framed {
+  position: relative;
+  padding: calc(var(--space-md) + var(--bracket-size));
+}
+
+/* Status Indicators */
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: pulse-glow 2s infinite;
+}
+
+.status-dot.success { background: var(--status-success); box-shadow: var(--glow-sm); }
+.status-dot.warning { background: var(--status-warning); box-shadow: var(--glow-sm); }
+.status-dot.error { background: var(--status-error); box-shadow: var(--glow-sm); }
+.status-dot.info { background: var(--status-info); box-shadow: var(--glow-sm); }
+.status-dot.active { background: var(--status-active); box-shadow: var(--glow-sm); }
+
+/* Neon Lines & Dividers */
+.neon-line {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    var(--neon-cyan) 50%,
+    transparent 100%
+  );
+  box-shadow: var(--glow-sm);
+}
+
+.neon-line-vertical {
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(180deg,
+    transparent 0%,
+    var(--neon-cyan) 50%,
+    transparent 100%
+  );
+  box-shadow: var(--glow-sm);
+}
+
+/* Metric Display */
+.metric-value {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--neon-cyan);
+  text-shadow: var(--glow-md);
+  letter-spacing: 0.05em;
+}
+
+.metric-label {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+/* Grid Overlays */
+.tactical-grid {
+  background-image:
+    linear-gradient(rgba(0, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Scan Lines Effect */
+.scanlines {
+  position: relative;
+  overflow: hidden;
+}
+
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15) 0px,
+    transparent 1px,
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 3px
+  );
+  pointer-events: none;
+  animation: scan 8s linear infinite;
+}
+
+@keyframes scan {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(20px); }
+}
+
+/* Terminal-style Text */
+.terminal-text {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  color: var(--neon-green);
+  white-space: pre-wrap;
+}
+
+.terminal-prompt::before {
+  content: '> ';
+  color: var(--neon-cyan);
+}
+
+/* Data Tables */
+.tactical-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+}
+
+.tactical-table th {
+  text-align: left;
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--border-primary);
+  color: var(--text-secondary);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: var(--font-size-xs);
+}
+
+.tactical-table td {
+  padding: var(--space-sm);
+  border-bottom: 1px solid var(--border-secondary);
+  color: var(--text-primary);
+}
+
+.tactical-table tr:hover {
+  background: rgba(0, 255, 255, 0.05);
+}
+
+/* Progress Bars */
+.tactical-progress {
+  width: 100%;
+  height: 4px;
+  background: var(--tactical-bg-tertiary);
+  border: 1px solid var(--border-secondary);
+  overflow: hidden;
+}
+
+.tactical-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--neon-cyan), var(--neon-blue));
+  box-shadow: var(--glow-md);
+  transition: width var(--transition-normal);
+}
+
+/* Buttons */
+.tactical-button {
+  padding: var(--space-sm) var(--space-md);
+  background: transparent;
+  border: 1px solid var(--border-primary);
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.tactical-button:hover {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+  box-shadow: inset 0 0 20px rgba(0, 255, 255, 0.1);
+}
+
+.tactical-button:active {
+  transform: scale(0.98);
+}
+
+.tactical-button.primary {
+  border-color: var(--neon-cyan);
+  color: var(--neon-cyan);
+}
+
+.tactical-button.danger {
+  border-color: var(--neon-red);
+  color: var(--neon-red);
+}
+
+.tactical-button.success {
+  border-color: var(--neon-green);
+  color: var(--neon-green);
+}
+
+/* Animations */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    filter: brightness(1);
+  }
+  50% {
+    opacity: 0.7;
+    filter: brightness(1.5);
+  }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+  75% { opacity: 0.9; }
+}
+
+.flicker {
+  animation: flicker 0.15s infinite;
+}
+
+/* Node Connections */
+.node-connection {
+  stroke: var(--neon-cyan);
+  stroke-width: 2;
+  fill: none;
+  stroke-dasharray: 5, 5;
+  animation: dash 1s linear infinite;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -10;
+  }
+}
+
+/* Utility Classes */
+.glow-sm { box-shadow: var(--glow-sm); }
+.glow-md { box-shadow: var(--glow-md); }
+.glow-lg { box-shadow: var(--glow-lg); }
+
+.text-neon-green { color: var(--neon-green); }
+.text-neon-cyan { color: var(--neon-cyan); }
+.text-neon-yellow { color: var(--neon-yellow); }
+.text-neon-red { color: var(--neon-red); }
+
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+.text-dim { color: var(--text-dim); }
+
+.bg-tactical-primary { background: var(--tactical-bg-primary); }
+.bg-tactical-secondary { background: var(--tactical-bg-secondary); }
+.bg-tactical-panel { background: var(--tactical-bg-panel); }
