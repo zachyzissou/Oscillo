@@ -70,7 +70,7 @@
     "detect-gpu": "^5.0.70",
     "gif.js": "^0.2.0",
     "gsap": "^3.12.8",
-    "lucide-react": "^0.468.0",
+    "lucide-react": "^0.544.0",
     "nanoid": "^5.1.5",
     "next": "^15.5.3",
     "pino": "^9.11.0",
