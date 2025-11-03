@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 # Multi-stage Dockerfile for Enhanced Oscillo Audio-Reactive Platform
 
-FROM node:20.17.0-alpine AS base
+FROM node:25.1.0-alpine AS base
 WORKDIR /app
 
 # Install basic dependencies
