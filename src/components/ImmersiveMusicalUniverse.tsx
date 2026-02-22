@@ -24,6 +24,7 @@ import AudioReactiveTunnel from '@/components/visual/AudioReactiveTunnel'
 // Morphing geometric shapes
 import MorphingGeometry from '@/components/visual/MorphingGeometry'
 import PluginLoader from '@/plugins/PluginLoader'
+import ExperienceCommandDeck from '@/components/ui/ExperienceCommandDeck'
 
 // Simple glow effect using built-in Three.js features
 // Main musical grid with advanced particles
@@ -144,7 +145,6 @@ SimplePostProcessing.displayName = 'SimplePostProcessing'
 
 // Main immersive canvas
 export default function ImmersiveMusicalUniverse() {
-  const { key, scale, tempo } = useMusicalPalette()
   const hasUserInteracted = useAudioEngine((state) => state.hasUserInteracted)
 
   // Setup performance monitoring
@@ -289,32 +289,9 @@ export default function ImmersiveMusicalUniverse() {
       <PluginLoader />
       {process.env.NODE_ENV === 'development' && <AudioDebugPanel />}
 
-      {/* Enhanced UI overlay - only show after interaction */}
+      {/* Cohesive command deck UI - only show after interaction */}
       {hasUserInteracted && (
-        <div style={{
-        position: 'fixed',
-        top: '20px',
-        right: '20px',
-        color: 'white',
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: '16px',
-        zIndex: 10,
-        textShadow: '0 0 10px rgba(255,255,255,0.3)',
-        background: 'rgba(0,0,0,0.3)',
-        backdropFilter: 'blur(10px)',
-        padding: '15px',
-        borderRadius: '10px',
-        border: '1px solid rgba(255,255,255,0.1)'
-      }}>
-        <div style={{ marginBottom: '8px', fontSize: '18px', fontWeight: 'bold' }}>🎵 Musical Universe</div>
-        <div>Key: <span style={{ color: '#ff006e' }}>{key}</span></div>
-        <div>Scale: <span style={{ color: '#00f5ff' }}>{scale}</span></div>
-        <div>Tempo: <span style={{ color: '#8338ec' }}>{tempo}</span></div>
-        <div style={{ marginTop: '10px', fontSize: '12px', opacity: 0.8 }}>
-          Click particles to play notes<br/>
-          Drag to explore • Scroll to zoom
-        </div>
-      </div>
+        <ExperienceCommandDeck />
       )}
     </div>
   )

@@ -1,0 +1,115 @@
+.banner {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 90;
+  width: min(360px, calc(100vw - 32px));
+  border-radius: 18px;
+  padding: 16px;
+  color: #f3fbff;
+  border: 1px solid rgba(119, 241, 255, 0.22);
+  background:
+    linear-gradient(155deg, rgba(10, 16, 32, 0.95), rgba(6, 10, 20, 0.94)),
+    rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 14px 30px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(138, 246, 255, 0.1) inset,
+    0 0 24px rgba(0, 208, 255, 0.14);
+  backdrop-filter: blur(12px);
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.description {
+  margin-top: 8px;
+  margin-bottom: 0;
+  font-size: 14px;
+  line-height: 1.45;
+  color: rgba(224, 244, 255, 0.82);
+}
+
+.actions {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.allow,
+.deny {
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.allow {
+  border: 0;
+  color: #001017;
+  background: linear-gradient(140deg, #43f5ff 0%, #1bd7f4 65%, #47f6ff 100%);
+  box-shadow:
+    0 8px 20px rgba(0, 219, 255, 0.28),
+    0 0 0 1px rgba(255, 255, 255, 0.28) inset;
+}
+
+.deny {
+  border: 1px solid rgba(188, 234, 255, 0.45);
+  color: #e4f7ff;
+  background: rgba(12, 23, 40, 0.5);
+}
+
+.allow:hover,
+.allow:focus-visible,
+.deny:hover,
+.deny:focus-visible {
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.allow:hover,
+.allow:focus-visible {
+  box-shadow:
+    0 10px 22px rgba(0, 219, 255, 0.36),
+    0 0 0 2px rgba(198, 249, 255, 0.85) inset;
+}
+
+.deny:hover,
+.deny:focus-visible {
+  border-color: rgba(180, 238, 255, 0.8);
+  background: rgba(24, 38, 62, 0.72);
+}
+
+.footnote {
+  margin-top: 10px;
+  margin-bottom: 0;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(208, 236, 255, 0.48);
+}
+
+@media (max-width: 900px) {
+  .banner {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+    bottom: auto;
+    width: auto;
+    border-radius: 16px;
+    padding: 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .allow,
+  .deny {
+    transition: none;
+  }
+}
