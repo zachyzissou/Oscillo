@@ -18,7 +18,6 @@ tsconfig.tsbuildinfo
 # Test artifacts and build results
 test-results/
 playwright-report/
-tests/e2e/visual-regression.spec.ts-snapshots/
 coverage/
 *.tgz
 .nyc_output/

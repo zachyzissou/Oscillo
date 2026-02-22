@@ -23,6 +23,9 @@ export default function RootLayout({ children }: { readonly children: React.Reac
   return (
     <html lang="en" className="h-full w-full">
       <body className="h-full w-full relative">
+        <a href="#main-content" className="skip-link">
+          Skip to main content
+        </a>
         <ClientLayout>
           {children}
         </ClientLayout>

@@ -7,9 +7,12 @@ const ImmersiveMusicalUniverse = dynamic(() => import('../src/components/Immersi
 
 export default function Home() {
   return (
-    <div
+    <main
       id="main-content"
       data-testid="main-content"
+      role="main"
+      tabIndex={-1}
+      aria-label="Interactive 3D music experience"
       style={{
         position: 'fixed',
         inset: 0,
@@ -20,6 +23,6 @@ export default function Home() {
       }}
     >
       <ImmersiveMusicalUniverse />
-    </div>
+    </main>
   )
 }

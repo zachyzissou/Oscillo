@@ -2,11 +2,15 @@ import type { Page } from '@playwright/test'
 
 export async function startExperience(page: Page, { waitForAudio = false } = {}) {
   const overlay = page.locator('#start-overlay')
-  if (await overlay.isVisible()) {
-    const button = page.getByTestId('start-button')
-    await button.waitFor({ state: 'visible' })
+  const button = page.getByTestId('start-button')
+  const canStart = await button
+    .waitFor({ state: 'visible', timeout: 5000 })
+    .then(() => true)
+    .catch(() => false)
+
+  if (canStart) {
     await button.scrollIntoViewIfNeeded()
-    await button.evaluate((node) => (node as HTMLButtonElement).click())
+    await button.click({ force: true })
     await overlay.waitFor({ state: 'hidden', timeout: 7000 })
   }
 

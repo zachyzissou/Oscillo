@@ -10,6 +10,49 @@ interface PerformanceMetrics {
   timestamp: number
 }
 
+interface MonitorSummary {
+  fps: number
+  frameTime: number
+  memoryUsed: number
+  renderer: string
+}
+
+async function readStableSummary(
+  page: Parameters<typeof test>[0]['page'],
+  { attempts = 8, intervalMs = 500 }: { attempts?: number; intervalMs?: number } = {},
+): Promise<MonitorSummary> {
+  for (let i = 0; i < attempts; i++) {
+    const summary = await page.evaluate(() => {
+      const monitor = (window as any).performanceMonitor
+      const avg = monitor?.getAverageMetrics?.(10) ?? {}
+      const latest = monitor?.getLatestMetrics?.() ?? {}
+      return {
+        fps: Number(avg?.fps ?? latest?.fps ?? 0),
+        frameTime: Number(avg?.frameTime ?? latest?.frameTime ?? 0),
+        memoryUsed: Number(avg?.memoryUsed ?? latest?.memoryUsed ?? 0),
+        renderer: String(latest?.webglRenderer ?? ''),
+      }
+    })
+
+    if (summary.fps > 0 && summary.frameTime > 0) {
+      return summary
+    }
+
+    await page.waitForTimeout(intervalMs)
+  }
+
+  return page.evaluate(() => {
+    const monitor = (window as any).performanceMonitor
+    const latest = monitor?.getLatestMetrics?.() ?? {}
+    return {
+      fps: Number(latest?.fps ?? 0),
+      frameTime: Number(latest?.frameTime ?? 0),
+      memoryUsed: Number(latest?.memoryUsed ?? 0),
+      renderer: String(latest?.webglRenderer ?? ''),
+    }
+  })
+}
+
 test.describe('Performance Tests', () => {
   test.describe.configure({ mode: 'serial' })
   test.beforeEach(async ({ page }) => {
@@ -123,7 +166,7 @@ test.describe('Performance Tests', () => {
     expect(latency).toBeLessThan(100)
   })
 
-  test('bundle size under targets', async ({ page }) => {
+  test('bundle footprint is measurable', async ({ page }) => {
     // Navigate to see network requests
     await page.goto('/')
     await startExperience(page, { waitForAudio: false })
@@ -143,7 +186,11 @@ test.describe('Performance Tests', () => {
       let initialSize = 0
 
       jsResources.forEach(resource => {
-        const size = resource.transferSize || 0
+        const size =
+          resource.transferSize ||
+          resource.encodedBodySize ||
+          resource.decodedBodySize ||
+          0
         totalSize += size
 
         // If the resource was loaded as an initial script (present in HTML)
@@ -176,6 +223,8 @@ test.describe('Performance Tests', () => {
     console.log(`Resource Count: ${resourceSizes.resourceCount}`)
     
     expect(resourceSizes.resourceCount).toBeGreaterThan(0)
+    expect(resourceSizes.totalSize).toBeGreaterThan(1024)
+    expect(resourceSizes.initialSize).toBeGreaterThan(0)
   })
 
   test('frame time consistency', async ({ page }) => {
@@ -213,10 +262,7 @@ test.describe('Performance Tests', () => {
   })
 
   test('performance under stress', async ({ page }) => {
-    const baselineMetrics = await page.evaluate(() => {
-      const monitor = (window as any).performanceMonitor
-      return monitor?.getAverageMetrics(10)
-    })
+    const baseline = await readStableSummary(page)
     
     // Create stress conditions: click rapidly to spawn particles and play notes
     for (let i = 0; i < 10; i++) {
@@ -227,15 +273,20 @@ test.describe('Performance Tests', () => {
     // Let it run under stress for 10 seconds
     await page.waitForTimeout(10000)
     
-    const stressMetrics = await page.evaluate(() => {
-      const monitor = (window as any).performanceMonitor
-      return monitor?.getAverageMetrics(10)
-    })
-    
-    console.log('Baseline FPS:', baselineMetrics?.fps || 0)
-    console.log('Stress FPS:', stressMetrics?.fps || 0)
-    
-    expect(stressMetrics?.fps ?? 0).toBeGreaterThanOrEqual(0)
+    const stress = await readStableSummary(page)
+    const isSwiftShader = baseline.renderer.includes('SwiftShader') || stress.renderer.includes('SwiftShader')
+    const minStressFps = isSwiftShader ? 10 : 25
+    const floorFromBaseline = Math.floor(Math.max(1, baseline.fps * 0.35))
+
+    console.log('Baseline FPS:', baseline.fps)
+    console.log('Stress FPS:', stress.fps)
+    console.log('Baseline Frame Time:', baseline.frameTime)
+    console.log('Stress Frame Time:', stress.frameTime)
+
+    expect(baseline.fps).toBeGreaterThan(0)
+    expect(stress.fps).toBeGreaterThanOrEqual(minStressFps)
+    expect(stress.fps).toBeGreaterThanOrEqual(floorFromBaseline)
+    expect(stress.frameTime).toBeLessThan(80)
   })
 
   test.afterEach(async ({ page }) => {
@@ -257,4 +308,3 @@ test.describe('Performance Tests', () => {
     }
   })
 })
-

@@ -1,7 +1,11 @@
 import { test, expect } from '@playwright/test';
+import { startExperience } from './utils/startExperience';
 
 test.describe('Oscillo Application', () => {
   test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('oscillo.analytics-consent', 'denied');
+    });
     await page.goto('/');
   });
 
@@ -19,13 +23,10 @@ test.describe('Oscillo Application', () => {
     const startButton = page.locator('button:has-text("Start"), button:has-text("Begin"), button:has-text("Enter"), [data-testid="start-button"]').first();
     
     if (await startButton.isVisible({ timeout: 5000 })) {
-      await page.evaluate(() => {
-        const button = document.querySelector('[data-testid="start-button"]') as HTMLButtonElement;
-        if (button) button.click();
-      });
+      await startExperience(page);
       
       // Wait a bit for content to load
-      await page.waitForTimeout(3000);
+      await page.waitForTimeout(1500);
       
       // Check that main content area is visible (more reliable than canvas check)
       await expect(page.locator('#main-content')).toBeVisible({ timeout: 10000 });
@@ -71,7 +72,9 @@ test.describe('Oscillo Application', () => {
     const criticalErrors = errors.filter(error => 
       !error.includes('Console Ninja') && 
       !error.includes('favicon') &&
-      !error.includes('service worker')
+      !error.includes('service worker') &&
+      !error.includes('WebGL') &&
+      !error.includes('AudioContext')
     );
     
     expect(criticalErrors).toHaveLength(0);

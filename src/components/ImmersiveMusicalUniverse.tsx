@@ -1,10 +1,8 @@
 'use client'
-import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { OrbitControls, Stars, Effects, Environment, PerspectiveCamera, AdaptiveDpr } from '@react-three/drei'
+import React, { useRef, useState, useMemo, useEffect } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { OrbitControls, Stars, Effects, AdaptiveDpr } from '@react-three/drei'
 import * as THREE from 'three'
-import { extend } from '@react-three/fiber'
-import { playNote, playChord, playBeat } from '@/lib/audio'
 import { useMusicalPalette } from '../store/useMusicalPalette'
 import { useAudioEngine } from '../store/useAudioEngine'
 import SimpleStartOverlay from './ui/SimpleStartOverlay'
@@ -147,7 +145,7 @@ SimplePostProcessing.displayName = 'SimplePostProcessing'
 // Main immersive canvas
 export default function ImmersiveMusicalUniverse() {
   const { key, scale, tempo } = useMusicalPalette()
-  const hasUserInteracted = useAudioEngine((state) => state.userInteracted)
+  const hasUserInteracted = useAudioEngine((state) => state.hasUserInteracted)
 
   // Setup performance monitoring
   useEffect(() => {
@@ -181,7 +179,9 @@ export default function ImmersiveMusicalUniverse() {
   }), [profile, perfLevel])
   
   return (
-    <div style={{
+    <div
+      data-testid="canvas-container"
+      style={{
       width: '100vw',
       height: '100vh',
       position: 'fixed',
@@ -189,9 +189,10 @@ export default function ImmersiveMusicalUniverse() {
       left: 0,
       backgroundColor: '#000011',
       zIndex: 1
-    }}>
+    }}
+    >
       {hasUserInteracted ? (
-        <Canvas {...canvasSettings}>
+        <Canvas data-testid="webgl-canvas" {...canvasSettings}>
         <AdaptiveDpr pixelated />
         <color attach="background" args={['#000011']} />
         <fog attach="fog" args={['#000033', 20, 60]} />
@@ -286,7 +287,7 @@ export default function ImmersiveMusicalUniverse() {
       <SimpleStartOverlay />
       <QualityManager />
       <PluginLoader />
-      <AudioDebugPanel />
+      {process.env.NODE_ENV === 'development' && <AudioDebugPanel />}
 
       {/* Enhanced UI overlay - only show after interaction */}
       {hasUserInteracted && (

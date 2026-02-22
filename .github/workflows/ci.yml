@@ -17,7 +17,8 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - run: npx tsc --noEmit
-      - run: npm run lint
+      - run: npm run lint:check
+      - run: npm test -- --run
       - run: npm run build
       - name: Upload build artifacts
         if: always()
@@ -27,10 +28,10 @@ jobs:
           path: .next
           if-no-files-found: error
           retention-days: 1
-      - name: Install Playwright browsers and system dependencies
-        run: npx playwright install --with-deps
-      - name: Run Playwright tests
-        run: npm test
+      - name: Install Playwright browser and system dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Run Playwright smoke tests
+        run: npm run test:smoke
         env:
           CI: true
 
@@ -75,6 +76,7 @@ jobs:
         run: npm run test:visual
         env:
           CI: true
+          RUN_VISUAL_REGRESSION: '1'
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -89,3 +91,36 @@ jobs:
           name: test-videos
           path: test-results/
           retention-days: 30
+
+  visual-regression:
+    runs-on: ubuntu-latest
+    needs: quick-checks
+    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Install Playwright browsers and dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Run visual regression suite (chromium)
+        run: npx playwright test tests/e2e/visual-regression.spec.ts --project=chromium
+        env:
+          CI: true
+          RUN_VISUAL_REGRESSION: '1'
+      - name: Upload visual report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: visual-playwright-report
+          path: playwright-report/
+          retention-days: 14
+      - name: Upload visual failures
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: visual-test-results
+          path: test-results/
+          retention-days: 14

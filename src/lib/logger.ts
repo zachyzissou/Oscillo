@@ -14,6 +14,8 @@ const fallbackLogger: Logger = {
   debug: (...args: unknown[]) => console.debug(...args),
 }
 
+const isVitest = typeof process !== 'undefined' && process.env.VITEST === 'true'
+
 const loadServerLogger = (): Logger => {
   try {
     const moduleExports = require('./logger.server') as { logger: Logger }
@@ -25,6 +27,10 @@ const loadServerLogger = (): Logger => {
 }
 
 const loadClientLogger = (): Logger => {
+  // Keep test output deterministic and avoid optional logger loader noise in jsdom.
+  if (isVitest) {
+    return fallbackLogger
+  }
   try {
     const moduleExports = require('./logger.client') as { logger: Logger }
     return moduleExports.logger ?? fallbackLogger

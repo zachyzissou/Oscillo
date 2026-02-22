@@ -9,7 +9,7 @@ export default function AudioDebugPanel() {
   const [overlayDebug, setOverlayDebug] = useState<any>({})
   const audioReady = useAudioEngine((s) => s.audioReady)
   const audioContext = useAudioEngine((s) => s.audioContext)
-  const error = useAudioEngine((s) => s.error)
+  const error = useAudioEngine((s) => s.lastError)
 
   // Check overlay state
   React.useEffect(() => {

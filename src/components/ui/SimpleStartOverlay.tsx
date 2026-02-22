@@ -18,14 +18,16 @@ export default function SimpleStartOverlay() {
       const success = await startAudio()
       if (success) {
         setAudioContextState('running')
-        setIsVisible(false)
-        localStorage.setItem('hasSeenOverlay', 'true')
+      } else {
+        setAudioContextState('suspended')
       }
     } catch (error) {
       console.error('Audio init failed:', error)
       setAudioContextState('suspended')
     }
 
+    setIsVisible(false)
+    localStorage.setItem('hasSeenOverlay', 'true')
     setIsLoading(false)
   }
 
@@ -33,6 +35,12 @@ export default function SimpleStartOverlay() {
 
   return (
     <div
+      id="start-overlay"
+      data-testid="start-overlay"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="start-overlay-title"
+      aria-describedby="start-overlay-description"
       style={{
         position: 'fixed',
         top: 0,
@@ -57,15 +65,17 @@ export default function SimpleStartOverlay() {
           boxShadow: '0 0 40px rgba(0, 255, 255, 0.5)'
         }}
       >
-        <h1 style={{ color: 'white', fontSize: '28px', marginBottom: '20px' }}>
+        <h1 id="start-overlay-title" style={{ color: 'white', fontSize: '28px', marginBottom: '20px' }}>
           🎵 Interactive 3D Music
         </h1>
-        <p style={{ color: 'rgba(255, 255, 255, 0.8)', marginBottom: '30px' }}>
+        <p id="start-overlay-description" style={{ color: 'rgba(255, 255, 255, 0.8)', marginBottom: '30px' }}>
           Click to start your musical journey
         </p>
         <button
           onClick={handleStart}
           disabled={isLoading}
+          data-testid="start-button"
+          aria-label="Start creating music"
           style={{
             backgroundColor: '#00ffff',
             color: '#000',

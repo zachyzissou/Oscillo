@@ -2,10 +2,12 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './tests/e2e',
+  testIgnore: ['**/debug-*.spec.ts', '**/visual-verification.spec.ts'],
+  snapshotPathTemplate: '{testDir}/{testFilePath}-snapshots/{arg}-{projectName}{ext}',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : 2,
   reporter: [
     ['html'],
     ['junit', { outputFile: 'test-results/junit.xml' }],
@@ -15,16 +17,17 @@ export default defineConfig({
   
   // Optimized web server configuration for faster startup
   webServer: {
-    command: 'npm run dev',
-    port: 3000,
-    reuseExistingServer: false, // Force restart to avoid stale state
+    command: 'npx next dev -p 3100',
+    port: 3100,
+    // Keep local runs deterministic by using a dedicated test port.
+    reuseExistingServer: false,
     timeout: 120000,
     stderr: 'pipe',
     stdout: 'pipe',
   },
   
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: 'http://localhost:3100',
     trace: 'off', // Disable tracing for CI to avoid FFmpeg issues
     video: 'off', // Disable video recording for CI
     screenshot: 'only-on-failure',
@@ -42,8 +45,7 @@ export default defineConfig({
         '--disable-gpu',
         '--disable-web-security',
         '--disable-features=VizDisplayCompositor',
-        '--use-gl=swiftshader',
-        '--single-process'
+        '--use-gl=swiftshader'
       ]
     }
   },

@@ -5,7 +5,6 @@ import { AdaptiveDpr } from '@react-three/drei'
 import * as THREE from 'three'
 import { QUALITY_PROFILES } from '@/lib/quality'
 import { usePerformanceSettings } from '@/store/usePerformanceSettings'
-import { useWebGLRecovery } from '@/hooks/useWebGLRecovery'
 import { WebGLFallbackRenderer } from '@/components/WebGLFallbackRenderer'
 import { logger } from '@/lib/logger'
 
@@ -25,8 +24,14 @@ const SceneManager = React.memo<SceneManagerProps>(({ children }) => {
   const perfLevel = usePerformanceSettings((s) => s.level)
   const profile = QUALITY_PROFILES[perfLevel]
   const [canvasError, setCanvasError] = useState<Error | null>(null)
-  // Temporarily disable WebGL recovery to test if it's causing issues
-  const webglRecovery = { contextLost: false, canRecover: false, handleContextLoss: () => {}, resetState: () => {} }
+  // Temporarily keep recovery logic as a stable no-op while fallback renderer matures.
+  const webglRecovery = useMemo(() => ({
+    contextLost: false,
+    canRecover: false,
+    handleContextLoss: () => {},
+    resetState: () => {},
+    attemptRecovery: async () => false,
+  }), [])
 
   const handleCanvasCreated = useCallback((state: any) => {
     try {

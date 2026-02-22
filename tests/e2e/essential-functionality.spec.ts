@@ -1,6 +1,13 @@
 import { test, expect } from '@playwright/test';
+import { startExperience } from './utils/startExperience';
 
 test.describe('Essential Functionality Verification - Smoke Tests', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      window.localStorage.setItem('oscillo.analytics-consent', 'denied')
+    })
+  })
+
   test('core application loads and starts correctly', async ({ page, browserName }) => {
     // Navigate to the app
     await page.goto('/');
@@ -13,14 +20,11 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
     await expect(startOverlay).toBeVisible({ timeout: 8000 });
     
     // Verify start overlay content
-    await expect(page.locator('text=Interactive 3D Music Experience')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: /interactive 3d music/i })).toBeVisible({ timeout: 5000 });
     await expect(page.locator('[data-testid="start-button"]')).toBeVisible();
     
-    // Click start to begin the experience (use evaluate to force click via JavaScript)
-    await page.evaluate(() => {
-      const button = document.querySelector('[data-testid="start-button"]') as HTMLButtonElement;
-      if (button) button.click();
-    });
+    // Click start to begin the experience.
+    await startExperience(page);
     
     // Wait for overlay to disappear
     await expect(startOverlay).not.toBeVisible({ timeout: 5000 });
@@ -34,7 +38,7 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
       console.log('Safari/WebKit: Basic app structure verified (audio may be limited)');
     } else {
       // For other browsers, check main content area appears after start
-      await page.waitForTimeout(2000); // Brief wait for initialization
+      await page.waitForTimeout(1500); // Brief wait for initialization
       
       // Check that main content area is available after starting
       const hasMainContent = await page.locator('#main-content').isVisible();

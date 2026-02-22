@@ -32,6 +32,9 @@ class PerformanceMonitor {
   private startTime = 0
   private isRunning = false
   private lastBudgetStatus: { passed: boolean; violations: string[] } = { passed: true, violations: [] }
+  private hasResolvedWebGLInfo = false
+  private webglRenderer = 'Unknown'
+  private gpuMemory: number | undefined
   
   // Budget thresholds
   private budgets: PerformanceBudgets = {
@@ -139,43 +142,47 @@ class PerformanceMonitor {
     return 0
   }
 
-  private getGPUMemory(): number | undefined {
-    // Try to get WebGL memory info if available
+  private resolveWebGLInfo() {
+    if (this.hasResolvedWebGLInfo || typeof window === 'undefined') return
+
+    this.hasResolvedWebGLInfo = true
+    let canvas: HTMLCanvasElement | null = null
+
     try {
-      const canvas = document.createElement('canvas')
+      canvas = document.createElement('canvas')
       const gl = canvas.getContext('webgl2') || canvas.getContext('webgl')
-      if (gl) {
-        const ext = gl.getExtension('WEBGL_debug_renderer_info')
-        if (ext) {
-          const renderer = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)
-          // Extract memory from renderer string if available
-          const memMatch = renderer.match(/(\d+)MB/i)
-          if (memMatch) {
-            return parseInt(memMatch[1]) * 1024 * 1024
+      if (!gl) return
+
+      const ext = gl.getExtension('WEBGL_debug_renderer_info')
+      const renderer = ext
+        ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)
+        : gl.getParameter(gl.RENDERER)
+
+      if (typeof renderer === 'string' && renderer.length > 0) {
+        this.webglRenderer = renderer
+        const memMatch = renderer.match(/(\d+)MB/i)
+        if (memMatch?.[1]) {
+          const parsed = Number.parseInt(memMatch[1], 10)
+          if (Number.isFinite(parsed)) {
+            this.gpuMemory = parsed * 1024 * 1024
           }
         }
       }
     } catch {
       // Ignore errors
+    } finally {
+      canvas?.remove()
     }
-    return undefined
+  }
+
+  private getGPUMemory(): number | undefined {
+    this.resolveWebGLInfo()
+    return this.gpuMemory
   }
 
   private getWebGLRenderer(): string {
-    try {
-      const canvas = document.createElement('canvas')
-      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl')
-      if (gl) {
-        const ext = gl.getExtension('WEBGL_debug_renderer_info')
-        if (ext) {
-          return gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) || 'Unknown'
-        }
-        return gl.getParameter(gl.RENDERER) || 'WebGL'
-      }
-    } catch {
-      // Ignore errors
-    }
-    return 'Unknown'
+    this.resolveWebGLInfo()
+    return this.webglRenderer
   }
 
   private getRAFDrift(now: number): number {

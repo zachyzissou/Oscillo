@@ -19,7 +19,7 @@ test.describe('Oscillo Application - Complete Functional Test', () => {
     await expect(startOverlay).toBeVisible({ timeout: 10000 });
     
     // Verify the overlay headline is present
-    const introHeading = page.getByRole('heading', { name: /interactive 3d music experience/i });
+    const introHeading = page.getByRole('heading', { name: /interactive 3d music/i });
     await expect(introHeading).toBeVisible();
     
     // Take screenshot showing the start overlay
