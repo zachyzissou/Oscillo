@@ -377,6 +377,7 @@ export default function ExperienceCommandDeck() {
                   type="button"
                   data-testid="deck-snap-collapsed"
                   className={mobileSnap === 'collapsed' ? styles.snapActive : ''}
+                  aria-pressed={mobileSnap === 'collapsed'}
                   onClick={() => setMobileSnapPoint('collapsed')}
                 >
                   Hide
@@ -385,6 +386,7 @@ export default function ExperienceCommandDeck() {
                   type="button"
                   data-testid="deck-snap-peek"
                   className={mobileSnap === 'peek' ? styles.snapActive : ''}
+                  aria-pressed={mobileSnap === 'peek'}
                   onClick={() => setMobileSnapPoint('peek')}
                 >
                   Peek
@@ -393,6 +395,7 @@ export default function ExperienceCommandDeck() {
                   type="button"
                   data-testid="deck-snap-full"
                   className={mobileSnap === 'full' ? styles.snapActive : ''}
+                  aria-pressed={mobileSnap === 'full'}
                   onClick={() => setMobileSnapPoint('full')}
                 >
                   Full

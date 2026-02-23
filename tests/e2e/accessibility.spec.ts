@@ -176,11 +176,15 @@ test.describe('Accessibility Tests', () => {
       .poll(async () => (await shell.boundingBox())?.height ?? 0)
       .toBeGreaterThan(peekHeight + 30)
     const fullHeight = (await shell.boundingBox())?.height ?? 0
+    await expect(snapFull).toHaveAttribute('aria-pressed', 'true')
+    await expect(snapPeek).toHaveAttribute('aria-pressed', 'false')
 
     await snapPeek.click()
     await expect
       .poll(async () => (await shell.boundingBox())?.height ?? 0)
       .toBeLessThan(fullHeight - 20)
+    await expect(snapPeek).toHaveAttribute('aria-pressed', 'true')
+    await expect(snapFull).toHaveAttribute('aria-pressed', 'false')
 
     const targetHeights = await Promise.all(
       [snapPeek, snapFull, snapHide].map(locator => locator.boundingBox())
