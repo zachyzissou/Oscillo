@@ -148,10 +148,12 @@ test.describe('Visual Regression Tests', () => {
   })
 
   test('telemetry consent banner visual', async ({ page }) => {
+    await page.setViewportSize({ width: 393, height: 851 })
     await resetStartOverlayState(page)
     await startExperience(page)
 
     await hideWebglCanvas(page)
+    await clearActiveFocus(page)
 
     const banner = page.getByTestId('telemetry-banner')
     await expect(banner).toBeVisible({ timeout: 10000 })
