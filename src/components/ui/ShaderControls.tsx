@@ -1,27 +1,12 @@
 'use client'
 
 import React from 'react'
-import type { ShaderIconType } from '@/config/shaderConfigs'
-
-interface ShaderConfig {
-  id: string
-  name: string
-  iconType: ShaderIconType
-  params: {
-    [key: string]: {
-      value: number
-      min: number
-      max: number
-      step: number
-      label: string
-    }
-  }
-}
+import type { ShaderConfig, ShaderId } from '@/config/shaderConfigs'
 
 interface ShaderControlsProps {
   shaderConfigs: ShaderConfig[]
-  currentShader: string
-  onParamChange: (shaderId: string, paramName: string, value: number) => void
+  currentShader: ShaderId
+  onParamChange: (shaderId: ShaderId, paramName: string, value: number) => void
 }
 
 const ShaderControls: React.FC<ShaderControlsProps> = ({

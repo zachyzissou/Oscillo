@@ -1,13 +1,21 @@
 'use client'
 import React, { useState, useEffect, useCallback } from 'react'
 import { gsap } from 'gsap'
+import type { ShaderId } from '@/config/shaderConfigs'
 import styles from './AudioControls.module.css'
+
+const SHADER_OPTIONS: ReadonlyArray<{ id: ShaderId; label: string }> = [
+  { id: 'metaball', label: 'Metaball' },
+  { id: 'voronoi', label: 'Voronoi' },
+  { id: 'water', label: 'Water' },
+  { id: 'rgbGlitch', label: 'RGB Glitch' },
+]
 
 interface AudioControlsProps {
   readonly onBassChange: (value: number) => void
   readonly onMidChange: (value: number) => void
   readonly onHighChange: (value: number) => void
-  readonly onShaderChange: (shader: string) => void
+  readonly onShaderChange: (shader: ShaderId) => void
   readonly onGlitchIntensityChange: (value: number) => void
 }
 
@@ -21,7 +29,7 @@ export function AudioControls({
   const [bassSensitivity, setBassSensitivity] = useState(1.0)
   const [midSensitivity, setMidSensitivity] = useState(1.0)
   const [highSensitivity, setHighSensitivity] = useState(1.0)
-  const [activeShader, setActiveShader] = useState('metaball')
+  const [activeShader, setActiveShader] = useState<ShaderId>('metaball')
   const [glitchIntensity, setGlitchIntensity] = useState(0.0)
   const [isVisible, setIsVisible] = useState(false)
 
@@ -73,7 +81,7 @@ export function AudioControls({
     gsap.to(e.target, { scale: 1.1, duration: 0.1, yoyo: true, repeat: 1 })
   }, [onHighChange])
 
-  const handleShaderChange = useCallback((shader: string) => {
+  const handleShaderChange = useCallback((shader: ShaderId) => {
     setActiveShader(shader)
     onShaderChange(shader)
     
@@ -189,18 +197,18 @@ export function AudioControls({
               Visual Effect
             </legend>
             <div className={styles.shaderGrid}>
-              {['metaball', 'voronoi', 'water', 'glitch'].map((shader) => (
+              {SHADER_OPTIONS.map((shaderOption) => (
                 <button
-                  key={shader}
-                  data-shader={shader}
-                  onClick={() => handleShaderChange(shader)}
+                  key={shaderOption.id}
+                  data-shader={shaderOption.id}
+                  onClick={() => handleShaderChange(shaderOption.id)}
                   className={`${styles.shaderButton} ${
-                    activeShader === shader ? styles.shaderButtonActive : styles.shaderButtonInactive
+                    activeShader === shaderOption.id ? styles.shaderButtonActive : styles.shaderButtonInactive
                   }`}
-                  aria-pressed={activeShader === shader ? 'true' : 'false'}
-                  aria-label={`Select ${shader} visual effect`}
+                  aria-pressed={activeShader === shaderOption.id ? 'true' : 'false'}
+                  aria-label={`Select ${shaderOption.label} visual effect`}
                 >
-                  {shader.charAt(0).toUpperCase() + shader.slice(1)}
+                  {shaderOption.label}
                 </button>
               ))}
             </div>

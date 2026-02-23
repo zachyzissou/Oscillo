@@ -14,20 +14,48 @@ export type ShaderIconType =
   | 'adjustmentsHorizontal'
   | 'cloudArrowUp'
 
+export const SHADER_IDS = [
+  'metaball',
+  'proceduralNoise',
+  'water',
+  'rgbGlitch',
+  'voronoi',
+  'plasma',
+  'noise',
+  'ripple',
+  'particleField',
+] as const
+
+export type ShaderId = (typeof SHADER_IDS)[number]
+
+const shaderIdSet: ReadonlySet<string> = new Set(SHADER_IDS)
+
+export function isShaderId(value: unknown): value is ShaderId {
+  return typeof value === 'string' && shaderIdSet.has(value)
+}
+
+export function assertShaderId(value: unknown): ShaderId {
+  if (!isShaderId(value)) {
+    throw new Error(`Invalid shader id: ${String(value)}`)
+  }
+  return value
+}
+
 export interface ShaderConfig {
-  id: string
+  id: ShaderId
   name: string
   iconType: ShaderIconType
   description?: string
-  params: {
-    [key: string]: {
+  params: Record<
+    string,
+    {
       value: number
       min: number
       max: number
       step: number
       label: string
     }
-  }
+  >
 }
 
 export const shaderConfigurations: ShaderConfig[] = [
