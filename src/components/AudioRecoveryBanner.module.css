@@ -1,0 +1,120 @@
+.banner {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 91;
+  width: min(360px, calc(100vw - 32px));
+  border-radius: 16px;
+  padding: 14px;
+  border: 1px solid rgba(252, 165, 53, 0.5);
+  color: #fff3e1;
+  background:
+    linear-gradient(160deg, rgba(48, 23, 8, 0.92), rgba(31, 14, 5, 0.95)),
+    rgba(0, 0, 0, 0.56);
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.52),
+    0 0 0 1px rgba(255, 211, 153, 0.22) inset,
+    0 0 22px rgba(251, 146, 60, 0.16);
+  backdrop-filter: blur(10px);
+  animation: enterBanner var(--motion-duration-slow) var(--motion-ease-standard);
+}
+
+.title {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.25;
+}
+
+.description {
+  margin: 8px 0 0;
+  color: rgba(255, 236, 205, 0.84);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.actions {
+  margin-top: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.retry,
+.dismiss {
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  transition:
+    transform var(--motion-duration-fast) var(--motion-ease-emphasis),
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    filter var(--motion-duration-fast) var(--motion-ease-standard),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-standard);
+}
+
+.retry {
+  border: 0;
+  color: #2b1200;
+  background: linear-gradient(140deg, #ffcc7a 0%, #f9a44f 65%, #ffc98f 100%);
+  box-shadow:
+    0 8px 20px rgba(247, 144, 29, 0.35),
+    0 0 0 1px rgba(255, 246, 230, 0.28) inset;
+}
+
+.dismiss {
+  border: 1px solid rgba(255, 211, 158, 0.46);
+  color: #ffefdd;
+  background: rgba(47, 24, 10, 0.7);
+}
+
+.retry:hover:not(:disabled),
+.retry:focus-visible:not(:disabled),
+.dismiss:hover,
+.dismiss:focus-visible {
+  transform: translateY(var(--motion-lift-distance));
+  filter: brightness(var(--motion-focus-brightness));
+}
+
+.retry:focus-visible,
+.dismiss:focus-visible {
+  outline: var(--a11y-focus-outline-width) solid var(--a11y-focus-outline-color);
+  outline-offset: var(--a11y-focus-outline-offset);
+}
+
+.retry:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.dismiss:hover,
+.dismiss:focus-visible {
+  border-color: rgba(255, 220, 182, 0.86);
+}
+
+@keyframes enterBanner {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-enter-distance));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .banner {
+    top: auto;
+    left: 12px;
+    right: 12px;
+    bottom: 96px;
+    width: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banner {
+    animation: none;
+  }
+}

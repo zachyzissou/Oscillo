@@ -4,6 +4,7 @@ import { startExperience } from './utils/startExperience'
 const runVisualRegression = process.env.RUN_VISUAL_REGRESSION === '1'
 const CONSENT_KEY = 'oscillo.analytics-consent'
 const ONBOARDING_KEY = 'oscillo.v2.deck-onboarded'
+const OVERLAY_KEY = 'hasSeenOverlay'
 
 const hideWebglCanvas = async (page: Page) => {
   const canvas = page.locator('[data-testid="webgl-canvas"]')
@@ -16,16 +17,27 @@ const hideWebglCanvas = async (page: Page) => {
   }
 }
 
+const suppressTelemetryBanner = async (page: Page) => {
+  await page.addStyleTag({
+    content: `
+      [data-testid="telemetry-banner"] {
+        display: none !important;
+      }
+    `,
+  })
+}
+
 test.describe('Visual Regression Tests', () => {
   test.skip(!runVisualRegression, 'Set RUN_VISUAL_REGRESSION=1 and update baselines intentionally.')
 
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(
-      ({ consentKey, onboardingKey }) => {
+      ({ consentKey, onboardingKey, overlayKey }) => {
         globalThis.localStorage.removeItem(consentKey)
         globalThis.localStorage.setItem(onboardingKey, 'true')
+        globalThis.localStorage.removeItem(overlayKey)
       },
-      { consentKey: CONSENT_KEY, onboardingKey: ONBOARDING_KEY }
+      { consentKey: CONSENT_KEY, onboardingKey: ONBOARDING_KEY, overlayKey: OVERLAY_KEY }
     )
 
     await page.goto('/')
@@ -84,6 +96,7 @@ test.describe('Visual Regression Tests', () => {
   test('mobile command deck initializes without expanded flash', async ({ page }) => {
     await page.setViewportSize({ width: 393, height: 851 })
     await startExperience(page)
+    await suppressTelemetryBanner(page)
 
     await hideWebglCanvas(page)
 
