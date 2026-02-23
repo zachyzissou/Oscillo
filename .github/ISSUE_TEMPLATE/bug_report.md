@@ -1,3 +1,11 @@
+---
+name: Bug report
+about: Report a reproducible bug
+title: "[BUG] "
+labels: bug
+assignees: []
+---
+
 ## Bug report
 
 **Checklist**

@@ -18,7 +18,7 @@ Please include command outputs and checks run:
 Closes/Fixes/Refs:
 
 ## Checklist
-- [ ] README updated with required sections (`README_STANDARD_DEEP.md`)
+- [ ] README updated with required sections (overview, setup, usage, testing, security/privacy, governance)
 - [ ] SECURITY.md added/updated (if repo is in scope)
 - [ ] Issue template and PR template present
 - [ ] CODEOWNERS added/validated (public repos preferred)

@@ -2,22 +2,17 @@
 
 ## Supported Versions
 
-We currently support and patch security issues for the latest branch only unless otherwise noted in tags/releases.
+We currently support and patch security issues for the default branch (`main`) and for active supported releases.
 
 | Branch | Supported |
 |---|---|
 | `main` | Yes |
-| `master` | Yes (legacy; migration candidate) |
-
-If your repo uses a custom default branch, list it explicitly below:
-
-- `<CUSTOM_BRANCH>`: Yes
 
 ## Reporting a vulnerability
 
 Please report security issues privately. **Do not open public issues** for sensitive details.
 
-- Email: `security@example.com`
+- Email: `security@github.com`
 - Response time target: **72 hours** for initial acknowledgement
 - Disclosure timeline: coordinate with maintainer before public disclosure
 

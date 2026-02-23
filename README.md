@@ -1,10 +1,9 @@
 # Oscillo
 
 > Interactive 3D music sandbox with AI composition, spatial rendering, and collaborative WebSocket sessions.
-> Status: `active`
+> Status: `Production` (actively maintained)
 
-![CI](https://img.shields.io/github/actions/workflow/status/zachyzissou/Oscillo/.github/workflows/baseline-ts-ci.yml)
-![Coverage](https://img.shields.io/badge/coverage-82%25-brightgreen)
+![CI](https://github.com/zachyzissou/Oscillo/actions/workflows/baseline-ts-ci.yml/badge.svg?branch=main)
 ![License](https://img.shields.io/github/license/zachyzissou/Oscillo)
 ![Security](https://img.shields.io/badge/security-SECURITY.md-green)
 
@@ -117,7 +116,6 @@ Recommended additional checks:
 - `npm run test:performance`
 - `npm run test:a11y`
 
-Coverage goal: >= 70% in touched and changed paths.
 
 ## Security
 
