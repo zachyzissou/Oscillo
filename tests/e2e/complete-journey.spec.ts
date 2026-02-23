@@ -36,9 +36,8 @@ test.describe('UI/UX v2 Journey Validation', () => {
     await bootstrapJourney(page, 'denied')
 
     const overlay = page.getByTestId('start-overlay')
-    const panel = overlay.locator('[class*="UiPrimitives_surface"]').first()
     await expect(overlay).toBeVisible({ timeout: 10000 })
-    await expect(panel).toBeVisible()
+    await expect(overlay.getByRole('heading', { name: /interactive 3d music/i })).toBeVisible()
     await expect(page.getByTestId('start-button')).toBeVisible()
 
     await startExperience(page)
@@ -51,10 +50,12 @@ test.describe('UI/UX v2 Journey Validation', () => {
     await page.getByTestId('key-select').selectOption('D')
     await expect(page.getByTestId('key-select')).toHaveValue('D')
 
-    const modeBefore = await page.getByTestId('deck-rail-mode-cycle').textContent()
+    const modeCycle = page.getByTestId('deck-rail-mode-cycle')
+    const modeBefore = (await modeCycle.textContent())?.trim() ?? ''
     await page.keyboard.press('m')
-    const modeAfter = await page.getByTestId('deck-rail-mode-cycle').textContent()
-    expect(modeAfter).not.toBe(modeBefore)
+    await expect
+      .poll(async () => (await modeCycle.textContent())?.trim() ?? '', { timeout: 5000 })
+      .not.toBe(modeBefore)
   })
 
   test('mobile journey preserves discoverability and trust controls', async ({ page }) => {

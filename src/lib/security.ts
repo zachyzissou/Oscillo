@@ -43,7 +43,7 @@ export class SecurityManager {
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: blob: https:",
       "media-src 'self' blob:",
-      "connect-src 'self' ws: wss: blob: https://api.github.com",
+      "connect-src 'self' ws: wss: https://api.github.com",
       "worker-src 'self' blob:",
       "child-src 'self'",
       "frame-ancestors 'none'",
