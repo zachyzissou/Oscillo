@@ -126,8 +126,6 @@ export default function ExperienceCommandDeck() {
   )
 
   const currentOnboardingStep = onboardingSteps[onboardingStep]
-  const needsExpandedDeckForStep =
-    currentOnboardingStep?.id === 'palette' || currentOnboardingStep?.id === 'tempo'
   const adjustedTempo = tempo >= 188 ? Math.max(60, tempo - 12) : Math.min(200, tempo + 12)
   const tempoNudgeLabel =
     adjustedTempo > tempo ? `Boost to ${adjustedTempo} BPM` : `Ease to ${adjustedTempo} BPM`
@@ -380,16 +378,6 @@ export default function ExperienceCommandDeck() {
                   >
                     Skip
                   </button>
-                  {needsExpandedDeckForStep && !isExpanded && (
-                    <button
-                      type="button"
-                      className={styles.linkButton}
-                      data-testid="deck-onboarding-open-controls"
-                      onClick={handleExpand}
-                    >
-                      Open controls
-                    </button>
-                  )}
                   {currentOnboardingStep.id === 'palette' && isExpanded && (
                     <button
                       type="button"
