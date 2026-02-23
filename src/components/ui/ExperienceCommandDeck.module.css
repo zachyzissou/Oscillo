@@ -231,6 +231,11 @@
   cursor: pointer;
 }
 
+.modePills button:focus-visible {
+  outline: 2px solid rgba(129, 245, 255, 0.85);
+  outline-offset: 2px;
+}
+
 .modePills .active {
   border-color: rgba(117, 247, 255, 0.8);
   background: rgba(0, 190, 255, 0.2);
@@ -288,7 +293,21 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .deck *,
+  .deck *::before,
+  .deck *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
   .pulse {
     animation: none;
+  }
+
+  .iconButton:hover,
+  .iconButton:focus-visible,
+  .openButton:hover,
+  .openButton:focus-visible {
+    transform: none;
   }
 }

@@ -76,6 +76,37 @@ test.describe('Accessibility Tests', () => {
     await startExperience(page)
     await expect(page.getByTestId('start-overlay')).toBeHidden()
     await expect(page.getByTestId('main-content')).toBeVisible()
+
+    const deckCollapse = page.getByTestId('deck-collapse-button')
+    await expect(deckCollapse).toBeVisible()
+    const transitionDuration = await deckCollapse.evaluate((node) => getComputedStyle(node).transitionDuration)
+    const pulseAnimationName = await page
+      .getByTestId('deck-pulse-indicator')
+      .evaluate((node) => getComputedStyle(node).animationName)
+
+    expect(transitionDuration).toBe('0s')
+    expect(pulseAnimationName).toBe('none')
+  })
+
+  test('command deck preserves keyboard focus while collapsing and reopening', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 720 })
+    await loadWithDeniedTelemetry(page)
+    await startExperience(page)
+
+    const collapseButton = page.getByTestId('deck-collapse-button')
+    await expect(collapseButton).toBeVisible({ timeout: 10000 })
+    await collapseButton.focus()
+    await expect(collapseButton).toBeFocused()
+    await page.keyboard.press('Enter')
+
+    const openButton = page.getByTestId('deck-open-button')
+    await expect(openButton).toBeVisible({ timeout: 10000 })
+    await expect(openButton).toBeFocused()
+    await page.keyboard.press('Enter')
+
+    const keySelect = page.getByTestId('key-select')
+    await expect(keySelect).toBeVisible({ timeout: 10000 })
+    await expect(keySelect).toBeFocused()
   })
 
   test('post-start state has no critical automated accessibility violations', async ({ page }) => {

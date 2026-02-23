@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useMusicalPalette } from '@/store/useMusicalPalette'
 import { usePerformanceSettings } from '@/store/usePerformanceSettings'
 import styles from './ExperienceCommandDeck.module.css'
@@ -36,6 +36,8 @@ export default function ExperienceCommandDeck() {
   const [isExpanded, setIsExpanded] = useState(true)
   const [viewportReady, setViewportReady] = useState(false)
   const [showHint, setShowHint] = useState(false)
+  const openButtonRef = useRef<HTMLButtonElement>(null)
+  const keySelectRef = useRef<HTMLSelectElement>(null)
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -57,6 +59,28 @@ export default function ExperienceCommandDeck() {
   const wrapperClass = `${styles.deck} ${isMobile ? styles.mobile : styles.desktop} ${
     viewportReady ? '' : styles.unresolved
   }`
+
+  const queueFocus = (target: 'open' | 'primary') => {
+    if (typeof window === 'undefined') return
+    window.requestAnimationFrame(() => {
+      if (target === 'open') {
+        openButtonRef.current?.focus()
+        return
+      }
+
+      keySelectRef.current?.focus()
+    })
+  }
+
+  const handleExpand = () => {
+    setIsExpanded(true)
+    queueFocus('primary')
+  }
+
+  const handleCollapse = () => {
+    setIsExpanded(false)
+    queueFocus('open')
+  }
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -84,6 +108,15 @@ export default function ExperienceCommandDeck() {
     if (typeof window === 'undefined') return
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsExpanded((prev) => {
+          if (!prev) return prev
+          queueFocus('open')
+          return false
+        })
+        return
+      }
+
       if (event.key.toLowerCase() !== 't') return
 
       const target = event.target as HTMLElement | null
@@ -95,7 +128,11 @@ export default function ExperienceCommandDeck() {
 
       if (isTypingContext) return
       event.preventDefault()
-      setIsExpanded((prev) => !prev)
+      setIsExpanded((prev) => {
+        const next = !prev
+        queueFocus(next ? 'primary' : 'open')
+        return next
+      })
     }
 
     window.addEventListener('keydown', onKeyDown)
@@ -113,9 +150,10 @@ export default function ExperienceCommandDeck() {
         <div className={styles.floatingOpen}>
           <button
             type="button"
+            ref={openButtonRef}
             data-testid="deck-open-button"
             className={styles.openButton}
-            onClick={() => setIsExpanded(true)}
+            onClick={handleExpand}
             aria-expanded={isExpanded}
             aria-controls="experience-deck-shell"
             aria-label="Open command deck"
@@ -129,7 +167,7 @@ export default function ExperienceCommandDeck() {
         <div className={styles.shell} id="experience-deck-shell">
           <header className={styles.header}>
             <div className={styles.titleWrap}>
-              <span className={styles.pulse} aria-hidden="true" />
+              <span className={styles.pulse} data-testid="deck-pulse-indicator" aria-hidden="true" />
               <div>
                 <h2 className={styles.title}>Command Deck</h2>
                 <p className={styles.subtitle}>{modeLabel} mode | Press T to toggle</p>
@@ -140,7 +178,9 @@ export default function ExperienceCommandDeck() {
                 type="button"
                 data-testid="deck-collapse-button"
                 className={styles.iconButton}
-                onClick={() => setIsExpanded(false)}
+                onClick={handleCollapse}
+                aria-expanded={isExpanded}
+                aria-controls="experience-deck-shell"
                 aria-label="Collapse command deck"
               >
                 -
@@ -153,6 +193,7 @@ export default function ExperienceCommandDeck() {
               <label className={styles.field}>
                 <span className={styles.label}>Key</span>
                 <select
+                  ref={keySelectRef}
                   value={key}
                   className={styles.select}
                   data-testid="key-select"
