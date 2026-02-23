@@ -22,8 +22,8 @@ test.describe('Visual Regression Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(
       ({ consentKey, onboardingKey }) => {
-        window.localStorage.removeItem(consentKey)
-        window.localStorage.setItem(onboardingKey, 'true')
+        globalThis.localStorage.removeItem(consentKey)
+        globalThis.localStorage.setItem(onboardingKey, 'true')
       },
       { consentKey: CONSENT_KEY, onboardingKey: ONBOARDING_KEY }
     )

@@ -248,6 +248,7 @@
 }
 
 .hint {
+  display: block;
   border: 1px solid rgba(123, 241, 255, 0.24);
   border-radius: 14px;
   padding: 10px 12px;
@@ -288,7 +289,6 @@
 }
 
 .linkButton {
-  border: 0;
   border-radius: 999px;
   background: rgba(10, 24, 40, 0.82);
   border: 1px solid rgba(126, 236, 255, 0.24);

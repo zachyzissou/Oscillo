@@ -16,8 +16,8 @@ const PERF_OPTIONS = ['low', 'medium', 'high'] as const
 const ONBOARDING_TOTAL_STEPS = 3
 
 const readStoredDesktopExpanded = () => {
-  if (typeof window === 'undefined') return true
-  return window.localStorage.getItem(DECK_EXPANDED_KEY) !== 'false'
+  if (typeof globalThis === 'undefined' || !('localStorage' in globalThis)) return true
+  return globalThis.localStorage.getItem(DECK_EXPANDED_KEY) !== 'false'
 }
 
 interface OnboardingStep {
@@ -48,14 +48,14 @@ export default function ExperienceCommandDeck() {
   const keySelectRef = useRef<HTMLSelectElement>(null)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof globalThis === 'undefined' || !('localStorage' in globalThis)) return
 
-    const params = new URLSearchParams(window.location.search)
+    const params = new URLSearchParams(globalThis.location.search)
     if (params.get('onboarding') === 'reset') {
-      window.localStorage.removeItem(ONBOARDING_KEY)
+      globalThis.localStorage.removeItem(ONBOARDING_KEY)
     }
 
-    const seen = window.localStorage.getItem(ONBOARDING_KEY) === 'true'
+    const seen = globalThis.localStorage.getItem(ONBOARDING_KEY) === 'true'
     if (!seen) {
       setShowOnboarding(true)
       setOnboardingStep(0)
@@ -67,8 +67,8 @@ export default function ExperienceCommandDeck() {
   const completeOnboarding = useCallback(() => {
     setShowOnboarding(false)
     setOnboardingStep(0)
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(ONBOARDING_KEY, 'true')
+    if (typeof globalThis !== 'undefined' && 'localStorage' in globalThis) {
+      globalThis.localStorage.setItem(ONBOARDING_KEY, 'true')
     }
   }, [])
 
@@ -77,8 +77,8 @@ export default function ExperienceCommandDeck() {
   }`
 
   const queueFocus = useCallback((target: 'open' | 'primary') => {
-    if (typeof window === 'undefined') return
-    window.requestAnimationFrame(() => {
+    if (typeof globalThis === 'undefined') return
+    globalThis.requestAnimationFrame(() => {
       if (target === 'open') {
         openButtonRef.current?.focus()
         return
@@ -141,9 +141,9 @@ export default function ExperienceCommandDeck() {
   }
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof globalThis === 'undefined') return
 
-    const media = window.matchMedia(MOBILE_BREAKPOINT)
+    const media = globalThis.matchMedia(MOBILE_BREAKPOINT)
     const applyMode = (matches: boolean) => {
       setIsMobile(matches)
       setIsExpanded(matches ? false : readStoredDesktopExpanded())
@@ -158,12 +158,18 @@ export default function ExperienceCommandDeck() {
   }, [])
 
   useEffect(() => {
-    if (typeof window === 'undefined' || isMobile || !viewportReady) return
-    window.localStorage.setItem(DECK_EXPANDED_KEY, String(isExpanded))
+    if (
+      typeof globalThis === 'undefined' ||
+      !('localStorage' in globalThis) ||
+      isMobile ||
+      !viewportReady
+    )
+      return
+    globalThis.localStorage.setItem(DECK_EXPANDED_KEY, String(isExpanded))
   }, [isExpanded, isMobile, viewportReady])
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (typeof globalThis === 'undefined') return
 
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
@@ -194,8 +200,8 @@ export default function ExperienceCommandDeck() {
       })
     }
 
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+    globalThis.addEventListener('keydown', onKeyDown)
+    return () => globalThis.removeEventListener('keydown', onKeyDown)
   }, [queueFocus])
 
   return (
@@ -358,12 +364,7 @@ export default function ExperienceCommandDeck() {
             </div>
 
             {showOnboarding && currentOnboardingStep && (
-              <div
-                className={styles.hint}
-                role="status"
-                aria-live="polite"
-                data-testid="deck-onboarding"
-              >
+              <output className={styles.hint} aria-live="polite" data-testid="deck-onboarding">
                 <div className={styles.hintTop}>
                   <strong>{currentOnboardingStep.title}</strong>
                   <span className={styles.hintProgress}>
@@ -419,7 +420,7 @@ export default function ExperienceCommandDeck() {
                     {onboardingStep >= ONBOARDING_TOTAL_STEPS - 1 ? 'Finish' : 'Next'}
                   </button>
                 </div>
-              </div>
+              </output>
             )}
           </div>
         </div>

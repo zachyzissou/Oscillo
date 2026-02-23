@@ -6,7 +6,7 @@ const ONBOARDING_KEY = 'oscillo.v2.deck-onboarded'
 test.describe('Essential Functionality Verification - Smoke Tests', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
-      window.localStorage.setItem('oscillo.analytics-consent', 'denied')
+      globalThis.localStorage.setItem('oscillo.analytics-consent', 'denied')
     })
   })
 
@@ -70,7 +70,7 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
   }) => {
     await page.goto('/')
     await page.evaluate(onboardingKey => {
-      window.localStorage.removeItem(onboardingKey)
+      globalThis.localStorage.removeItem(onboardingKey)
     }, ONBOARDING_KEY)
     await page.reload()
     await startExperience(page)
@@ -88,7 +88,10 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
     await page.getByTestId('deck-onboarding-skip').click()
     await expect(onboarding).toBeHidden({ timeout: 5000 })
 
-    const persisted = await page.evaluate(key => window.localStorage.getItem(key), ONBOARDING_KEY)
+    const persisted = await page.evaluate(
+      key => globalThis.localStorage.getItem(key),
+      ONBOARDING_KEY
+    )
     expect(persisted).toBe('true')
 
     await page.reload()
