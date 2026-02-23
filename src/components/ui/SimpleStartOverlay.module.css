@@ -53,6 +53,9 @@
     0 0 32px rgba(0, 255, 255, 0.35),
     0 0 70px rgba(0, 172, 255, 0.22);
   backdrop-filter: blur(12px);
+  transition:
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
 .eyebrow {
@@ -123,12 +126,17 @@
     0 10px 22px rgba(0, 238, 255, 0.28),
     0 0 0 1px rgba(255, 255, 255, 0.32) inset;
   cursor: pointer;
-  transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+  transition:
+    transform var(--motion-duration-fast) var(--motion-ease-emphasis),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-standard),
+    filter var(--motion-duration-fast) var(--motion-ease-standard),
+    opacity var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
 .cta:hover:not(:disabled),
 .cta:focus-visible:not(:disabled) {
-  transform: translateY(-1px);
+  transform: translateY(var(--motion-lift-distance));
+  filter: brightness(var(--motion-focus-brightness));
   box-shadow:
     0 16px 28px rgba(0, 238, 255, 0.34),
     0 0 0 2px rgba(194, 250, 255, 0.9) inset;
@@ -174,7 +182,21 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .overlay::before,
+  .overlay::after {
+    display: none;
+  }
+
+  .panel {
+    border-color: rgba(169, 245, 255, 0.9);
+    box-shadow:
+      0 0 0 1px rgba(126, 240, 255, 0.22) inset,
+      0 10px 18px rgba(0, 0, 0, 0.52);
+  }
+
   .cta {
-    transition: none;
+    box-shadow:
+      0 8px 14px rgba(0, 238, 255, 0.18),
+      0 0 0 1px rgba(255, 255, 255, 0.32) inset;
   }
 }
