@@ -24,7 +24,7 @@
     "test:watch": "vitest watch",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:visual": "playwright test --project=visual",
+    "test:visual": "playwright test tests/e2e/visual-regression.spec.ts --project=chromium",
     "test:smoke": "playwright test tests/e2e/essential-functionality.spec.ts tests/e2e/home.spec.ts --project=chromium --timeout=30000",
     "test:performance": "playwright test tests/e2e/performance.spec.ts --project=chromium",
     "test:a11y": "playwright test tests/e2e/accessibility.spec.ts --project=chromium",

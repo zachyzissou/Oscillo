@@ -77,17 +77,15 @@ test.describe('Oscillo Enhanced Audio-Reactive Features', () => {
   test('should handle performance settings', async ({ page }) => {
     await page.click('[data-testid="start-button"]')
     
-    // Check if performance settings are available
-    const settingsButton = page.locator('[data-testid="settings-button"]')
-    if (await settingsButton.isVisible()) {
-      await settingsButton.click()
-      
-      const performanceSelect = page.locator('[data-testid="performance-level"]')
-      if (await performanceSelect.isVisible()) {
-        await performanceSelect.selectOption('high')
-        await page.waitForTimeout(1000)
-      }
+    const deckOpenButton = page.locator('[data-testid="deck-open-button"]')
+    if (await deckOpenButton.isVisible()) {
+      await deckOpenButton.click()
     }
+
+    const performanceSelect = page.locator('[data-testid="performance-level"]')
+    await expect(performanceSelect).toBeVisible({ timeout: 5000 })
+    await performanceSelect.selectOption('high')
+    await page.waitForTimeout(1000)
   })
 
   test('should display 3D audio-reactive orbs', async ({ page }) => {

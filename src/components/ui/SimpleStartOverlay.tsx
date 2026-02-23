@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import { startAudio } from '@/lib/audio/startAudio'
 import { useAudioEngine } from '@/store/useAudioEngine'
+import styles from './SimpleStartOverlay.module.css'
 
 export default function SimpleStartOverlay() {
   const [isVisible, setIsVisible] = useState(true)
@@ -41,56 +42,40 @@ export default function SimpleStartOverlay() {
       aria-modal="true"
       aria-labelledby="start-overlay-title"
       aria-describedby="start-overlay-description"
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 999999
-      }}
+      className={styles.overlay}
     >
-      <div
-        style={{
-          backgroundColor: 'rgba(30, 30, 50, 0.9)',
-          border: '2px solid #00ffff',
-          borderRadius: '20px',
-          padding: '40px',
-          maxWidth: '500px',
-          textAlign: 'center',
-          boxShadow: '0 0 40px rgba(0, 255, 255, 0.5)'
-        }}
-      >
-        <h1 id="start-overlay-title" style={{ color: 'white', fontSize: '28px', marginBottom: '20px' }}>
+      <div className={styles.panel}>
+        <div className={styles.eyebrow} aria-hidden="true">
+          live audiovisual playground
+        </div>
+        <h1 id="start-overlay-title" className={styles.title}>
           🎵 Interactive 3D Music
         </h1>
-        <p id="start-overlay-description" style={{ color: 'rgba(255, 255, 255, 0.8)', marginBottom: '30px' }}>
-          Click to start your musical journey
+        <p id="start-overlay-description" className={styles.description}>
+          Build sound-reactive scenes in seconds. Start instantly, then shape key, scale,
+          tempo, and quality from the live command deck.
         </p>
+        <ul className={styles.hints} aria-hidden="true">
+          <li>
+            <span>01</span> Click particles to play notes.
+          </li>
+          <li>
+            <span>02</span> Drag to orbit, scroll to zoom.
+          </li>
+          <li>
+            <span>03</span> Tune sound and visual quality live.
+          </li>
+        </ul>
         <button
           onClick={handleStart}
           disabled={isLoading}
           data-testid="start-button"
           aria-label="Start creating music"
-          style={{
-            backgroundColor: '#00ffff',
-            color: '#000',
-            border: 'none',
-            borderRadius: '10px',
-            padding: '15px 40px',
-            fontSize: '18px',
-            fontWeight: 'bold',
-            cursor: isLoading ? 'wait' : 'pointer',
-            opacity: isLoading ? 0.5 : 1,
-            transition: 'all 0.3s ease'
-          }}
+          className={styles.cta}
         >
           {isLoading ? 'Starting...' : 'Start Creating'}
         </button>
+        <p className={styles.footer}>Works best with headphones and a track playing nearby.</p>
       </div>
     </div>
   )

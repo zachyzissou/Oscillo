@@ -1,0 +1,174 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(70% 60% at 10% 85%, rgba(0, 242, 255, 0.1), transparent 60%),
+    radial-gradient(80% 70% at 90% 20%, rgba(63, 94, 251, 0.16), transparent 60%),
+    linear-gradient(160deg, #01050f 0%, #030817 60%, #01040d 100%);
+}
+
+.overlay::before,
+.overlay::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  filter: blur(60px);
+}
+
+.overlay::before {
+  top: 8%;
+  right: 4%;
+  width: min(42vw, 480px);
+  height: min(42vw, 480px);
+  border-radius: 50%;
+  background: rgba(0, 246, 255, 0.15);
+}
+
+.overlay::after {
+  bottom: -8%;
+  left: -6%;
+  width: min(46vw, 520px);
+  height: min(46vw, 520px);
+  border-radius: 50%;
+  background: rgba(66, 99, 255, 0.2);
+}
+
+.panel {
+  position: relative;
+  width: min(92vw, 560px);
+  border-radius: 28px;
+  padding: 30px;
+  color: #eaf7ff;
+  border: 1px solid rgba(0, 255, 255, 0.72);
+  background:
+    linear-gradient(155deg, rgba(17, 24, 47, 0.96), rgba(14, 15, 33, 0.94) 55%, rgba(13, 31, 52, 0.88)),
+    rgba(0, 0, 0, 0.5);
+  box-shadow:
+    0 0 0 1px rgba(94, 234, 255, 0.16) inset,
+    0 16px 42px rgba(0, 0, 0, 0.6),
+    0 0 32px rgba(0, 255, 255, 0.35),
+    0 0 70px rgba(0, 172, 255, 0.22);
+  backdrop-filter: blur(12px);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.35);
+  color: #9ae8ff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.title {
+  margin: 16px 0 10px;
+  font-family: 'Space Grotesk', 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-size: clamp(34px, 5vw, 48px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: #f5fbff;
+}
+
+.description {
+  margin: 0;
+  max-width: 46ch;
+  color: rgba(220, 241, 255, 0.84);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.hints {
+  display: grid;
+  gap: 10px;
+  margin: 20px 0 24px;
+  padding: 0;
+  list-style: none;
+}
+
+.hints li {
+  display: grid;
+  grid-template-columns: 24px 1fr;
+  align-items: center;
+  column-gap: 8px;
+  color: rgba(236, 247, 255, 0.9);
+  font-size: 14px;
+}
+
+.hints li span {
+  color: #36efff;
+  font-weight: 700;
+}
+
+.cta {
+  border: 0;
+  border-radius: 14px;
+  padding: 14px 30px;
+  font-family: 'Space Grotesk', 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: #00131f;
+  background: linear-gradient(140deg, #47f4ff 0%, #14d1f0 58%, #3ff6ff 100%);
+  box-shadow:
+    0 10px 22px rgba(0, 238, 255, 0.28),
+    0 0 0 1px rgba(255, 255, 255, 0.32) inset;
+  cursor: pointer;
+  transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+.cta:hover:not(:disabled),
+.cta:focus-visible:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow:
+    0 16px 28px rgba(0, 238, 255, 0.34),
+    0 0 0 2px rgba(194, 250, 255, 0.9) inset;
+  outline: none;
+}
+
+.cta:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.footer {
+  margin-top: 14px;
+  font-size: 12px;
+  color: rgba(205, 237, 255, 0.62);
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 640px) {
+  .panel {
+    width: calc(100vw - 22px);
+    border-radius: 24px;
+    padding: 22px;
+  }
+
+  .description {
+    font-size: 15px;
+  }
+
+  .hints {
+    margin: 14px 0 18px;
+    gap: 8px;
+  }
+
+  .hints li {
+    font-size: 13px;
+  }
+
+  .cta {
+    width: 100%;
+    font-size: 22px;
+  }
+}
