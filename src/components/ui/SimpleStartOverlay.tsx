@@ -289,7 +289,8 @@ export default function SimpleStartOverlay() {
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={isLoading ? startupProgress : 0}
-            aria-valuetext={startupMessage}
+            aria-valuetext={isLoading ? startupMessage : undefined}
+            aria-hidden={isLoading ? undefined : 'true'}
           >
             <span
               className={styles.progressFill}
