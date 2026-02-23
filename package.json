@@ -102,8 +102,8 @@
     "@testing-library/user-event": "^14.5.2",
     "@types/three": "^0.178.0",
     "@types/web": "^0.0.164",
-    "@typescript-eslint/eslint-plugin": "^8.44.0",
-    "@typescript-eslint/parser": "^8.44.0",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
     "@vitejs/plugin-react": "^5.0.3",
     "@vitest/ui": "^3.2.4",
     "@webgpu/types": "^0.1.40",
@@ -154,6 +154,12 @@
     "@magenta/music": {
       "minimist": "^1.2.6",
       "static-eval": "^2.1.0"
+    },
+    "minimatch": "^10.2.2",
+    "glob": "^11.1.0",
+    "@ducanh2912/next-pwa": {
+      "workbox-build": "^7.4.0",
+      "workbox-webpack-plugin": "^7.4.0"
     }
   },
   "keywords": [
