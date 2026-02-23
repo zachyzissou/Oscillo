@@ -47,6 +47,7 @@ test.describe('Accessibility Tests', () => {
   test('escape keeps start overlay active and returns focus to start control', async ({ page }) => {
     await loadWithDeniedTelemetry(page)
 
+    await expect(page.getByTestId('start-button')).toBeFocused()
     await page.keyboard.press('Escape')
     await expect(page.getByTestId('start-overlay')).toBeVisible()
     await expect(page.getByTestId('start-button')).toBeFocused()

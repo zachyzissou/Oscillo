@@ -17,8 +17,8 @@ const POST_START_FOCUS_TARGETS = [
   '[data-testid="telemetry-allow"]',
   '[data-testid="deck-rail-toggle"]',
   '[data-testid="deck-open-button"]',
-  '#main-content',
 ]
+const FINAL_FOCUS_FALLBACK_SELECTOR = '#main-content'
 
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now())
 
@@ -101,6 +101,8 @@ export default function SimpleStartOverlay() {
 
       if (event.key === 'Escape') {
         event.preventDefault()
+        event.stopPropagation()
+        event.stopImmediatePropagation()
         if (isLoading) {
           announcePolite('Startup in progress. Please wait.')
           return
@@ -151,19 +153,28 @@ export default function SimpleStartOverlay() {
         return
       }
 
-      if (isVisibleAndFocusable(preOverlayFocusedElementRef.current) && preOverlayFocusedElementRef.current?.isConnected) {
+      if (attempts < MAX_FOCUS_RESTORE_RETRIES) {
+        attempts += 1
+        globalThis.setTimeout(() => {
+          globalThis.requestAnimationFrame(attemptFocusRestore)
+        }, FOCUS_RESTORE_RETRY_MS)
+        return
+      }
+
+      if (
+        isVisibleAndFocusable(preOverlayFocusedElementRef.current) &&
+        preOverlayFocusedElementRef.current?.isConnected
+      ) {
         preOverlayFocusedElementRef.current.focus()
         return
       }
 
-      if (attempts >= MAX_FOCUS_RESTORE_RETRIES) {
-        return
+      const fallbackTarget = globalThis.document.querySelector(
+        FINAL_FOCUS_FALLBACK_SELECTOR
+      ) as HTMLElement | null
+      if (isVisibleAndFocusable(fallbackTarget)) {
+        fallbackTarget.focus()
       }
-
-      attempts += 1
-      globalThis.setTimeout(() => {
-        globalThis.requestAnimationFrame(attemptFocusRestore)
-      }, FOCUS_RESTORE_RETRY_MS)
     }
 
     globalThis.requestAnimationFrame(attemptFocusRestore)
