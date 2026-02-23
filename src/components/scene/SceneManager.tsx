@@ -1,6 +1,7 @@
 'use client'
 import React, { useMemo, useState, useCallback } from 'react'
 import { Canvas } from '@react-three/fiber'
+import type { RootState } from '@react-three/fiber'
 import { AdaptiveDpr } from '@react-three/drei'
 import * as THREE from 'three'
 import { QUALITY_PROFILES } from '@/lib/quality'
@@ -33,9 +34,8 @@ const SceneManager = React.memo<SceneManagerProps>(({ children }) => {
     attemptRecovery: async () => false,
   }), [])
 
-  const handleCanvasCreated = useCallback((state: any) => {
+  const handleCanvasCreated = useCallback((state: RootState) => {
     try {
-      console.log('[SceneManager] ✅ Canvas created successfully')
       logger.info('Three.js canvas created successfully', {
         renderer: state.gl.capabilities?.renderer || 'Unknown',
         vendor: state.gl.capabilities?.vendor || 'Unknown'
@@ -43,17 +43,9 @@ const SceneManager = React.memo<SceneManagerProps>(({ children }) => {
       setCanvasError(null)
       webglRecovery.resetState()
     } catch (error) {
-      console.error('[SceneManager] ❌ Canvas creation error:', error)
       logger.error('Canvas creation error:', error)
       setCanvasError(error as Error)
     }
-  }, [webglRecovery])
-
-  const handleCanvasError = useCallback((error: Error) => {
-    console.error('[SceneManager] ❌ Canvas error occurred:', error.message, error.stack)
-    logger.error('Canvas error occurred:', error)
-    setCanvasError(error)
-    webglRecovery.handleContextLoss()
   }, [webglRecovery])
 
   const handleRetryCanvas = useCallback(async () => {
@@ -77,12 +69,11 @@ const SceneManager = React.memo<SceneManagerProps>(({ children }) => {
     },
     dpr: profile.dpr as [number, number],
     onCreated: handleCanvasCreated,
-    onError: handleCanvasError
-  }), [profile, perfLevel, handleCanvasCreated, handleCanvasError])
+  }), [profile, perfLevel, handleCanvasCreated])
 
   // Show fallback if WebGL is unavailable or context is lost
   if (canvasError || webglRecovery.contextLost) {
-    console.warn('[SceneManager] 🔄 Showing WebGL fallback', {
+    logger.warn('Showing WebGL fallback', {
       hasCanvasError: !!canvasError,
       errorMessage: canvasError?.message,
       contextLost: webglRecovery.contextLost,
@@ -97,8 +88,6 @@ const SceneManager = React.memo<SceneManagerProps>(({ children }) => {
     )
   }
 
-  console.log('[SceneManager] 🎨 Attempting to render Canvas component')
-
   try {
     return (
       <Canvas
@@ -112,7 +101,6 @@ const SceneManager = React.memo<SceneManagerProps>(({ children }) => {
       </Canvas>
     )
   } catch (error) {
-    console.error('[SceneManager] ❌ Canvas render error:', error)
     logger.error('Canvas render error:', error)
     return (
       <WebGLFallbackRenderer

@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useMemo, useRef, useState } from 'react'
+import React, { useMemo, useRef } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { useMusicalPalette } from '@/store/useMusicalPalette'
 import ParticleNoteSystem from '@/components/visual/ParticleNoteSystem'
@@ -15,7 +15,6 @@ type NoteObject = {
 
 const SpiralNoteField = React.memo(() => {
   const { scaleNotes } = useMusicalPalette()
-  const [activeNote] = useState<string | null>(null)
 
   const objects = useMemo<NoteObject[]>(() => {
     const result: NoteObject[] = []
@@ -58,7 +57,7 @@ const SpiralNoteField = React.memo(() => {
             color={color}
             note={obj.note}
             type={obj.type}
-            isActive={activeNote === obj.id}
+            isActive={false}
           />
         )
       })}

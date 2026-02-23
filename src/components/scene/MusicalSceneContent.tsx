@@ -1,7 +1,7 @@
 'use client'
 
 import React from 'react'
-import { OrbitControls, Stars, Effects } from '@react-three/drei'
+import { OrbitControls, Stars } from '@react-three/drei'
 import AudioReactiveTunnel from '@/components/visual/AudioReactiveTunnel'
 import MovingAccentLights from '@/components/scene/MovingAccentLights'
 import SpiralNoteField from '@/components/scene/SpiralNoteField'
@@ -10,16 +10,6 @@ interface MusicalSceneContentProps {
   perfLevel: 'low' | 'medium' | 'high'
   starCountScale: number
 }
-
-const ScenePostProcessing = React.memo(() => {
-  return (
-    <Effects>
-      {/* Reserved for subtle post-processing upgrades. */}
-    </Effects>
-  )
-})
-
-ScenePostProcessing.displayName = 'ScenePostProcessing'
 
 const MusicalSceneContent = React.memo<MusicalSceneContentProps>(({ perfLevel, starCountScale }) => {
   return (
@@ -75,8 +65,6 @@ const MusicalSceneContent = React.memo<MusicalSceneContentProps>(({ perfLevel, s
         autoRotate={true}
         autoRotateSpeed={0.5}
       />
-
-      <ScenePostProcessing />
     </>
   )
 })
