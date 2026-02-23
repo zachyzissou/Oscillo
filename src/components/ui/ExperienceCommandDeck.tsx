@@ -252,7 +252,6 @@ export default function ExperienceCommandDeck() {
           data-testid="deck-rail-toggle"
           className={`${styles.railButton} ${styles.railPrimary}`}
           aria-expanded={isExpanded}
-          aria-controls="experience-deck-shell"
           onClick={isExpanded ? handleCollapse : handleExpand}
         >
           {isExpanded ? 'Hide controls' : 'Show controls'}
