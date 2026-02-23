@@ -152,6 +152,7 @@ graph TD
 - Touch: the command deck action rail remains visible across deck states with `Show controls`, `-5 BPM`, `+5 BPM`, and `Mode` actions.
 - Mobile sheet snap points: `Hide`, `Peek`, and `Full` provide deterministic bottom-sheet positions.
 - Keyboard: `T` toggles deck visibility, `M` cycles mode, `[` lowers tempo by 5 BPM, and `]` raises tempo by 5 BPM.
+- Hierarchy: expanded command deck surfaces a `Primary workflow` panel above a subdued `Secondary controls` panel to keep post-start priorities explicit.
 - Coverage: verified in `tests/e2e/accessibility.spec.ts` via the `persistent action rail keeps touch and keyboard control paths reachable` test.
 
 ### Accessibility Interaction Patterns

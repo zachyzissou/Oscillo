@@ -45,7 +45,14 @@ test.describe('UI/UX v2 Journey Validation', () => {
     await expect(overlay).toBeHidden({ timeout: 10000 })
     await expect(page.getByTestId('deck-action-rail')).toBeVisible({ timeout: 10000 })
     await expect(page.getByTestId('deck-collapse-button')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByTestId('deck-primary-workflow')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByTestId('deck-primary-next-action')).toContainText(/trigger your first note/i)
+    await expect(page.getByTestId('deck-secondary-controls')).toBeVisible({ timeout: 10000 })
     await expect(page.getByTestId('tempo-slider')).toBeVisible()
+
+    const primaryBox = await page.getByTestId('deck-primary-workflow').boundingBox()
+    const secondaryBox = await page.getByTestId('deck-secondary-controls').boundingBox()
+    expect(primaryBox?.y ?? 0).toBeLessThan(secondaryBox?.y ?? 0)
 
     await page.getByTestId('key-select').selectOption('D')
     await expect(page.getByTestId('key-select')).toHaveValue('D')

@@ -66,6 +66,8 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
 
       // Check that main content area is available after starting
       await expect(page.locator('#main-content')).toBeVisible({ timeout: 5000 })
+      await expect(page.getByTestId('deck-primary-workflow')).toBeVisible({ timeout: 5000 })
+      await expect(page.getByTestId('deck-primary-next-action')).toContainText(/trigger your first note/i)
       console.log('App initialized successfully with interactive content')
     }
   })
