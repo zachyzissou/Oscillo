@@ -7,6 +7,7 @@ import styles from './ExperienceCommandDeck.module.css'
 
 const ONBOARDING_KEY = 'oscillo.v2.deck-onboarded'
 const DECK_EXPANDED_KEY = 'oscillo.v2.deck-expanded'
+const MOBILE_SNAP_KEY = 'oscillo.v2.deck-mobile-snap'
 const MOBILE_BREAKPOINT = '(max-width: 900px)'
 
 const KEY_OPTIONS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const
@@ -18,12 +19,22 @@ const MIN_TEMPO = 60
 const MAX_TEMPO = 200
 const TEMPO_STEP = 5
 
+type MobileSnapPoint = 'collapsed' | 'peek' | 'full'
+
 const readStoredDesktopExpanded = () => {
   if (!('localStorage' in globalThis)) return true
   return globalThis.localStorage.getItem(DECK_EXPANDED_KEY) !== 'false'
 }
 
 const clampTempo = (value: number) => Math.min(MAX_TEMPO, Math.max(MIN_TEMPO, value))
+const isMobileSnapPoint = (value: string | null): value is MobileSnapPoint =>
+  value === 'collapsed' || value === 'peek' || value === 'full'
+
+const readStoredMobileSnap = (): MobileSnapPoint => {
+  if (!('localStorage' in globalThis)) return 'collapsed'
+  const storedValue = globalThis.localStorage.getItem(MOBILE_SNAP_KEY)
+  return isMobileSnapPoint(storedValue) ? storedValue : 'collapsed'
+}
 
 interface OnboardingStep {
   id: 'scene' | 'palette' | 'tempo'
@@ -45,12 +56,14 @@ export default function ExperienceCommandDeck() {
   const setPerfLevel = usePerformanceSettings(s => s.setLevel)
 
   const [isMobile, setIsMobile] = useState(false)
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [desktopExpanded, setDesktopExpanded] = useState(true)
+  const [mobileSnap, setMobileSnap] = useState<MobileSnapPoint>('collapsed')
   const [viewportReady, setViewportReady] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [onboardingStep, setOnboardingStep] = useState(0)
   const openButtonRef = useRef<HTMLButtonElement>(null)
   const keySelectRef = useRef<HTMLSelectElement>(null)
+  const isExpanded = isMobile ? mobileSnap !== 'collapsed' : desktopExpanded
 
   useEffect(() => {
     if (!('localStorage' in globalThis)) return
@@ -93,15 +106,34 @@ export default function ExperienceCommandDeck() {
     })
   }, [])
 
-  const handleExpand = () => {
-    setIsExpanded(true)
-    queueFocus('primary')
-  }
+  const setMobileSnapPoint = useCallback(
+    (nextSnap: MobileSnapPoint) => {
+      setMobileSnap(nextSnap)
+      queueFocus(nextSnap === 'collapsed' ? 'open' : 'primary')
+    },
+    [queueFocus]
+  )
 
-  const handleCollapse = () => {
-    setIsExpanded(false)
+  const handleExpand = useCallback(() => {
+    if (isMobile) {
+      const nextSnap = mobileSnap === 'collapsed' ? 'peek' : mobileSnap
+      setMobileSnapPoint(nextSnap)
+      return
+    }
+
+    setDesktopExpanded(true)
+    queueFocus('primary')
+  }, [isMobile, mobileSnap, queueFocus, setMobileSnapPoint])
+
+  const handleCollapse = useCallback(() => {
+    if (isMobile) {
+      setMobileSnapPoint('collapsed')
+      return
+    }
+
+    setDesktopExpanded(false)
     queueFocus('open')
-  }
+  }, [isMobile, queueFocus, setMobileSnapPoint])
 
   const adjustTempo = useCallback(
     (delta: number) => {
@@ -164,7 +196,12 @@ export default function ExperienceCommandDeck() {
     const media = globalThis.matchMedia(MOBILE_BREAKPOINT)
     const applyMode = (matches: boolean) => {
       setIsMobile(matches)
-      setIsExpanded(matches ? false : readStoredDesktopExpanded())
+      if (matches) {
+        setMobileSnap(readStoredMobileSnap())
+        return
+      }
+
+      setDesktopExpanded(readStoredDesktopExpanded())
     }
 
     applyMode(media.matches)
@@ -177,8 +214,13 @@ export default function ExperienceCommandDeck() {
 
   useEffect(() => {
     if (!('localStorage' in globalThis) || isMobile || !viewportReady) return
-    globalThis.localStorage.setItem(DECK_EXPANDED_KEY, String(isExpanded))
-  }, [isExpanded, isMobile, viewportReady])
+    globalThis.localStorage.setItem(DECK_EXPANDED_KEY, String(desktopExpanded))
+  }, [desktopExpanded, isMobile, viewportReady])
+
+  useEffect(() => {
+    if (!('localStorage' in globalThis) || !isMobile || !viewportReady) return
+    globalThis.localStorage.setItem(MOBILE_SNAP_KEY, mobileSnap)
+  }, [isMobile, mobileSnap, viewportReady])
 
   useEffect(() => {
     if (!('addEventListener' in globalThis)) return
@@ -194,11 +236,14 @@ export default function ExperienceCommandDeck() {
       if (isTypingContext) return
 
       if (event.key === 'Escape') {
-        setIsExpanded(prev => {
-          if (!prev) return prev
-          queueFocus('open')
-          return false
-        })
+        if (!isExpanded) return
+        if (isMobile) {
+          setMobileSnapPoint('collapsed')
+          return
+        }
+
+        setDesktopExpanded(false)
+        queueFocus('open')
         return
       }
 
@@ -222,7 +267,12 @@ export default function ExperienceCommandDeck() {
 
       if (event.key.toLowerCase() === 't') {
         event.preventDefault()
-        setIsExpanded(prev => {
+        if (isMobile) {
+          setMobileSnapPoint(isExpanded ? 'collapsed' : 'peek')
+          return
+        }
+
+        setDesktopExpanded(prev => {
           const next = !prev
           queueFocus(next ? 'primary' : 'open')
           return next
@@ -232,7 +282,11 @@ export default function ExperienceCommandDeck() {
 
     globalThis.addEventListener('keydown', onKeyDown)
     return () => globalThis.removeEventListener('keydown', onKeyDown)
-  }, [adjustTempo, cycleMode, queueFocus])
+  }, [adjustTempo, cycleMode, isExpanded, isMobile, queueFocus, setMobileSnapPoint])
+
+  const shellClass = `${styles.shell} ${
+    isMobile ? (mobileSnap === 'full' ? styles.shellFull : styles.shellPeek) : ''
+  }`
 
   return (
     <aside
@@ -255,7 +309,13 @@ export default function ExperienceCommandDeck() {
           aria-controls="experience-deck-shell"
           onClick={isExpanded ? handleCollapse : handleExpand}
         >
-          {isExpanded ? 'Hide controls' : 'Show controls'}
+          {isExpanded
+            ? isMobile
+              ? 'Hide sheet'
+              : 'Hide controls'
+            : isMobile
+              ? 'Show sheet'
+              : 'Show controls'}
         </button>
         <button
           type="button"
@@ -303,7 +363,43 @@ export default function ExperienceCommandDeck() {
       )}
 
       {isExpanded && (
-        <div className={styles.shell} id="experience-deck-shell">
+        <div className={shellClass} id="experience-deck-shell">
+          {isMobile && (
+            <div className={styles.sheetControls}>
+              <span className={styles.sheetHandle} aria-hidden="true" />
+              <div
+                className={styles.snapPoints}
+                role="group"
+                aria-label="Bottom sheet snap points"
+                data-testid="deck-snap-points"
+              >
+                <button
+                  type="button"
+                  data-testid="deck-snap-collapsed"
+                  className={mobileSnap === 'collapsed' ? styles.snapActive : ''}
+                  onClick={() => setMobileSnapPoint('collapsed')}
+                >
+                  Hide
+                </button>
+                <button
+                  type="button"
+                  data-testid="deck-snap-peek"
+                  className={mobileSnap === 'peek' ? styles.snapActive : ''}
+                  onClick={() => setMobileSnapPoint('peek')}
+                >
+                  Peek
+                </button>
+                <button
+                  type="button"
+                  data-testid="deck-snap-full"
+                  className={mobileSnap === 'full' ? styles.snapActive : ''}
+                  onClick={() => setMobileSnapPoint('full')}
+                >
+                  Full
+                </button>
+              </div>
+            </div>
+          )}
           <header className={styles.header}>
             <div className={styles.titleWrap}>
               <span
