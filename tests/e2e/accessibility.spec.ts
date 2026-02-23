@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 import { startExperience } from './utils/startExperience'
 
@@ -8,6 +8,14 @@ const CONSENT_KEY = 'oscillo.analytics-consent'
 async function loadWithDeniedTelemetry(page: Page) {
   await page.addInitScript(key => {
     globalThis.localStorage.setItem(key, 'denied')
+  }, CONSENT_KEY)
+  await page.goto('/')
+  await expect(page.getByTestId('start-overlay')).toBeVisible({ timeout: 10000 })
+}
+
+async function loadWithUnknownTelemetry(page: Page) {
+  await page.addInitScript(key => {
+    globalThis.localStorage.removeItem(key)
   }, CONSENT_KEY)
   await page.goto('/')
   await expect(page.getByTestId('start-overlay')).toBeVisible({ timeout: 10000 })
@@ -52,11 +60,7 @@ test.describe('Accessibility Tests', () => {
   })
 
   test('telemetry consent banner is actionable and dismissible', async ({ page }) => {
-    await page.addInitScript(key => {
-      globalThis.localStorage.removeItem(key)
-    }, CONSENT_KEY)
-
-    await page.goto('/')
+    await loadWithUnknownTelemetry(page)
     await startExperience(page)
 
     const banner = page.getByTestId('telemetry-banner')
@@ -67,6 +71,83 @@ test.describe('Accessibility Tests', () => {
 
     await page.getByTestId('telemetry-deny').click()
     await expect(banner).toBeHidden()
+  })
+
+  test('telemetry banner keyboard path is deterministic and returns focus to deck controls', async ({
+    page,
+  }) => {
+    await loadWithUnknownTelemetry(page)
+    await startExperience(page)
+
+    const allow = page.getByTestId('telemetry-allow')
+    const deny = page.getByTestId('telemetry-deny')
+    await expect(allow).toBeFocused()
+
+    await page.keyboard.press('Tab')
+    await expect(deny).toBeFocused()
+    await page.keyboard.press('Enter')
+
+    await expect(page.getByTestId('telemetry-banner')).toBeHidden()
+    await expect(page.getByTestId('deck-rail-toggle')).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(page.getByTestId('deck-rail-tempo-down')).toBeFocused()
+  })
+
+  test('focus indicators stay consistent across primary interactive surfaces', async ({ page }) => {
+    const readFocusStyles = async (target: Locator) => {
+      await target.focus()
+      return target.evaluate(node => {
+        const computed = getComputedStyle(node)
+        return {
+          color: computed.outlineColor,
+          style: computed.outlineStyle,
+          width: computed.outlineWidth,
+        }
+      })
+    }
+
+    await loadWithUnknownTelemetry(page)
+    const startFocus = await readFocusStyles(page.getByTestId('start-button'))
+    await startExperience(page)
+    const allowFocus = await readFocusStyles(page.getByTestId('telemetry-allow'))
+    await page.getByTestId('telemetry-deny').click()
+    await expect(page.getByTestId('deck-rail-toggle')).toBeFocused()
+    await page.keyboard.press('Tab')
+    await expect(page.getByTestId('deck-rail-tempo-down')).toBeFocused()
+    const deckFocus = await page.getByTestId('deck-rail-tempo-down').evaluate(node => {
+      const computed = getComputedStyle(node)
+      return {
+        color: computed.outlineColor,
+        style: computed.outlineStyle,
+        width: computed.outlineWidth,
+      }
+    })
+
+    expect(startFocus.style).toBe('solid')
+    expect(allowFocus.style).toBe('solid')
+    expect(deckFocus.style).toBe('solid')
+    expect(startFocus.width).toBe(allowFocus.width)
+    expect(allowFocus.width).toBe(deckFocus.width)
+    expect(startFocus.color).toBe(allowFocus.color)
+    expect(allowFocus.color).toBe(deckFocus.color)
+  })
+
+  test('screen-reader announcements describe key state changes', async ({ page }) => {
+    await loadWithUnknownTelemetry(page)
+
+    const announcer = page.getByTestId('sr-announcer-polite')
+    await expect(announcer).toContainText('Start overlay ready')
+
+    await page.getByTestId('start-button').click()
+    await expect(page.getByTestId('start-overlay')).toBeHidden({ timeout: 10000 })
+    await expect(page.getByTestId('telemetry-banner')).toBeVisible({ timeout: 10000 })
+    await expect(announcer).toContainText('Telemetry choice available. Allow or choose Not now.')
+
+    await page.getByTestId('telemetry-deny').click()
+    await expect(announcer).toContainText('Telemetry sharing disabled.')
+
+    await page.getByTestId('deck-rail-mode-cycle').click()
+    await expect(announcer).toContainText(/Mode set to/)
   })
 
   test('remains functional when reduced-motion is requested', async ({ page }) => {

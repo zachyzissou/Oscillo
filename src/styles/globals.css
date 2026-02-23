@@ -17,6 +17,9 @@
   --motion-focus-brightness: 1.08;
   --focus-ring: 0 0 0 2px #3b82f6;
   --focus-ring-offset: 2px;
+  --a11y-focus-outline-color: #8cf3ff;
+  --a11y-focus-outline-width: 3px;
+  --a11y-focus-outline-offset: 2px;
 
   /* Design tokens (defaults to Ethereal theme) */
   --background: 240 27% 8%;
@@ -87,6 +90,9 @@
     --bg-primary: #000000;
     --text-primary: #ffffff;
     --border-color: #ffffff;
+    --a11y-focus-outline-color: #ffffff;
+    --a11y-focus-outline-width: 3px;
+    --a11y-focus-outline-offset: 3px;
   }
 }
 
@@ -188,8 +194,15 @@ button:disabled {
 }
 
 button:focus-visible {
-  outline: 2px solid #3b82f6;
-  outline-offset: 2px;
+  outline: var(--a11y-focus-outline-width) solid var(--a11y-focus-outline-color);
+  outline-offset: var(--a11y-focus-outline-offset);
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: var(--a11y-focus-outline-width) solid var(--a11y-focus-outline-color);
+  outline-offset: var(--a11y-focus-outline-offset);
 }
 
 /* Reduced motion alternatives */

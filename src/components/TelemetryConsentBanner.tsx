@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useTelemetryConsent } from '@/store/useTelemetryConsent'
 import { useAudioEngine } from '@/store/useAudioEngine'
+import { useAccessibilityAnnouncements } from '@/store/useAccessibilityAnnouncements'
 import styles from './TelemetryConsentBanner.module.css'
 
 export function TelemetryConsentBanner() {
@@ -12,10 +13,47 @@ export function TelemetryConsentBanner() {
   const allowAnalytics = useTelemetryConsent((state) => state.allowAnalytics)
   const denyAnalytics = useTelemetryConsent((state) => state.denyAnalytics)
   const hasUserInteracted = useAudioEngine((state) => state.hasUserInteracted)
+  const announcePolite = useAccessibilityAnnouncements((state) => state.announcePolite)
+  const allowButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
     hydrate()
   }, [hydrate])
+
+  useEffect(() => {
+    if (!hasUserInteracted || !hydrated || status !== 'unknown') return
+    globalThis.requestAnimationFrame(() => {
+      allowButtonRef.current?.focus()
+      announcePolite('Telemetry choice available. Allow or choose Not now.')
+    })
+  }, [announcePolite, hasUserInteracted, hydrated, status])
+
+  const focusPersistentControl = useCallback(() => {
+    globalThis.requestAnimationFrame(() => {
+      const railToggle = document.querySelector(
+        '[data-testid="deck-rail-toggle"]'
+      ) as HTMLButtonElement | null
+      if (railToggle) {
+        railToggle.focus()
+        return
+      }
+
+      const mainContent = document.querySelector('#main-content') as HTMLElement | null
+      mainContent?.focus()
+    })
+  }, [])
+
+  const handleAllow = useCallback(() => {
+    announcePolite('Telemetry sharing enabled.')
+    allowAnalytics()
+    focusPersistentControl()
+  }, [allowAnalytics, announcePolite, focusPersistentControl])
+
+  const handleDeny = useCallback(() => {
+    announcePolite('Telemetry sharing disabled.')
+    denyAnalytics()
+    focusPersistentControl()
+  }, [announcePolite, denyAnalytics, focusPersistentControl])
 
   // Avoid stacking multiple overlays before the user starts the experience.
   if (!hasUserInteracted || !hydrated || status !== 'unknown') {
@@ -41,7 +79,8 @@ export function TelemetryConsentBanner() {
       <div className={styles.actions}>
         <button
           type="button"
-          onClick={allowAnalytics}
+          ref={allowButtonRef}
+          onClick={handleAllow}
           className={styles.allow}
           data-testid="telemetry-allow"
         >
@@ -49,7 +88,7 @@ export function TelemetryConsentBanner() {
         </button>
         <button
           type="button"
-          onClick={denyAnalytics}
+          onClick={handleDeny}
           className={styles.deny}
           data-testid="telemetry-deny"
         >

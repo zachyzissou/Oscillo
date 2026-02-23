@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMusicalPalette } from '@/store/useMusicalPalette'
 import { usePerformanceSettings } from '@/store/usePerformanceSettings'
+import { useAccessibilityAnnouncements } from '@/store/useAccessibilityAnnouncements'
 import styles from './ExperienceCommandDeck.module.css'
 
 const ONBOARDING_KEY = 'oscillo.v2.deck-onboarded'
@@ -34,6 +35,13 @@ const readStoredMobileSnap = (): MobileSnapPoint => {
   if (!('localStorage' in globalThis)) return 'collapsed'
   const storedValue = globalThis.localStorage.getItem(MOBILE_SNAP_KEY)
   return isMobileSnapPoint(storedValue) ? storedValue : 'collapsed'
+}
+
+const modeToLabel = (value: string) => value.charAt(0).toUpperCase() + value.slice(1)
+const describeMobileSnap = (snap: MobileSnapPoint) => {
+  if (snap === 'full') return 'Control sheet set to full height.'
+  if (snap === 'peek') return 'Control sheet set to peek height.'
+  return 'Control sheet hidden.'
 }
 
 interface OnboardingStep {
@@ -146,6 +154,7 @@ export default function ExperienceCommandDeck() {
 
   const perfLevel = usePerformanceSettings(s => s.level)
   const setPerfLevel = usePerformanceSettings(s => s.setLevel)
+  const announcePolite = useAccessibilityAnnouncements(state => state.announcePolite)
 
   const [isMobile, setIsMobile] = useState(false)
   const [desktopExpanded, setDesktopExpanded] = useState(true)
@@ -172,7 +181,7 @@ export default function ExperienceCommandDeck() {
     }
   }, [])
 
-  const modeLabel = useMemo(() => mode.charAt(0).toUpperCase() + mode.slice(1), [mode])
+  const modeLabel = useMemo(() => modeToLabel(mode), [mode])
 
   const completeOnboarding = useCallback(() => {
     setShowOnboarding(false)
@@ -180,7 +189,8 @@ export default function ExperienceCommandDeck() {
     if ('localStorage' in globalThis) {
       globalThis.localStorage.setItem(ONBOARDING_KEY, 'true')
     }
-  }, [])
+    announcePolite('Command deck onboarding completed.')
+  }, [announcePolite])
 
   const wrapperClass = `${styles.deck} ${isMobile ? styles.mobile : styles.desktop} ${
     viewportReady ? '' : styles.unresolved
@@ -200,10 +210,15 @@ export default function ExperienceCommandDeck() {
 
   const setMobileSnapPoint = useCallback(
     (nextSnap: MobileSnapPoint) => {
-      setMobileSnap(nextSnap)
+      setMobileSnap(currentSnap => {
+        if (currentSnap !== nextSnap) {
+          announcePolite(describeMobileSnap(nextSnap))
+        }
+        return nextSnap
+      })
       queueFocus(nextSnap === 'collapsed' ? 'open' : 'primary')
     },
-    [queueFocus]
+    [announcePolite, queueFocus]
   )
 
   const handleExpand = useCallback(() => {
@@ -215,7 +230,8 @@ export default function ExperienceCommandDeck() {
 
     setDesktopExpanded(true)
     queueFocus('primary')
-  }, [isMobile, mobileSnap, queueFocus, setMobileSnapPoint])
+    announcePolite('Command deck expanded.')
+  }, [announcePolite, isMobile, mobileSnap, queueFocus, setMobileSnapPoint])
 
   const handleCollapse = useCallback(() => {
     if (isMobile) {
@@ -225,7 +241,8 @@ export default function ExperienceCommandDeck() {
 
     setDesktopExpanded(false)
     queueFocus('open')
-  }, [isMobile, queueFocus, setMobileSnapPoint])
+    announcePolite('Command deck collapsed.')
+  }, [announcePolite, isMobile, queueFocus, setMobileSnapPoint])
 
   const adjustTempo = useCallback(
     (delta: number) => {
@@ -234,11 +251,19 @@ export default function ExperienceCommandDeck() {
     [setTempo, tempo]
   )
 
+  const setModeWithAnnouncement = useCallback(
+    (nextMode: (typeof MODE_OPTIONS)[number]) => {
+      setMode(nextMode)
+      announcePolite(`Mode set to ${modeToLabel(nextMode)}.`)
+    },
+    [announcePolite, setMode]
+  )
+
   const cycleMode = useCallback(() => {
     const currentIndex = MODE_OPTIONS.indexOf(mode)
     const nextIndex = (currentIndex + 1) % MODE_OPTIONS.length
-    setMode(MODE_OPTIONS[nextIndex])
-  }, [mode, setMode])
+    setModeWithAnnouncement(MODE_OPTIONS[nextIndex])
+  }, [mode, setModeWithAnnouncement])
 
   const onboardingSteps = useMemo<OnboardingStep[]>(
     () => buildOnboardingSteps(isMobile, isExpanded),
@@ -552,7 +577,7 @@ export default function ExperienceCommandDeck() {
                     type="button"
                     data-testid={`mode-${value}`}
                     className={mode === value ? styles.active : ''}
-                    onClick={() => setMode(value)}
+                    onClick={() => setModeWithAnnouncement(value)}
                     aria-label={`Switch to ${value} mode`}
                   >
                     {value}

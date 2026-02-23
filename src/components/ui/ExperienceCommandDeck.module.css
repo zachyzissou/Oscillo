@@ -53,13 +53,20 @@
   background: linear-gradient(130deg, rgba(19, 102, 155, 0.9), rgba(4, 69, 111, 0.86));
 }
 
-.railButton:hover,
+.railButton:hover {
+  transform: translateY(var(--motion-lift-distance));
+  border-color: rgba(134, 241, 255, 0.84);
+  color: #ffffff;
+  background: rgba(19, 45, 69, 0.95);
+}
+
 .railButton:focus-visible {
   transform: translateY(var(--motion-lift-distance));
   border-color: rgba(134, 241, 255, 0.84);
   color: #ffffff;
   background: rgba(19, 45, 69, 0.95);
-  outline: none;
+  outline: var(--a11y-focus-outline-width) solid var(--a11y-focus-outline-color);
+  outline-offset: var(--a11y-focus-outline-offset);
 }
 
 .shell {
@@ -135,8 +142,8 @@
 }
 
 .snapPoints button:focus-visible {
-  outline: 2px solid rgba(147, 241, 255, 0.78);
-  outline-offset: 1px;
+  outline: var(--a11y-focus-outline-width) solid var(--a11y-focus-outline-color);
+  outline-offset: var(--a11y-focus-outline-offset);
 }
 
 .snapActive {
@@ -266,14 +273,21 @@
 }
 
 .iconButton:hover,
+.openButton:hover {
+  transform: translateY(var(--motion-lift-distance));
+  filter: brightness(var(--motion-focus-brightness));
+  border-color: rgba(123, 246, 255, 0.8);
+  background: rgba(12, 42, 61, 0.92);
+}
+
 .iconButton:focus-visible,
-.openButton:hover,
 .openButton:focus-visible {
   transform: translateY(var(--motion-lift-distance));
   filter: brightness(var(--motion-focus-brightness));
   border-color: rgba(123, 246, 255, 0.8);
   background: rgba(12, 42, 61, 0.92);
-  outline: none;
+  outline: var(--a11y-focus-outline-width) solid var(--a11y-focus-outline-color);
+  outline-offset: var(--a11y-focus-outline-offset);
 }
 
 .body {
@@ -318,8 +332,8 @@
 }
 
 .select:focus-visible {
-  outline: 2px solid rgba(141, 244, 255, 0.7);
-  outline-offset: 1px;
+  outline: var(--a11y-focus-outline-width) solid var(--a11y-focus-outline-color);
+  outline-offset: var(--a11y-focus-outline-offset);
 }
 
 .slider {
@@ -355,10 +369,14 @@
     color var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
-.segment button:hover,
+.segment button:hover {
+  border-color: rgba(118, 242, 255, 0.7);
+}
+
 .segment button:focus-visible {
   border-color: rgba(118, 242, 255, 0.7);
-  outline: none;
+  outline: var(--a11y-focus-outline-width) solid var(--a11y-focus-outline-color);
+  outline-offset: var(--a11y-focus-outline-offset);
 }
 
 .segment .active {
@@ -390,8 +408,8 @@
 }
 
 .modePills button:focus-visible {
-  outline: 2px solid rgba(129, 245, 255, 0.85);
-  outline-offset: 2px;
+  outline: var(--a11y-focus-outline-width) solid var(--a11y-focus-outline-color);
+  outline-offset: var(--a11y-focus-outline-offset);
 }
 
 .modePills .active {
@@ -454,12 +472,18 @@
     background var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
-.linkButton:hover,
+.linkButton:hover {
+  color: #e5fcff;
+  border-color: rgba(126, 236, 255, 0.72);
+  background: rgba(16, 44, 67, 0.86);
+}
+
 .linkButton:focus-visible {
   color: #e5fcff;
   border-color: rgba(126, 236, 255, 0.72);
   background: rgba(16, 44, 67, 0.86);
-  outline: none;
+  outline: var(--a11y-focus-outline-width) solid var(--a11y-focus-outline-color);
+  outline-offset: var(--a11y-focus-outline-offset);
 }
 
 .floatingOpen {
