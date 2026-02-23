@@ -299,6 +299,53 @@
   padding: 14px;
 }
 
+.primaryWorkflow {
+  border: 1px solid rgba(98, 234, 255, 0.42);
+  border-radius: 14px;
+  padding: 11px 12px;
+  background: linear-gradient(140deg, rgba(10, 38, 59, 0.8), rgba(8, 17, 32, 0.9));
+  box-shadow:
+    0 0 0 1px rgba(130, 240, 255, 0.12) inset,
+    0 0 18px rgba(46, 229, 255, 0.12);
+}
+
+.primaryKicker {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(173, 239, 255, 0.82);
+}
+
+.primaryTitle {
+  margin: 6px 0 0;
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  color: #f2fbff;
+}
+
+.primaryList {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+}
+
+.primaryList li {
+  display: grid;
+  gap: 2px;
+  font-size: 12px;
+  line-height: 1.4;
+  color: rgba(224, 247, 255, 0.84);
+}
+
+.primaryList li strong {
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #9ef6ff;
+}
+
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -415,6 +462,34 @@
 .modePills .active {
   border-color: rgba(117, 247, 255, 0.8);
   background: rgba(0, 190, 255, 0.2);
+}
+
+.secondaryControls {
+  display: grid;
+  gap: 12px;
+  border: 1px solid rgba(121, 209, 238, 0.2);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(8, 17, 29, 0.66);
+}
+
+.secondaryHeader {
+  display: grid;
+  gap: 4px;
+}
+
+.secondaryHeader h3 {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: rgba(184, 231, 245, 0.74);
+}
+
+.secondaryHeader p {
+  margin: 0;
+  font-size: 11px;
+  color: rgba(178, 217, 230, 0.62);
 }
 
 .hint {

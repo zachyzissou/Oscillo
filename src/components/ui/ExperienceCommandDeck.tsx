@@ -271,6 +271,10 @@ export default function ExperienceCommandDeck() {
     [isExpanded, isMobile]
   )
 
+  const primaryNextAction = isMobile
+    ? 'Tap a glowing particle in the scene to trigger your first note.'
+    : 'Click a glowing particle in the scene to trigger your first note.'
+
   const currentOnboardingStep = onboardingSteps[onboardingStep]
   const needsExpandedDeckForStep =
     currentOnboardingStep?.id === 'palette' || currentOnboardingStep?.id === 'tempo'
@@ -480,6 +484,29 @@ export default function ExperienceCommandDeck() {
           </header>
 
           <div className={styles.body}>
+            <section
+              className={styles.primaryWorkflow}
+              data-testid="deck-primary-workflow"
+              aria-label="Primary workflow"
+            >
+              <p className={styles.primaryKicker}>Primary workflow</p>
+              <h3 className={styles.primaryTitle}>Create your loop in 3 moves</h3>
+              <ol className={styles.primaryList}>
+                <li>
+                  <strong>Trigger the scene</strong>
+                  <span data-testid="deck-primary-next-action">{primaryNextAction}</span>
+                </li>
+                <li>
+                  <strong>Shape harmony</strong>
+                  <span>Choose Key and Scale to set tonal color.</span>
+                </li>
+                <li>
+                  <strong>Set momentum</strong>
+                  <span>Adjust Tempo, then fine-tune quality and mode only if needed.</span>
+                </li>
+              </ol>
+            </section>
+
             <div className={styles.row}>
               <label className={styles.field}>
                 <span className={styles.label}>Key</span>
@@ -531,60 +558,6 @@ export default function ExperienceCommandDeck() {
                 onChange={event => setTempo(Number(event.target.value))}
                 aria-label="Tempo"
               />
-            </div>
-
-            <div className={styles.field}>
-              <span className={styles.label}>Performance Profile</span>
-              <select
-                value={perfLevel}
-                data-testid="performance-level"
-                className={styles.select}
-                aria-label="Performance level"
-                onChange={event =>
-                  setPerfLevel(event.target.value as (typeof PERF_OPTIONS)[number])
-                }
-              >
-                {PERF_OPTIONS.map(value => (
-                  <option key={value} value={value}>
-                    {value.charAt(0).toUpperCase() + value.slice(1)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.field}>
-              <span className={styles.label}>Quick Quality Switch</span>
-              <div className={styles.segment}>
-                {PERF_OPTIONS.map(value => (
-                  <button
-                    key={value}
-                    type="button"
-                    data-testid={`quality-${value}`}
-                    className={perfLevel === value ? styles.active : ''}
-                    onClick={() => setPerfLevel(value)}
-                  >
-                    {value}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.field}>
-              <span className={styles.label}>Mode</span>
-              <div className={styles.modePills}>
-                {MODE_OPTIONS.map(value => (
-                  <button
-                    key={value}
-                    type="button"
-                    data-testid={`mode-${value}`}
-                    className={mode === value ? styles.active : ''}
-                    onClick={() => setModeWithAnnouncement(value)}
-                    aria-label={`Switch to ${value} mode`}
-                  >
-                    {value}
-                  </button>
-                ))}
-              </div>
             </div>
 
             {showOnboarding && currentOnboardingStep && (
@@ -646,6 +619,71 @@ export default function ExperienceCommandDeck() {
                 </div>
               </output>
             )}
+
+            <section
+              className={styles.secondaryControls}
+              data-testid="deck-secondary-controls"
+              aria-label="Secondary controls"
+            >
+              <div className={styles.secondaryHeader}>
+                <h3>Secondary controls</h3>
+                <p>Use these once your core loop feels right.</p>
+              </div>
+
+              <div className={styles.field}>
+                <span className={styles.label}>Performance Profile</span>
+                <select
+                  value={perfLevel}
+                  data-testid="performance-level"
+                  className={styles.select}
+                  aria-label="Performance level"
+                  onChange={event =>
+                    setPerfLevel(event.target.value as (typeof PERF_OPTIONS)[number])
+                  }
+                >
+                  {PERF_OPTIONS.map(value => (
+                    <option key={value} value={value}>
+                      {value.charAt(0).toUpperCase() + value.slice(1)}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.field}>
+                <span className={styles.label}>Quick Quality Switch</span>
+                <div className={styles.segment}>
+                  {PERF_OPTIONS.map(value => (
+                    <button
+                      key={value}
+                      type="button"
+                      data-testid={`quality-${value}`}
+                      className={perfLevel === value ? styles.active : ''}
+                      onClick={() => setPerfLevel(value)}
+                    >
+                      {value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className={styles.field}>
+                <span className={styles.label}>Mode</span>
+                <div className={styles.modePills}>
+                  {MODE_OPTIONS.map(value => (
+                    <button
+                      key={value}
+                      type="button"
+                      data-testid={`mode-${value}`}
+                      className={mode === value ? styles.active : ''}
+                      onClick={() => setModeWithAnnouncement(value)}
+                      aria-label={`Switch to ${value} mode`}
+                    >
+                      {value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </section>
           </div>
         </UISurface>
       )}
