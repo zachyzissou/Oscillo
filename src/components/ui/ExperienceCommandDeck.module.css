@@ -60,6 +60,8 @@
 }
 
 .shell {
+  display: flex;
+  flex-direction: column;
   border-radius: 20px;
   border: 1px solid rgba(118, 237, 255, 0.35);
   background:
@@ -71,6 +73,76 @@
     0 0 0 1px rgba(143, 247, 255, 0.1) inset,
     0 0 24px rgba(0, 209, 255, 0.2);
   overflow: hidden;
+}
+
+.shellPeek {
+  max-height: min(48vh, 430px);
+}
+
+.shellFull {
+  max-height: min(78vh, 680px);
+}
+
+.sheetControls {
+  display: grid;
+  gap: 8px;
+  padding: 10px 12px 8px;
+  background: linear-gradient(150deg, rgba(10, 20, 34, 0.9), rgba(10, 18, 30, 0.9));
+  border-bottom: 1px solid rgba(144, 235, 255, 0.1);
+}
+
+.sheetHandle {
+  width: 44px;
+  height: 5px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: rgba(162, 233, 255, 0.46);
+}
+
+.snapPoints {
+  display: flex;
+  gap: 7px;
+  border: 0;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 0;
+}
+
+.snapPoints button {
+  flex: 1;
+  min-height: 38px;
+  border: 1px solid rgba(133, 218, 255, 0.24);
+  border-radius: 10px;
+  background: rgba(7, 19, 32, 0.86);
+  color: rgba(219, 245, 255, 0.88);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.snapPoints button:focus-visible {
+  outline: 2px solid rgba(147, 241, 255, 0.78);
+  outline-offset: 1px;
+}
+
+.snapActive {
+  border-color: rgba(117, 244, 255, 0.74) !important;
+  background: linear-gradient(140deg, rgba(31, 208, 255, 0.2), rgba(59, 129, 255, 0.22)) !important;
+  color: #051722 !important;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  border: 0;
+  padding: 0;
+  clip-path: inset(100%);
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .header {
@@ -170,6 +242,9 @@
 
 .body {
   display: grid;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
   gap: 14px;
   padding: 14px;
 }
@@ -369,6 +444,7 @@
   }
 
   .body {
+    padding-top: 12px;
     padding-bottom: 16px;
   }
 

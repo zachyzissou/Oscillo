@@ -7,6 +7,7 @@ import styles from './ExperienceCommandDeck.module.css'
 
 const ONBOARDING_KEY = 'oscillo.v2.deck-onboarded'
 const DECK_EXPANDED_KEY = 'oscillo.v2.deck-expanded'
+const MOBILE_SNAP_KEY = 'oscillo.v2.deck-mobile-snap'
 const MOBILE_BREAKPOINT = '(max-width: 900px)'
 
 const KEY_OPTIONS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'] as const
@@ -18,18 +19,120 @@ const MIN_TEMPO = 60
 const MAX_TEMPO = 200
 const TEMPO_STEP = 5
 
+type MobileSnapPoint = 'collapsed' | 'peek' | 'full'
+
 const readStoredDesktopExpanded = () => {
   if (!('localStorage' in globalThis)) return true
   return globalThis.localStorage.getItem(DECK_EXPANDED_KEY) !== 'false'
 }
 
 const clampTempo = (value: number) => Math.min(MAX_TEMPO, Math.max(MIN_TEMPO, value))
+const isMobileSnapPoint = (value: string | null): value is MobileSnapPoint =>
+  value === 'collapsed' || value === 'peek' || value === 'full'
+
+const readStoredMobileSnap = (): MobileSnapPoint => {
+  if (!('localStorage' in globalThis)) return 'collapsed'
+  const storedValue = globalThis.localStorage.getItem(MOBILE_SNAP_KEY)
+  return isMobileSnapPoint(storedValue) ? storedValue : 'collapsed'
+}
 
 interface OnboardingStep {
   id: 'scene' | 'palette' | 'tempo'
   title: string
   description: string
 }
+
+interface DeckHotkeyHandlers {
+  adjustTempo: (delta: number) => void
+  cycleMode: () => void
+  isExpanded: boolean
+  isMobile: boolean
+  queueFocus: (target: 'open' | 'primary') => void
+  setDesktopExpanded: (value: boolean | ((prev: boolean) => boolean)) => void
+  setMobileSnapPoint: (nextSnap: MobileSnapPoint) => void
+}
+
+const isTypingContextTarget = (target: EventTarget | null) => {
+  if (!(target instanceof HTMLElement)) return false
+  return (
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.tagName === 'SELECT' ||
+    target.isContentEditable
+  )
+}
+
+const handleDeckHotkeys = (event: KeyboardEvent, handlers: DeckHotkeyHandlers) => {
+  if (isTypingContextTarget(event.target)) return
+
+  if (event.key === 'Escape') {
+    if (!handlers.isExpanded) return
+    if (handlers.isMobile) {
+      handlers.setMobileSnapPoint('collapsed')
+      return
+    }
+
+    handlers.setDesktopExpanded(false)
+    handlers.queueFocus('open')
+    return
+  }
+
+  if (event.key.toLowerCase() === 'm') {
+    event.preventDefault()
+    handlers.cycleMode()
+    return
+  }
+
+  if (event.key === '[') {
+    event.preventDefault()
+    handlers.adjustTempo(-TEMPO_STEP)
+    return
+  }
+
+  if (event.key === ']') {
+    event.preventDefault()
+    handlers.adjustTempo(TEMPO_STEP)
+    return
+  }
+
+  if (event.key.toLowerCase() !== 't') return
+
+  event.preventDefault()
+  if (handlers.isMobile) {
+    handlers.setMobileSnapPoint(handlers.isExpanded ? 'collapsed' : 'peek')
+    return
+  }
+
+  handlers.setDesktopExpanded(prev => {
+    const next = !prev
+    handlers.queueFocus(next ? 'primary' : 'open')
+    return next
+  })
+}
+
+const buildOnboardingSteps = (isMobile: boolean, isExpanded: boolean): OnboardingStep[] => [
+  {
+    id: 'scene',
+    title: 'Step 1: Trigger the scene',
+    description: isMobile
+      ? 'Tap glowing particles to hear notes and wake the atmosphere.'
+      : 'Click glowing particles to hear notes and wake the atmosphere.',
+  },
+  {
+    id: 'palette',
+    title: 'Step 2: Shape harmony',
+    description: isExpanded
+      ? 'Use Key and Scale controls to instantly shift the tonal mood.'
+      : 'Open the deck, then use Key and Scale to shift the tonal mood.',
+  },
+  {
+    id: 'tempo',
+    title: 'Step 3: Set momentum',
+    description: isExpanded
+      ? 'Adjust Tempo and performance profile to match your device and vibe.'
+      : 'Open the deck, then adjust Tempo and performance profile to lock your groove.',
+  },
+]
 
 export default function ExperienceCommandDeck() {
   const key = useMusicalPalette(s => s.key)
@@ -45,12 +148,14 @@ export default function ExperienceCommandDeck() {
   const setPerfLevel = usePerformanceSettings(s => s.setLevel)
 
   const [isMobile, setIsMobile] = useState(false)
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [desktopExpanded, setDesktopExpanded] = useState(true)
+  const [mobileSnap, setMobileSnap] = useState<MobileSnapPoint>('collapsed')
   const [viewportReady, setViewportReady] = useState(false)
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [onboardingStep, setOnboardingStep] = useState(0)
   const openButtonRef = useRef<HTMLButtonElement>(null)
   const keySelectRef = useRef<HTMLSelectElement>(null)
+  const isExpanded = isMobile ? mobileSnap !== 'collapsed' : desktopExpanded
 
   useEffect(() => {
     if (!('localStorage' in globalThis)) return
@@ -93,15 +198,34 @@ export default function ExperienceCommandDeck() {
     })
   }, [])
 
-  const handleExpand = () => {
-    setIsExpanded(true)
-    queueFocus('primary')
-  }
+  const setMobileSnapPoint = useCallback(
+    (nextSnap: MobileSnapPoint) => {
+      setMobileSnap(nextSnap)
+      queueFocus(nextSnap === 'collapsed' ? 'open' : 'primary')
+    },
+    [queueFocus]
+  )
 
-  const handleCollapse = () => {
-    setIsExpanded(false)
+  const handleExpand = useCallback(() => {
+    if (isMobile) {
+      const nextSnap = mobileSnap === 'collapsed' ? 'peek' : mobileSnap
+      setMobileSnapPoint(nextSnap)
+      return
+    }
+
+    setDesktopExpanded(true)
+    queueFocus('primary')
+  }, [isMobile, mobileSnap, queueFocus, setMobileSnapPoint])
+
+  const handleCollapse = useCallback(() => {
+    if (isMobile) {
+      setMobileSnapPoint('collapsed')
+      return
+    }
+
+    setDesktopExpanded(false)
     queueFocus('open')
-  }
+  }, [isMobile, queueFocus, setMobileSnapPoint])
 
   const adjustTempo = useCallback(
     (delta: number) => {
@@ -117,29 +241,7 @@ export default function ExperienceCommandDeck() {
   }, [mode, setMode])
 
   const onboardingSteps = useMemo<OnboardingStep[]>(
-    () => [
-      {
-        id: 'scene',
-        title: 'Step 1: Trigger the scene',
-        description: isMobile
-          ? 'Tap glowing particles to hear notes and wake the atmosphere.'
-          : 'Click glowing particles to hear notes and wake the atmosphere.',
-      },
-      {
-        id: 'palette',
-        title: 'Step 2: Shape harmony',
-        description: isExpanded
-          ? 'Use Key and Scale controls to instantly shift the tonal mood.'
-          : 'Open the deck, then use Key and Scale to shift the tonal mood.',
-      },
-      {
-        id: 'tempo',
-        title: 'Step 3: Set momentum',
-        description: isExpanded
-          ? 'Adjust Tempo and performance profile to match your device and vibe.'
-          : 'Open the deck, then adjust Tempo and performance profile to lock your groove.',
-      },
-    ],
+    () => buildOnboardingSteps(isMobile, isExpanded),
     [isExpanded, isMobile]
   )
 
@@ -164,7 +266,12 @@ export default function ExperienceCommandDeck() {
     const media = globalThis.matchMedia(MOBILE_BREAKPOINT)
     const applyMode = (matches: boolean) => {
       setIsMobile(matches)
-      setIsExpanded(matches ? false : readStoredDesktopExpanded())
+      if (matches) {
+        setMobileSnap(readStoredMobileSnap())
+        return
+      }
+
+      setDesktopExpanded(readStoredDesktopExpanded())
     }
 
     applyMode(media.matches)
@@ -177,62 +284,46 @@ export default function ExperienceCommandDeck() {
 
   useEffect(() => {
     if (!('localStorage' in globalThis) || isMobile || !viewportReady) return
-    globalThis.localStorage.setItem(DECK_EXPANDED_KEY, String(isExpanded))
-  }, [isExpanded, isMobile, viewportReady])
+    globalThis.localStorage.setItem(DECK_EXPANDED_KEY, String(desktopExpanded))
+  }, [desktopExpanded, isMobile, viewportReady])
+
+  useEffect(() => {
+    if (!('localStorage' in globalThis) || !isMobile || !viewportReady) return
+    globalThis.localStorage.setItem(MOBILE_SNAP_KEY, mobileSnap)
+  }, [isMobile, mobileSnap, viewportReady])
 
   useEffect(() => {
     if (!('addEventListener' in globalThis)) return
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null
-      const isTypingContext =
-        target?.tagName === 'INPUT' ||
-        target?.tagName === 'TEXTAREA' ||
-        target?.tagName === 'SELECT' ||
-        target?.isContentEditable
-
-      if (isTypingContext) return
-
-      if (event.key === 'Escape') {
-        setIsExpanded(prev => {
-          if (!prev) return prev
-          queueFocus('open')
-          return false
-        })
-        return
-      }
-
-      if (event.key.toLowerCase() === 'm') {
-        event.preventDefault()
-        cycleMode()
-        return
-      }
-
-      if (event.key === '[') {
-        event.preventDefault()
-        adjustTempo(-TEMPO_STEP)
-        return
-      }
-
-      if (event.key === ']') {
-        event.preventDefault()
-        adjustTempo(TEMPO_STEP)
-        return
-      }
-
-      if (event.key.toLowerCase() === 't') {
-        event.preventDefault()
-        setIsExpanded(prev => {
-          const next = !prev
-          queueFocus(next ? 'primary' : 'open')
-          return next
-        })
-      }
-    }
+    const onKeyDown = (event: KeyboardEvent) =>
+      handleDeckHotkeys(event, {
+        adjustTempo,
+        cycleMode,
+        isExpanded,
+        isMobile,
+        queueFocus,
+        setDesktopExpanded,
+        setMobileSnapPoint,
+      })
 
     globalThis.addEventListener('keydown', onKeyDown)
     return () => globalThis.removeEventListener('keydown', onKeyDown)
-  }, [adjustTempo, cycleMode, queueFocus])
+  }, [adjustTempo, cycleMode, isExpanded, isMobile, queueFocus, setMobileSnapPoint])
+
+  const mobileShellClass = useMemo(() => {
+    if (!isMobile) return ''
+    if (mobileSnap === 'full') return styles.shellFull
+    return styles.shellPeek
+  }, [isMobile, mobileSnap])
+
+  const shellClass = `${styles.shell} ${mobileShellClass}`
+
+  const railToggleLabel = useMemo(() => {
+    if (isMobile) {
+      return isExpanded ? 'Hide sheet' : 'Show sheet'
+    }
+    return isExpanded ? 'Hide controls' : 'Show controls'
+  }, [isExpanded, isMobile])
 
   return (
     <aside
@@ -255,7 +346,7 @@ export default function ExperienceCommandDeck() {
           aria-controls="experience-deck-shell"
           onClick={isExpanded ? handleCollapse : handleExpand}
         >
-          {isExpanded ? 'Hide controls' : 'Show controls'}
+          {railToggleLabel}
         </button>
         <button
           type="button"
@@ -303,7 +394,39 @@ export default function ExperienceCommandDeck() {
       )}
 
       {isExpanded && (
-        <div className={styles.shell} id="experience-deck-shell">
+        <div className={shellClass} id="experience-deck-shell">
+          {isMobile && (
+            <div className={styles.sheetControls}>
+              <span className={styles.sheetHandle} aria-hidden="true" />
+              <fieldset className={styles.snapPoints} data-testid="deck-snap-points">
+                <legend className={styles.visuallyHidden}>Bottom sheet snap points</legend>
+                <button
+                  type="button"
+                  data-testid="deck-snap-collapsed"
+                  className={mobileSnap === 'collapsed' ? styles.snapActive : ''}
+                  onClick={() => setMobileSnapPoint('collapsed')}
+                >
+                  Hide
+                </button>
+                <button
+                  type="button"
+                  data-testid="deck-snap-peek"
+                  className={mobileSnap === 'peek' ? styles.snapActive : ''}
+                  onClick={() => setMobileSnapPoint('peek')}
+                >
+                  Peek
+                </button>
+                <button
+                  type="button"
+                  data-testid="deck-snap-full"
+                  className={mobileSnap === 'full' ? styles.snapActive : ''}
+                  onClick={() => setMobileSnapPoint('full')}
+                >
+                  Full
+                </button>
+              </fieldset>
+            </div>
+          )}
           <header className={styles.header}>
             <div className={styles.titleWrap}>
               <span

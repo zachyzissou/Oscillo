@@ -150,6 +150,49 @@ test.describe('Accessibility Tests', () => {
     expect(tempoReturned).toBe(tempoBefore)
   })
 
+  test('mobile bottom sheet exposes stable snap points with ergonomic targets', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 393, height: 851 })
+    await loadWithDeniedTelemetry(page)
+    await startExperience(page)
+
+    const shell = page.locator('#experience-deck-shell')
+    const railToggle = page.getByTestId('deck-rail-toggle')
+    const snapPeek = page.getByTestId('deck-snap-peek')
+    const snapFull = page.getByTestId('deck-snap-full')
+    const snapHide = page.getByTestId('deck-snap-collapsed')
+
+    await expect(page.getByTestId('deck-open-button')).toBeVisible({ timeout: 10000 })
+    await railToggle.click()
+
+    await expect(shell).toBeVisible({ timeout: 10000 })
+    await expect(page.getByTestId('deck-snap-points')).toBeVisible({ timeout: 10000 })
+
+    const peekHeight = (await shell.boundingBox())?.height ?? 0
+
+    await snapFull.click()
+    await expect
+      .poll(async () => (await shell.boundingBox())?.height ?? 0)
+      .toBeGreaterThan(peekHeight + 30)
+    const fullHeight = (await shell.boundingBox())?.height ?? 0
+
+    await snapPeek.click()
+    await expect
+      .poll(async () => (await shell.boundingBox())?.height ?? 0)
+      .toBeLessThan(fullHeight - 20)
+
+    const targetHeights = await Promise.all(
+      [snapPeek, snapFull, snapHide].map(locator => locator.boundingBox())
+    )
+    targetHeights.forEach(target => {
+      expect(target?.height ?? 0).toBeGreaterThanOrEqual(38)
+    })
+
+    await snapHide.click()
+    await expect(page.getByTestId('deck-open-button')).toBeVisible({ timeout: 10000 })
+  })
+
   test('post-start state has no critical automated accessibility violations', async ({ page }) => {
     await loadWithDeniedTelemetry(page)
     await startExperience(page)
