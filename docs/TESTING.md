@@ -125,6 +125,10 @@ graph TD
 
 ## Usage Examples
 
+### Pre-PR Standard
+- Run the team checklist before opening a PR: [`docs/pre-pr-checklist.md`](./pre-pr-checklist.md)
+- If CI fails, follow the triage drill: [`docs/ci-failure-triage.md`](./ci-failure-triage.md)
+
 ### Local Development
 ```bash
 # Quick validation before commit

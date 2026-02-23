@@ -15,8 +15,8 @@ Provide a reusable, command-first workflow to triage failing GitHub PR checks an
 # 1) Auth sanity
 gh auth status
 
-# 2) Inspect failing checks on a PR (preferred helper)
-python3 /Users/zachgonser/.codex/skills/gh-fix-ci/scripts/inspect_pr_checks.py --repo . --pr <PR_NUMBER_OR_URL>
+# 2) Inspect failing checks on a PR (preferred helper, if installed locally)
+python3 "<path-to-gh-fix-ci-skill>/scripts/inspect_pr_checks.py" --repo . --pr <PR_NUMBER_OR_URL>
 
 # 3) If helper reports failures, inspect checks
 gh pr checks <PR_NUMBER> --json name,state,bucket,link,workflow
@@ -33,7 +33,7 @@ gh run view <RUN_ID> --job <JOB_ID>
 
 ### A) Current PR check triage (PR #302)
 ```bash
-python3 /Users/zachgonser/.codex/skills/gh-fix-ci/scripts/inspect_pr_checks.py --repo . --pr 302 --json
+python3 "<path-to-gh-fix-ci-skill>/scripts/inspect_pr_checks.py" --repo . --pr 302 --json
 ```
 Result: `PR #302: no failing checks detected.`
 
