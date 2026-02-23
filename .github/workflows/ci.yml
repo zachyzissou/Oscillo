@@ -55,11 +55,15 @@ jobs:
       - name: Summarize security audit report
         if: always()
         run: |
-          if [ ! -f security-audit-report.json ]; then
-            echo "security-audit-report.json was not generated."
+          if [ ! -s security-audit-report.json ]; then
+            if [ -f security-audit-report.json ]; then
+              echo "security-audit-report.json exists but is empty. npm audit may have failed before producing valid JSON."
+            else
+              echo "security-audit-report.json was not generated."
+            fi
             exit 1
           fi
-          node -e "const fs=require('fs');const p='security-audit-report.json';const r=JSON.parse(fs.readFileSync(p,'utf8'));const v=r.metadata?.vulnerabilities||{};console.log('vulnerabilities:', JSON.stringify(v));"
+          node -e "const fs=require('fs');const p='security-audit-report.json';let raw='';try{raw=fs.readFileSync(p,'utf8');}catch(e){console.error('Error reading security-audit-report.json:',e.message);process.exit(1);}if(!raw||!raw.trim()){console.error('security-audit-report.json is empty or only whitespace.');process.exit(1);}let parsed;try{parsed=JSON.parse(raw);}catch(e){console.error('Failed to parse security-audit-report.json as JSON:',e.message);console.error('Raw content of security-audit-report.json:');console.error(raw);process.exit(1);}const v=(parsed.metadata&&parsed.metadata.vulnerabilities)||{};console.log('vulnerabilities:',JSON.stringify(v));"
       - name: Upload security audit report
         if: always()
         uses: actions/upload-artifact@v4
