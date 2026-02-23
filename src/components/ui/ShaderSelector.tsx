@@ -11,22 +11,7 @@ import {
   CubeIcon,
   GlobeAltIcon
 } from '@heroicons/react/24/outline'
-import type { ShaderIconType } from '@/config/shaderConfigs'
-
-interface ShaderConfig {
-  id: string
-  name: string
-  iconType: ShaderIconType
-  params: {
-    [key: string]: {
-      value: number
-      min: number
-      max: number
-      step: number
-      label: string
-    }
-  }
-}
+import type { ShaderConfig, ShaderIconType, ShaderId } from '@/config/shaderConfigs'
 
 // Icon mapper function
 const getIconComponent = (iconType: ShaderIconType): React.ReactNode => {
@@ -54,8 +39,8 @@ const getIconComponent = (iconType: ShaderIconType): React.ReactNode => {
 
 interface ShaderSelectorProps {
   shaderConfigs: ShaderConfig[]
-  currentShader: string
-  onShaderChange: (shaderId: string) => void
+  currentShader: ShaderId
+  onShaderChange: (shaderId: ShaderId) => void
 }
 
 const ShaderSelector: React.FC<ShaderSelectorProps> = ({
@@ -86,4 +71,3 @@ const ShaderSelector: React.FC<ShaderSelectorProps> = ({
   )
 }
 export default ShaderSelector
-
