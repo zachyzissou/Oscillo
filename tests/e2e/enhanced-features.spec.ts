@@ -135,6 +135,21 @@ test.describe('Oscillo Enhanced Audio-Reactive Features', () => {
 
     await page.waitForTimeout(1200)
     const after = await readPerformanceSnapshot(page)
+    const memoryGrowth = after.memoryUsed - baseline.memoryUsed
+
+    console.log(
+      `[perf-toggle] baseline fps=${baseline.fps.toFixed(1)} frame=${baseline.frameTime.toFixed(1)}ms memory=${(
+        baseline.memoryUsed /
+        (1024 * 1024)
+      ).toFixed(1)}MB`,
+    )
+    console.log(
+      `[perf-toggle] after fps=${after.fps.toFixed(1)} frame=${after.frameTime.toFixed(1)}ms memory=${(
+        after.memoryUsed /
+        (1024 * 1024)
+      ).toFixed(1)}MB growth=${(memoryGrowth / (1024 * 1024)).toFixed(1)}MB`,
+    )
+
     const renderer = after.renderer || baseline.renderer
     const minFps = renderer.includes('SwiftShader')
       ? 8
@@ -145,7 +160,6 @@ test.describe('Oscillo Enhanced Audio-Reactive Features', () => {
     expect(after.frameTime).toBeLessThan(100)
 
     if (baseline.memoryUsed > 0 && after.memoryUsed > 0) {
-      const memoryGrowth = after.memoryUsed - baseline.memoryUsed
       expect(memoryGrowth).toBeLessThan(60 * 1024 * 1024)
     }
   })
