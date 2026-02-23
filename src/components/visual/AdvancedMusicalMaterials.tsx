@@ -1,5 +1,5 @@
 'use client'
-import React, { useMemo, useRef } from 'react'
+import React, { useEffect, useMemo, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { MeshTransmissionMaterial } from '@react-three/drei'
@@ -69,7 +69,7 @@ export function AdvancedMusicalMaterial({ type, soundType, audioReactive = true 
           ...cymaticFluidShader,
           uniforms: {
             ...cymaticFluidShader.uniforms,
-            resolution: { value: [size.width, size.height] },
+            resolution: { value: [1, 1] },
             colorPrimary: { value: colorMap[soundType] },
             colorSecondary: { value: [1.0, 1.0, 1.0] },
           },
@@ -226,7 +226,24 @@ export function AdvancedMusicalMaterial({ type, soundType, audioReactive = true 
       default:
         return new THREE.MeshStandardMaterial({ color: new THREE.Color(...colorMap[soundType]) })
     }
-  }, [type, soundType, size])
+  }, [type, soundType])
+
+  useEffect(() => {
+    if (!(material instanceof THREE.Material)) return
+
+    const uniforms = (material as THREE.ShaderMaterial).uniforms
+    if (uniforms?.resolution) {
+      uniforms.resolution.value = [size.width, size.height]
+    }
+  }, [material, size.width, size.height])
+
+  useEffect(() => {
+    if (!(material instanceof THREE.Material)) return
+
+    return () => {
+      material.dispose()
+    }
+  }, [material])
 
   // Update shader uniforms
   useFrame((state, delta) => {

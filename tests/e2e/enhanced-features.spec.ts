@@ -1,6 +1,20 @@
 import { test, expect } from '@playwright/test'
 import { startExperience } from './utils/startExperience'
 
+async function readPerformanceSnapshot(page: Parameters<typeof test>[0]['page']) {
+  return page.evaluate(() => {
+    const monitor = (window as any).performanceMonitor
+    const avg = monitor?.getAverageMetrics?.(15) ?? {}
+    const latest = monitor?.getLatestMetrics?.() ?? {}
+    return {
+      fps: Number(avg?.fps ?? latest?.fps ?? 0),
+      frameTime: Number(avg?.frameTime ?? latest?.frameTime ?? 0),
+      memoryUsed: Number(avg?.memoryUsed ?? latest?.memoryUsed ?? 0),
+      renderer: String(latest?.webglRenderer ?? ''),
+    }
+  })
+}
+
 test.describe('Oscillo Enhanced Audio-Reactive Features', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
@@ -75,7 +89,7 @@ test.describe('Oscillo Enhanced Audio-Reactive Features', () => {
   })
 
   test('should handle performance settings', async ({ page }) => {
-    await page.click('[data-testid="start-button"]')
+    await startExperience(page)
     
     const deckOpenButton = page.locator('[data-testid="deck-open-button"]')
     if (await deckOpenButton.isVisible()) {
@@ -86,6 +100,54 @@ test.describe('Oscillo Enhanced Audio-Reactive Features', () => {
     await expect(performanceSelect).toBeVisible({ timeout: 5000 })
     await performanceSelect.selectOption('high')
     await page.waitForTimeout(1000)
+  })
+
+  test('maintains stable frame timing across repeated shader profile switches', async ({ page }) => {
+    await startExperience(page)
+
+    const deckOpenButton = page.locator('[data-testid="deck-open-button"]')
+    if (await deckOpenButton.isVisible()) {
+      await deckOpenButton.click()
+    }
+
+    const performanceSelect = page.locator('[data-testid="performance-level"]')
+    await expect(performanceSelect).toBeVisible({ timeout: 5000 })
+
+    await page.waitForTimeout(1200)
+    const baseline = await readPerformanceSnapshot(page)
+
+    const toggles: Array<'low' | 'medium' | 'high'> = [
+      'low',
+      'medium',
+      'high',
+      'medium',
+      'low',
+      'high',
+      'medium',
+      'high',
+      'low',
+    ]
+
+    for (const level of toggles) {
+      await performanceSelect.selectOption(level)
+      await page.waitForTimeout(350)
+    }
+
+    await page.waitForTimeout(1200)
+    const after = await readPerformanceSnapshot(page)
+    const renderer = after.renderer || baseline.renderer
+    const minFps = renderer.includes('SwiftShader')
+      ? 8
+      : Math.max(15, Math.floor((baseline.fps || 30) * 0.45))
+
+    expect(after.fps).toBeGreaterThanOrEqual(minFps)
+    expect(after.frameTime).toBeGreaterThan(0)
+    expect(after.frameTime).toBeLessThan(100)
+
+    if (baseline.memoryUsed > 0 && after.memoryUsed > 0) {
+      const memoryGrowth = after.memoryUsed - baseline.memoryUsed
+      expect(memoryGrowth).toBeLessThan(60 * 1024 * 1024)
+    }
   })
 
   test('should display 3D audio-reactive orbs', async ({ page }) => {
