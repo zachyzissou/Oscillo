@@ -5,10 +5,12 @@ import { OrbitControls, Stars, Effects } from '@react-three/drei'
 import AudioReactiveTunnel from '@/components/visual/AudioReactiveTunnel'
 import MovingAccentLights from '@/components/scene/MovingAccentLights'
 import SpiralNoteField from '@/components/scene/SpiralNoteField'
+import type { PerfLevel } from '@/store/usePerformanceSettings'
 
 interface MusicalSceneContentProps {
-  perfLevel: 'low' | 'medium' | 'high'
+  perfLevel: PerfLevel
   starCountScale: number
+  postprocessingEnabled: boolean
 }
 
 const ScenePostProcessing = React.memo(() => {
@@ -21,9 +23,10 @@ const ScenePostProcessing = React.memo(() => {
 
 ScenePostProcessing.displayName = 'ScenePostProcessing'
 
-const MusicalSceneContent = React.memo<MusicalSceneContentProps>(({ perfLevel, starCountScale }) => {
-  return (
-    <>
+const MusicalSceneContent = React.memo<MusicalSceneContentProps>(
+  ({ perfLevel, starCountScale, postprocessingEnabled }) => {
+    return (
+      <>
       <ambientLight intensity={0.2} color="#4a0e4e" />
 
       <pointLight
@@ -76,10 +79,11 @@ const MusicalSceneContent = React.memo<MusicalSceneContentProps>(({ perfLevel, s
         autoRotateSpeed={0.5}
       />
 
-      <ScenePostProcessing />
-    </>
-  )
-})
+        {postprocessingEnabled ? <ScenePostProcessing /> : null}
+      </>
+    )
+  }
+)
 
 MusicalSceneContent.displayName = 'MusicalSceneContent'
 

@@ -1,7 +1,6 @@
 'use client'
 
-import React, { useMemo, useRef, useState } from 'react'
-import { useFrame } from '@react-three/fiber'
+import React, { useMemo } from 'react'
 import { useMusicalPalette } from '@/store/useMusicalPalette'
 import ParticleNoteSystem from '@/components/visual/ParticleNoteSystem'
 import MorphingGeometry from '@/components/visual/MorphingGeometry'
@@ -10,12 +9,12 @@ type NoteObject = {
   id: string
   position: [number, number, number]
   note: string
+  color: string
   type: 'note' | 'chord' | 'beat'
 }
 
 const SpiralNoteField = React.memo(() => {
   const { scaleNotes } = useMusicalPalette()
-  const [activeNote] = useState<string | null>(null)
 
   const objects = useMemo<NoteObject[]>(() => {
     const result: NoteObject[] = []
@@ -31,6 +30,7 @@ const SpiralNoteField = React.memo(() => {
         id: `${scaleNotes[i]}-${i}`,
         position: [Math.cos(angle) * spiralRadius, spiralHeight, Math.sin(angle) * spiralRadius],
         note: scaleNotes[i],
+        color: `hsl(${(t * 360) % 360}, 85%, 65%)`,
         type: (i % 4 === 0 ? 'chord' : i % 3 === 0 ? 'beat' : 'note') as 'note' | 'chord' | 'beat',
       })
     }
@@ -38,30 +38,19 @@ const SpiralNoteField = React.memo(() => {
     return result
   }, [scaleNotes])
 
-  const timeRef = useRef(0)
-  useFrame(state => {
-    timeRef.current = state.clock.getElapsedTime()
-  })
-
   return (
     <group>
-      {objects.map((obj, index) => {
-        const t = index / objects.length
-        const hue = (t * 360 + timeRef.current * 10) % 360
-        const color = `hsl(${hue}, 85%, 65%)`
-
-        return (
-          <ParticleNoteSystem
-            key={obj.id}
-            id={obj.id}
-            position={obj.position}
-            color={color}
-            note={obj.note}
-            type={obj.type}
-            isActive={activeNote === obj.id}
-          />
-        )
-      })}
+      {objects.map(obj => (
+        <ParticleNoteSystem
+          key={obj.id}
+          id={obj.id}
+          position={obj.position}
+          color={obj.color}
+          note={obj.note}
+          type={obj.type}
+          isActive={false}
+        />
+      ))}
 
       <MorphingGeometry position={[0, 0, 0]} type="primary" />
       <MorphingGeometry position={[8, 4, -5]} type="secondary" />

@@ -57,7 +57,11 @@ export default function ImmersiveMusicalUniverse() {
     <div data-testid="canvas-container" style={containerStyle}>
       {hasUserInteracted ? (
         <MusicalCanvas perfLevel={perfLevel} profile={profile}>
-          <MusicalSceneContent perfLevel={perfLevel} starCountScale={profile.starCountScale} />
+          <MusicalSceneContent
+            perfLevel={perfLevel}
+            starCountScale={profile.starCountScale}
+            postprocessingEnabled={profile.postprocessing}
+          />
         </MusicalCanvas>
       ) : (
         <div style={placeholderStyle}>
