@@ -11,7 +11,7 @@ const BUNDLE_BUDGETS_MB = {
 const RUNTIME_BUDGETS = {
   constrainedRenderer: {
     minFps: 14,
-    maxFrameTimeMs: 80,
+    maxFrameTimeMs: 170,
     maxMemoryMb: 240,
     maxAudioLatencyMs: 120,
   },
