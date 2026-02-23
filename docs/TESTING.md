@@ -135,6 +135,10 @@ graph TD
 - Keyboard: `T` toggles deck visibility, `M` cycles mode, `[` lowers tempo by 5 BPM, and `]` raises tempo by 5 BPM.
 - Coverage: verified in `tests/e2e/accessibility.spec.ts` via the `persistent action rail keeps touch and keyboard control paths reachable` test.
 
+### Accessibility Interaction Patterns
+- Canonical focus, keyboard-path, and screen-reader announcement rules are documented in `docs/accessibility-patterns.md`.
+- Global live-region coverage is asserted in `tests/e2e/accessibility.spec.ts` using `sr-announcer-polite`.
+
 ### Local Development
 ```bash
 # Quick validation before commit

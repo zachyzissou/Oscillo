@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { startAudio } from '@/lib/audio/startAudio'
 import { useAudioEngine } from '@/store/useAudioEngine'
+import { useAccessibilityAnnouncements } from '@/store/useAccessibilityAnnouncements'
 import styles from './SimpleStartOverlay.module.css'
 import { logger } from '@/lib/logger'
 
@@ -11,6 +12,7 @@ export default function SimpleStartOverlay() {
   const [isLoading, setIsLoading] = useState(false)
   const setUserInteracted = useAudioEngine((s) => s.setUserInteracted)
   const setAudioContextState = useAudioEngine((s) => s.setAudioContext)
+  const announcePolite = useAccessibilityAnnouncements((state) => state.announcePolite)
   const startButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -29,20 +31,24 @@ export default function SimpleStartOverlay() {
   useEffect(() => {
     if (isHydrated && isVisible) {
       startButtonRef.current?.focus()
+      announcePolite('Start overlay ready. Press Start Creating to begin.')
     }
-  }, [isHydrated, isVisible])
+  }, [announcePolite, isHydrated, isVisible])
 
   const handleStart = async () => {
     if (isLoading) return
     setIsLoading(true)
     setUserInteracted(true)
+    announcePolite('Starting audio and opening the experience.')
 
     try {
       const success = await startAudio()
       if (success) {
         setAudioContextState('running')
+        announcePolite('Audio initialized. Experience started.')
       } else {
         setAudioContextState('suspended')
+        announcePolite('Experience started with audio unavailable.')
       }
     } catch (error) {
       logger.error({
@@ -50,6 +56,7 @@ export default function SimpleStartOverlay() {
         error: error instanceof Error ? error.message : String(error),
       })
       setAudioContextState('suspended')
+      announcePolite('Experience started with audio unavailable.')
     }
 
     setIsVisible(false)

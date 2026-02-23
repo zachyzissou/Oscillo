@@ -75,12 +75,10 @@
 }
 
 .allow:hover,
-.allow:focus-visible,
 .deny:hover,
 .deny:focus-visible {
   transform: translateY(var(--motion-lift-distance));
   filter: brightness(var(--motion-focus-brightness));
-  outline: none;
 }
 
 .allow:hover,
@@ -88,6 +86,12 @@
   box-shadow:
     0 10px 22px rgba(0, 219, 255, 0.36),
     0 0 0 2px rgba(198, 249, 255, 0.85) inset;
+}
+
+.allow:focus-visible,
+.deny:focus-visible {
+  outline: var(--a11y-focus-outline-width) solid var(--a11y-focus-outline-color);
+  outline-offset: var(--a11y-focus-outline-offset);
 }
 
 .deny:hover,
