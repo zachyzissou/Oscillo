@@ -64,13 +64,35 @@ test.describe('Accessibility Tests', () => {
     await startExperience(page)
 
     const banner = page.getByTestId('telemetry-banner')
+    await expect(banner).toBeHidden({ timeout: 800 })
     await expect(banner).toBeVisible({ timeout: 10000 })
 
     await expect(page.getByTestId('telemetry-allow')).toBeVisible()
     await expect(page.getByTestId('telemetry-deny')).toBeVisible()
+    const detailsToggle = page.getByTestId('telemetry-details-toggle')
+    await expect(detailsToggle).toHaveAttribute('aria-expanded', 'false')
+
+    await detailsToggle.click()
+    await expect(detailsToggle).toHaveAttribute('aria-expanded', 'true')
+    await expect(banner).toContainText('Core Web Vitals diagnostics')
 
     await page.getByTestId('telemetry-deny').click()
     await expect(banner).toBeHidden()
+  })
+
+  test('start overlay communicates startup progress before handoff', async ({ page }) => {
+    await loadWithDeniedTelemetry(page)
+
+    const startButton = page.getByTestId('start-button')
+    const status = page.getByTestId('start-status')
+    const progress = status.getByRole('progressbar')
+    await startButton.click()
+
+    await expect(status).toContainText(
+      /Requesting browser permission|Audio initialized|Audio unavailable|Audio initialization failed/
+    )
+    await expect(progress).toHaveAttribute('aria-valuenow', /(?:[1-9]\d?|100)/)
+    await expect(page.getByTestId('start-overlay')).toBeHidden({ timeout: 10000 })
   })
 
   test('telemetry banner keyboard path is deterministic and returns focus to deck controls', async ({

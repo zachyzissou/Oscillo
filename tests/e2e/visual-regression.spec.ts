@@ -4,6 +4,7 @@ import { startExperience } from './utils/startExperience'
 const runVisualRegression = process.env.RUN_VISUAL_REGRESSION === '1'
 const CONSENT_KEY = 'oscillo.analytics-consent'
 const ONBOARDING_KEY = 'oscillo.v2.deck-onboarded'
+const OVERLAY_KEY = 'hasSeenOverlay'
 
 const hideWebglCanvas = async (page: Page) => {
   const canvas = page.locator('[data-testid="webgl-canvas"]')
@@ -21,11 +22,12 @@ test.describe('Visual Regression Tests', () => {
 
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(
-      ({ consentKey, onboardingKey }) => {
+      ({ consentKey, onboardingKey, overlayKey }) => {
         globalThis.localStorage.removeItem(consentKey)
         globalThis.localStorage.setItem(onboardingKey, 'true')
+        globalThis.localStorage.removeItem(overlayKey)
       },
-      { consentKey: CONSENT_KEY, onboardingKey: ONBOARDING_KEY }
+      { consentKey: CONSENT_KEY, onboardingKey: ONBOARDING_KEY, overlayKey: OVERLAY_KEY }
     )
 
     await page.goto('/')

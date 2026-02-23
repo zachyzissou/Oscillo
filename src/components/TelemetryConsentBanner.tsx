@@ -1,10 +1,12 @@
 'use client'
 
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTelemetryConsent } from '@/store/useTelemetryConsent'
 import { useAudioEngine } from '@/store/useAudioEngine'
 import { useAccessibilityAnnouncements } from '@/store/useAccessibilityAnnouncements'
 import styles from './TelemetryConsentBanner.module.css'
+
+const BANNER_REVEAL_DELAY_MS = 900
 
 export function TelemetryConsentBanner() {
   const status = useTelemetryConsent((state) => state.status)
@@ -14,6 +16,8 @@ export function TelemetryConsentBanner() {
   const denyAnalytics = useTelemetryConsent((state) => state.denyAnalytics)
   const hasUserInteracted = useAudioEngine((state) => state.hasUserInteracted)
   const announcePolite = useAccessibilityAnnouncements((state) => state.announcePolite)
+  const [isVisible, setIsVisible] = useState(false)
+  const [detailsOpen, setDetailsOpen] = useState(false)
   const allowButtonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -21,12 +25,23 @@ export function TelemetryConsentBanner() {
   }, [hydrate])
 
   useEffect(() => {
-    if (!hasUserInteracted || !hydrated || status !== 'unknown') return
+    if (!hasUserInteracted || !hydrated || status !== 'unknown') {
+      setIsVisible(false)
+      setDetailsOpen(false)
+      return
+    }
+
+    const timer = globalThis.setTimeout(() => setIsVisible(true), BANNER_REVEAL_DELAY_MS)
+    return () => globalThis.clearTimeout(timer)
+  }, [hasUserInteracted, hydrated, status])
+
+  useEffect(() => {
+    if (!isVisible) return
     globalThis.requestAnimationFrame(() => {
       allowButtonRef.current?.focus()
       announcePolite('Telemetry choice available. Allow or choose Not now.')
     })
-  }, [announcePolite, hasUserInteracted, hydrated, status])
+  }, [announcePolite, isVisible])
 
   const focusPersistentControl = useCallback(() => {
     globalThis.requestAnimationFrame(() => {
@@ -46,17 +61,19 @@ export function TelemetryConsentBanner() {
   const handleAllow = useCallback(() => {
     announcePolite('Telemetry sharing enabled.')
     allowAnalytics()
+    setIsVisible(false)
     focusPersistentControl()
   }, [allowAnalytics, announcePolite, focusPersistentControl])
 
   const handleDeny = useCallback(() => {
     announcePolite('Telemetry sharing disabled.')
     denyAnalytics()
+    setIsVisible(false)
     focusPersistentControl()
   }, [announcePolite, denyAnalytics, focusPersistentControl])
 
   // Avoid stacking multiple overlays before the user starts the experience.
-  if (!hasUserInteracted || !hydrated || status !== 'unknown') {
+  if (!hasUserInteracted || !hydrated || status !== 'unknown' || !isVisible) {
     return null
   }
 
@@ -70,11 +87,10 @@ export function TelemetryConsentBanner() {
       data-testid="telemetry-banner"
     >
       <h3 id="telemetry-consent-title" className={styles.title}>
-        Share Web Vitals telemetry?
+        Share anonymous performance signals?
       </h3>
       <p id="telemetry-consent-description" className={styles.description}>
-        Oscillo can send anonymized performance metrics when you opt in. This helps us spot
-        regressions without collecting personal data.
+        Help us catch regressions faster with Web Vitals only.
       </p>
       <div className={styles.actions}>
         <button
@@ -94,10 +110,26 @@ export function TelemetryConsentBanner() {
         >
           Not now
         </button>
+        <button
+          type="button"
+          className={styles.details}
+          data-testid="telemetry-details-toggle"
+          aria-expanded={detailsOpen}
+          aria-controls="telemetry-consent-details"
+          onClick={() => setDetailsOpen(current => !current)}
+        >
+          {detailsOpen ? 'Hide details' : 'Why this helps'}
+        </button>
       </div>
-      <p className={styles.footnote}>
-        Change this later from the Settings panel.
-      </p>
+      {detailsOpen && (
+        <div id="telemetry-consent-details" className={styles.detailsPanel}>
+          <p className={styles.footnote}>
+            Oscillo only sends anonymized Core Web Vitals diagnostics. No account profile, no
+            personal content.
+          </p>
+          <p className={styles.footnote}>You can change this later from the Settings panel.</p>
+        </div>
+      )}
     </div>
   )
 }

@@ -6,10 +6,24 @@ import { useAccessibilityAnnouncements } from '@/store/useAccessibilityAnnouncem
 import styles from './SimpleStartOverlay.module.css'
 import { logger } from '@/lib/logger'
 
+const MIN_STARTUP_FEEDBACK_MS = 480
+const FINALIZE_FEEDBACK_MS = 140
+
+const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now())
+
+const wait = (durationMs: number) =>
+  new Promise<void>(resolve => {
+    globalThis.setTimeout(resolve, durationMs)
+  })
+
 export default function SimpleStartOverlay() {
   const [isHydrated, setIsHydrated] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [startupMessage, setStartupMessage] = useState(
+    'Audio starts after you press Start Creating.'
+  )
+  const [startupProgress, setStartupProgress] = useState(0)
   const setUserInteracted = useAudioEngine((s) => s.setUserInteracted)
   const setAudioContextState = useAudioEngine((s) => s.setAudioContext)
   const announcePolite = useAccessibilityAnnouncements((state) => state.announcePolite)
@@ -37,16 +51,25 @@ export default function SimpleStartOverlay() {
 
   const handleStart = async () => {
     if (isLoading) return
+
+    const startupBeganAt = now()
+    let startedWithAudio = false
     setIsLoading(true)
-    setUserInteracted(true)
+    setStartupProgress(22)
+    setStartupMessage('Requesting browser permission for audio...')
     announcePolite('Starting audio and opening the experience.')
 
     try {
       const success = await startAudio()
       if (success) {
+        startedWithAudio = true
+        setStartupProgress(72)
+        setStartupMessage('Audio initialized. Finalizing scene...')
         setAudioContextState('running')
         announcePolite('Audio initialized. Experience started.')
       } else {
+        setStartupProgress(72)
+        setStartupMessage('Audio unavailable. Launching visual-only mode.')
         setAudioContextState('suspended')
         announcePolite('Experience started with audio unavailable.')
       }
@@ -55,13 +78,33 @@ export default function SimpleStartOverlay() {
         event: 'start-overlay.audio-init-failed',
         error: error instanceof Error ? error.message : String(error),
       })
+      setStartupProgress(72)
+      setStartupMessage('Audio initialization failed. Launching visual-only mode.')
       setAudioContextState('suspended')
       announcePolite('Experience started with audio unavailable.')
     }
 
+    const elapsed = now() - startupBeganAt
+    if (elapsed < MIN_STARTUP_FEEDBACK_MS) {
+      await wait(MIN_STARTUP_FEEDBACK_MS - elapsed)
+    }
+
+    setStartupProgress(100)
+    setStartupMessage(
+      startedWithAudio ? 'Ready. Opening your instrument.' : 'Visual-only mode ready. Opening now.'
+    )
+    await wait(FINALIZE_FEEDBACK_MS)
+
+    setUserInteracted(true)
     setIsVisible(false)
-    localStorage.setItem('hasSeenOverlay', 'true')
+    try {
+      localStorage.setItem('hasSeenOverlay', 'true')
+    } catch {
+      // Ignore localStorage failures in private/restricted browsing contexts.
+    }
     setIsLoading(false)
+    setStartupProgress(0)
+    setStartupMessage('Audio starts after you press Start Creating.')
   }
 
   if (!isHydrated) return null
@@ -110,6 +153,26 @@ export default function SimpleStartOverlay() {
         >
           {isLoading ? 'Starting...' : 'Start Creating'}
         </button>
+        <div className={styles.statusRegion} role="status" aria-live="polite" data-testid="start-status">
+          <div className={styles.statusMeta}>
+            <span>{startupMessage}</span>
+            {isLoading && <span className={styles.statusPercent}>{startupProgress}%</span>}
+          </div>
+          <div
+            className={styles.progressTrack}
+            role="progressbar"
+            aria-label="Startup progress"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={isLoading ? startupProgress : 0}
+            aria-valuetext={startupMessage}
+          >
+            <span
+              className={styles.progressFill}
+              style={{ width: `${isLoading ? startupProgress : 0}%` }}
+            />
+          </div>
+        </div>
         <p className={styles.footer}>Works best with headphones and a track playing nearby.</p>
       </div>
     </div>
