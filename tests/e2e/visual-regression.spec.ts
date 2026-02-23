@@ -22,6 +22,10 @@ test.describe('Visual Regression Tests', () => {
           animation-iteration-count: 1 !important;
           transition-duration: 0.01ms !important;
         }
+
+        html, body, button, input, select, textarea {
+          font-family: Arial, Helvetica, sans-serif !important;
+        }
       `,
     })
   })
