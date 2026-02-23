@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTelemetryConsent } from '@/store/useTelemetryConsent'
 import { useAudioEngine } from '@/store/useAudioEngine'
 import { useAccessibilityAnnouncements } from '@/store/useAccessibilityAnnouncements'
+import { UIButton, UISurface } from '@/components/ui/primitives/UiPrimitives'
 import styles from './TelemetryConsentBanner.module.css'
 
 const BANNER_REVEAL_DELAY_MS = 900
@@ -78,7 +79,8 @@ export function TelemetryConsentBanner() {
   }
 
   return (
-    <div
+    <UISurface
+      tone="banner"
       className={styles.banner}
       role="dialog"
       aria-live="polite"
@@ -93,25 +95,31 @@ export function TelemetryConsentBanner() {
         Help us catch regressions faster with Web Vitals only.
       </p>
       <div className={styles.actions}>
-        <button
+        <UIButton
           type="button"
           ref={allowButtonRef}
           onClick={handleAllow}
+          tone="primary"
+          shape="pill"
           className={styles.allow}
           data-testid="telemetry-allow"
         >
           Allow
-        </button>
-        <button
+        </UIButton>
+        <UIButton
           type="button"
           onClick={handleDeny}
+          tone="secondary"
+          shape="pill"
           className={styles.deny}
           data-testid="telemetry-deny"
         >
           Not now
-        </button>
-        <button
+        </UIButton>
+        <UIButton
           type="button"
+          tone="ghost"
+          shape="pill"
           className={styles.details}
           data-testid="telemetry-details-toggle"
           aria-expanded={detailsOpen}
@@ -119,7 +127,7 @@ export function TelemetryConsentBanner() {
           onClick={() => setDetailsOpen(current => !current)}
         >
           {detailsOpen ? 'Hide details' : 'Why this helps'}
-        </button>
+        </UIButton>
       </div>
       {detailsOpen && (
         <div id="telemetry-consent-details" className={styles.detailsPanel}>
@@ -130,7 +138,7 @@ export function TelemetryConsentBanner() {
           <p className={styles.footnote}>You can change this later from the Settings panel.</p>
         </div>
       )}
-    </div>
+    </UISurface>
   )
 }
 

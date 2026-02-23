@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { startAudio } from '@/lib/audio/startAudio'
 import { useAudioEngine } from '@/store/useAudioEngine'
 import { useAccessibilityAnnouncements } from '@/store/useAccessibilityAnnouncements'
+import { UIButton, UIOverlay, UISurface } from '@/components/ui/primitives/UiPrimitives'
 import styles from './SimpleStartOverlay.module.css'
 import { logger } from '@/lib/logger'
 
@@ -111,7 +112,7 @@ export default function SimpleStartOverlay() {
   if (!isVisible) return null
 
   return (
-    <div
+    <UIOverlay
       id="start-overlay"
       data-testid="start-overlay"
       role="dialog"
@@ -120,7 +121,7 @@ export default function SimpleStartOverlay() {
       aria-describedby="start-overlay-description"
       className={styles.overlay}
     >
-      <div className={styles.panel}>
+      <UISurface tone="dialog" className={styles.panel}>
         <div className={styles.eyebrow} aria-hidden="true">
           live audiovisual playground
         </div>
@@ -142,17 +143,19 @@ export default function SimpleStartOverlay() {
             <span>03</span> Tune sound and visual quality live.
           </li>
         </ul>
-        <button
+        <UIButton
           ref={startButtonRef}
           onClick={handleStart}
           disabled={isLoading}
           data-testid="start-button"
           aria-label="Start creating music"
           aria-busy={isLoading ? 'true' : 'false'}
+          tone="primary"
+          shape="rounded"
           className={styles.cta}
         >
           {isLoading ? 'Starting...' : 'Start Creating'}
-        </button>
+        </UIButton>
         <div className={styles.statusRegion} role="status" aria-live="polite" data-testid="start-status">
           <div className={styles.statusMeta}>
             <span>{startupMessage}</span>
@@ -174,7 +177,7 @@ export default function SimpleStartOverlay() {
           </div>
         </div>
         <p className={styles.footer}>Works best with headphones and a track playing nearby.</p>
-      </div>
-    </div>
+      </UISurface>
+    </UIOverlay>
   )
 }

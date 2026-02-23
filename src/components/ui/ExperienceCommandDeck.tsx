@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMusicalPalette } from '@/store/useMusicalPalette'
 import { usePerformanceSettings } from '@/store/usePerformanceSettings'
 import { useAccessibilityAnnouncements } from '@/store/useAccessibilityAnnouncements'
+import { UISurface } from '@/components/ui/primitives/UiPrimitives'
 import styles from './ExperienceCommandDeck.module.css'
 
 const ONBOARDING_KEY = 'oscillo.v2.deck-onboarded'
@@ -419,7 +420,7 @@ export default function ExperienceCommandDeck() {
       )}
 
       {isExpanded && (
-        <div className={shellClass} id="experience-deck-shell">
+        <UISurface tone={isMobile ? 'sheet' : 'panel'} className={shellClass} id="experience-deck-shell">
           {isMobile && (
             <div className={styles.sheetControls}>
               <span className={styles.sheetHandle} aria-hidden="true" />
@@ -646,7 +647,7 @@ export default function ExperienceCommandDeck() {
               </output>
             )}
           </div>
-        </div>
+        </UISurface>
       )}
     </aside>
   )

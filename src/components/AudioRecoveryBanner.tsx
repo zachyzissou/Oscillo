@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { startAudio } from '@/lib/audio/startAudio'
 import { useAudioEngine } from '@/store/useAudioEngine'
 import { useAccessibilityAnnouncements } from '@/store/useAccessibilityAnnouncements'
+import { UIButton, UISurface } from '@/components/ui/primitives/UiPrimitives'
 import styles from './AudioRecoveryBanner.module.css'
 
 export default function AudioRecoveryBanner() {
@@ -65,7 +66,8 @@ export default function AudioRecoveryBanner() {
   if (!shouldShow) return null
 
   return (
-    <aside
+    <UISurface
+      tone="banner"
       className={styles.banner}
       data-testid="audio-recovery-banner"
       role="alert"
@@ -80,9 +82,11 @@ export default function AudioRecoveryBanner() {
         Sound could not start. You can retry audio now or continue visual-only and keep creating.
       </p>
       <div className={styles.actions}>
-        <button
+        <UIButton
           ref={retryButtonRef}
           type="button"
+          tone="primary"
+          shape="pill"
           className={styles.retry}
           data-testid="audio-recovery-retry"
           onClick={handleRetry}
@@ -90,16 +94,18 @@ export default function AudioRecoveryBanner() {
           aria-busy={isRetrying ? 'true' : 'false'}
         >
           {isRetrying ? 'Retrying...' : 'Retry audio'}
-        </button>
-        <button
+        </UIButton>
+        <UIButton
           type="button"
+          tone="secondary"
+          shape="pill"
           className={styles.dismiss}
           data-testid="audio-recovery-dismiss"
           onClick={handleDismiss}
         >
           Continue visual-only
-        </button>
+        </UIButton>
       </div>
-    </aside>
+    </UISurface>
   )
 }

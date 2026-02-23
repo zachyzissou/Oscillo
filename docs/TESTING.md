@@ -139,6 +139,11 @@ graph TD
 - Canonical focus, keyboard-path, and screen-reader announcement rules are documented in `docs/accessibility-patterns.md`.
 - Global live-region coverage is asserted in `tests/e2e/accessibility.spec.ts` using `sr-announcer-polite`.
 
+### Tokenized Primitive Coverage
+- Primitive architecture reference and adoption rules live in `docs/ui-primitives.md`.
+- Start flow and core overlays (`SimpleStartOverlay`, `TelemetryConsentBanner`, `AudioRecoveryBanner`, deck shell) are protected by `tests/e2e/visual-regression.spec.ts`.
+- Mobile deck snapshots now suppress telemetry during capture to keep visual baselines deterministic across CI and local runs.
+
 ### Local Development
 ```bash
 # Quick validation before commit
