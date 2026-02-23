@@ -21,7 +21,7 @@ if [ "$npm_major" -lt "$REQUIRED_NPM_MAJOR" ]; then
 fi
 
 npm run type-check
-npm run lint
+npm run lint:check
 npm run build
 
 # Prefer a fast test cycle for hooks

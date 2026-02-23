@@ -79,7 +79,7 @@ jobs:
 
       - name: 🔎 Type-check, lint & build
         if: steps.changes.outputs.src == 'true'
-        run: npx tsc --noEmit && npm run lint && npm run build
+        run: npx tsc --noEmit && npm run lint:check && npm run build
 
       - name: 🛠 Set up Docker Buildx
         if: steps.changes.outputs.src == 'true'
