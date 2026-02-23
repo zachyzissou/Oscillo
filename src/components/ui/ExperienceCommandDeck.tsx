@@ -19,14 +19,6 @@ const readStoredDesktopExpanded = () => {
   return window.localStorage.getItem(DECK_EXPANDED_KEY) !== 'false'
 }
 
-const getInitialIsMobile = () =>
-  typeof window !== 'undefined' && window.matchMedia(MOBILE_BREAKPOINT).matches
-
-const getInitialIsExpanded = () => {
-  if (typeof window === 'undefined') return true
-  return getInitialIsMobile() ? false : readStoredDesktopExpanded()
-}
-
 export default function ExperienceCommandDeck() {
   const key = useMusicalPalette((s) => s.key)
   const scale = useMusicalPalette((s) => s.scale)
@@ -40,8 +32,9 @@ export default function ExperienceCommandDeck() {
   const perfLevel = usePerformanceSettings((s) => s.level)
   const setPerfLevel = usePerformanceSettings((s) => s.setLevel)
 
-  const [isMobile, setIsMobile] = useState(getInitialIsMobile)
-  const [isExpanded, setIsExpanded] = useState(getInitialIsExpanded)
+  const [isMobile, setIsMobile] = useState(false)
+  const [isExpanded, setIsExpanded] = useState(true)
+  const [viewportReady, setViewportReady] = useState(false)
   const [showHint, setShowHint] = useState(false)
 
   useEffect(() => {
@@ -61,7 +54,9 @@ export default function ExperienceCommandDeck() {
     }
   }
 
-  const wrapperClass = `${styles.deck} ${isMobile ? styles.mobile : styles.desktop}`
+  const wrapperClass = `${styles.deck} ${isMobile ? styles.mobile : styles.desktop} ${
+    viewportReady ? '' : styles.unresolved
+  }`
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -73,6 +68,7 @@ export default function ExperienceCommandDeck() {
     }
 
     applyMode(media.matches)
+    setViewportReady(true)
     const onChange = (event: MediaQueryListEvent) => applyMode(event.matches)
     media.addEventListener('change', onChange)
 
@@ -80,9 +76,9 @@ export default function ExperienceCommandDeck() {
   }, [])
 
   useEffect(() => {
-    if (typeof window === 'undefined' || isMobile) return
+    if (typeof window === 'undefined' || isMobile || !viewportReady) return
     window.localStorage.setItem(DECK_EXPANDED_KEY, String(isExpanded))
-  }, [isExpanded, isMobile])
+  }, [isExpanded, isMobile, viewportReady])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
