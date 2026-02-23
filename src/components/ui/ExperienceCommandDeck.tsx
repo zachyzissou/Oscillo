@@ -16,7 +16,7 @@ const PERF_OPTIONS = ['low', 'medium', 'high'] as const
 const ONBOARDING_TOTAL_STEPS = 3
 
 const readStoredDesktopExpanded = () => {
-  if (typeof globalThis === 'undefined' || !('localStorage' in globalThis)) return true
+  if (!('localStorage' in globalThis)) return true
   return globalThis.localStorage.getItem(DECK_EXPANDED_KEY) !== 'false'
 }
 
@@ -48,7 +48,7 @@ export default function ExperienceCommandDeck() {
   const keySelectRef = useRef<HTMLSelectElement>(null)
 
   useEffect(() => {
-    if (typeof globalThis === 'undefined' || !('localStorage' in globalThis)) return
+    if (!('localStorage' in globalThis)) return
 
     const params = new URLSearchParams(globalThis.location.search)
     if (params.get('onboarding') === 'reset') {
@@ -67,7 +67,7 @@ export default function ExperienceCommandDeck() {
   const completeOnboarding = useCallback(() => {
     setShowOnboarding(false)
     setOnboardingStep(0)
-    if (typeof globalThis !== 'undefined' && 'localStorage' in globalThis) {
+    if ('localStorage' in globalThis) {
       globalThis.localStorage.setItem(ONBOARDING_KEY, 'true')
     }
   }, [])
@@ -77,7 +77,7 @@ export default function ExperienceCommandDeck() {
   }`
 
   const queueFocus = useCallback((target: 'open' | 'primary') => {
-    if (typeof globalThis === 'undefined') return
+    if (!('requestAnimationFrame' in globalThis)) return
     globalThis.requestAnimationFrame(() => {
       if (target === 'open') {
         openButtonRef.current?.focus()
@@ -141,7 +141,7 @@ export default function ExperienceCommandDeck() {
   }
 
   useEffect(() => {
-    if (typeof globalThis === 'undefined') return
+    if (!('matchMedia' in globalThis)) return
 
     const media = globalThis.matchMedia(MOBILE_BREAKPOINT)
     const applyMode = (matches: boolean) => {
@@ -158,18 +158,12 @@ export default function ExperienceCommandDeck() {
   }, [])
 
   useEffect(() => {
-    if (
-      typeof globalThis === 'undefined' ||
-      !('localStorage' in globalThis) ||
-      isMobile ||
-      !viewportReady
-    )
-      return
+    if (!('localStorage' in globalThis) || isMobile || !viewportReady) return
     globalThis.localStorage.setItem(DECK_EXPANDED_KEY, String(isExpanded))
   }, [isExpanded, isMobile, viewportReady])
 
   useEffect(() => {
-    if (typeof globalThis === 'undefined') return
+    if (!('addEventListener' in globalThis)) return
 
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
