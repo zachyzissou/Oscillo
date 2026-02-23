@@ -5,6 +5,18 @@ const runVisualRegression = process.env.RUN_VISUAL_REGRESSION === '1'
 const CONSENT_KEY = 'oscillo.analytics-consent'
 const ONBOARDING_KEY = 'oscillo.v2.deck-onboarded'
 const OVERLAY_KEY = 'hasSeenOverlay'
+const DETERMINISTIC_STYLE_ID = 'oscillo-visual-deterministic-style'
+const DETERMINISTIC_VISUAL_STYLES = `
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html, body, button, input, select, textarea {
+    font-family: Arial, Helvetica, sans-serif !important;
+  }
+`
 
 const hideWebglCanvas = async (page: Page) => {
   const canvas = page.locator('[data-testid="webgl-canvas"]')
@@ -54,22 +66,27 @@ test.describe('Visual Regression Tests', () => {
       { consentKey: CONSENT_KEY, onboardingKey: ONBOARDING_KEY, overlayKey: OVERLAY_KEY }
     )
 
+    await page.addInitScript(
+      ({ styleId, styleContent }) => {
+        const applyDeterministicStyles = () => {
+          if (document.getElementById(styleId)) return
+          const style = document.createElement('style')
+          style.id = styleId
+          style.textContent = styleContent
+          ;(document.head ?? document.documentElement).appendChild(style)
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', applyDeterministicStyles, { once: true })
+          return
+        }
+
+        applyDeterministicStyles()
+      },
+      { styleId: DETERMINISTIC_STYLE_ID, styleContent: DETERMINISTIC_VISUAL_STYLES }
+    )
+
     await page.goto('/')
-
-    // Keep visual snapshots deterministic.
-    await page.addStyleTag({
-      content: `
-        *, *::before, *::after {
-          animation-duration: 0.01ms !important;
-          animation-iteration-count: 1 !important;
-          transition-duration: 0.01ms !important;
-        }
-
-        html, body, button, input, select, textarea {
-          font-family: Arial, Helvetica, sans-serif !important;
-        }
-      `,
-    })
   })
 
   test('start overlay card visual', async ({ page }) => {
