@@ -33,6 +33,19 @@ const isValidHttpUrl = (value: unknown): value is string => {
 const isValidTimestamp = (value: unknown): value is string =>
   isNonEmptyString(value) && !Number.isNaN(Date.parse(value))
 
+const toErrorDetails = (error: unknown): Record<string, string | undefined> => {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+    }
+  }
+
+  return {
+    message: String(error),
+  }
+}
+
 export function isWebVitalsBody(value: unknown): value is WebVitalsBody {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false
 
@@ -64,7 +77,7 @@ async function forwardMetric(body: WebVitalsBody) {
   } catch (error) {
     logger.warn({
       event: 'web-vitals-forward-failed',
-      error: String(error),
+      error: toErrorDetails(error),
       endpoint: FORWARD_ENDPOINT,
       metric: body.name,
     })
@@ -88,7 +101,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ status: 'ok' })
   } catch (error) {
-    logger.error({ event: 'web-vitals-handler-failed', error: String(error) })
+    logger.error({ event: 'web-vitals-handler-failed', error: toErrorDetails(error) })
     return NextResponse.json({ status: 'error' }, { status: 500 })
   }
 }

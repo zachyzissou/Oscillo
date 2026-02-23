@@ -40,10 +40,25 @@ describe('web vitals payload guard', () => {
   it.each([
     [{ ...validPayload, name: 'UNKNOWN' }, 'unsupported metric name'],
     [{ ...validPayload, value: '0.12' }, 'non-numeric metric value'],
+    [{ ...validPayload, value: -0.1 }, 'negative metric value'],
     [{ ...validPayload, url: '/relative-path' }, 'invalid URL protocol'],
     [{ ...validPayload, timestamp: 'not-a-date' }, 'invalid timestamp'],
+    [{ ...validPayload, id: 'x'.repeat(257) }, 'id exceeding 256 characters'],
+    [{ ...validPayload, label: 'y'.repeat(65) }, 'label exceeding 64 characters'],
     [{ ...validPayload, entries: {} }, 'non-array entries'],
     [null, 'null payload'],
+    [[{ ...validPayload }], 'array payload'],
+    [
+      {
+        ...validPayload,
+        id: '   ',
+        name: '   ',
+        label: '   ',
+        url: '   ',
+        timestamp: '   ',
+      },
+      'empty required fields after trim',
+    ],
   ])('rejects invalid payload shape: %s', (payload) => {
     expect(isWebVitalsBody(payload)).toBe(false)
   })
