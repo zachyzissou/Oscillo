@@ -17,6 +17,16 @@ const hideWebglCanvas = async (page: Page) => {
   }
 }
 
+const suppressTelemetryBanner = async (page: Page) => {
+  await page.addStyleTag({
+    content: `
+      [data-testid="telemetry-banner"] {
+        display: none !important;
+      }
+    `,
+  })
+}
+
 test.describe('Visual Regression Tests', () => {
   test.skip(!runVisualRegression, 'Set RUN_VISUAL_REGRESSION=1 and update baselines intentionally.')
 
@@ -86,6 +96,7 @@ test.describe('Visual Regression Tests', () => {
   test('mobile command deck initializes without expanded flash', async ({ page }) => {
     await page.setViewportSize({ width: 393, height: 851 })
     await startExperience(page)
+    await suppressTelemetryBanner(page)
 
     await hideWebglCanvas(page)
 
