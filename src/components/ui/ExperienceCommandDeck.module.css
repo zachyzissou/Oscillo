@@ -281,3 +281,9 @@
     margin-bottom: 2px;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .pulse {
+    animation: none;
+  }
+}

@@ -80,7 +80,7 @@ export default function ExperienceCommandDeck() {
     if (typeof window === 'undefined') return
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() !== 'd') return
+      if (event.key.toLowerCase() !== 't') return
 
       const target = event.target as HTMLElement | null
       const isTypingContext =
@@ -104,11 +104,12 @@ export default function ExperienceCommandDeck() {
         <div className={styles.floatingOpen}>
           <button
             type="button"
-            data-testid="settings-button"
+            data-testid="deck-open-button"
             className={styles.openButton}
             onClick={() => setIsExpanded(true)}
             aria-expanded={isExpanded}
             aria-controls="experience-deck-shell"
+            aria-label="Open command deck"
           >
             Open Deck
           </button>
@@ -122,13 +123,13 @@ export default function ExperienceCommandDeck() {
               <span className={styles.pulse} aria-hidden="true" />
               <div>
                 <h2 className={styles.title}>Command Deck</h2>
-                <p className={styles.subtitle}>{modeLabel} mode | Press D to toggle</p>
+                <p className={styles.subtitle}>{modeLabel} mode | Press T to toggle</p>
               </div>
             </div>
             <div className={styles.headerActions}>
               <button
                 type="button"
-                data-testid="settings-button"
+                data-testid="deck-collapse-button"
                 className={styles.iconButton}
                 onClick={() => setIsExpanded(false)}
                 aria-label="Collapse command deck"
@@ -232,8 +233,10 @@ export default function ExperienceCommandDeck() {
                   <button
                     key={value}
                     type="button"
+                    data-testid={`mode-${value}`}
                     className={mode === value ? styles.active : ''}
                     onClick={() => setMode(value)}
+                    aria-label={`Switch to ${value} mode`}
                   >
                     {value}
                   </button>
