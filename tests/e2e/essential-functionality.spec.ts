@@ -3,6 +3,7 @@ import { startExperience } from './utils/startExperience'
 import { readBundleFootprint, readStableRuntimeMetrics } from './utils/performanceMetrics'
 
 const ONBOARDING_KEY = 'oscillo.v2.deck-onboarded'
+const OVERLAY_KEY = 'hasSeenOverlay'
 const BUNDLE_BUDGETS_MB = {
   maxTotalJs: 35,
   maxInitialJs: 18,
@@ -85,6 +86,18 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
     await page.keyboard.press('Enter')
     await expect(startOverlay).toBeHidden({ timeout: 5000 })
     await expect(page.locator('#main-content')).toBeVisible({ timeout: 5000 })
+  })
+
+  test('returning visitor still sees start gate before interaction', async ({ page }) => {
+    await page.addInitScript(overlayKey => {
+      globalThis.localStorage.setItem(overlayKey, 'true')
+    }, OVERLAY_KEY)
+
+    await page.goto('/')
+
+    const startOverlay = page.getByTestId('start-overlay')
+    await expect(startOverlay).toBeVisible({ timeout: 8000 })
+    await expect(page.getByTestId('start-button')).toBeVisible({ timeout: 5000 })
   })
 
   test('first-session onboarding is skippable and does not repeat once completed', async ({

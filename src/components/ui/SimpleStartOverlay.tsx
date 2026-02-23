@@ -67,15 +67,9 @@ export default function SimpleStartOverlay() {
   const preOverlayFocusedElementRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
-    let hasSeenOverlay = false
-    try {
-      hasSeenOverlay = localStorage.getItem('hasSeenOverlay') === 'true'
-    } catch {
-      hasSeenOverlay = false
-    }
-
-    const shouldShowOverlay = process.env.NODE_ENV === 'development' || !hasSeenOverlay
-    setIsVisible(shouldShowOverlay)
+    // A user gesture is required on every fresh page load to unlock audio.
+    // Keep the start gate visible regardless of prior visits to avoid dead-end blank states.
+    setIsVisible(true)
     setIsHydrated(true)
   }, [])
 
