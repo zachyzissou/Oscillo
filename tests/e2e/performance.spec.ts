@@ -1,6 +1,7 @@
 // tests/e2e/performance.spec.ts
 import { test, expect } from '@playwright/test'
 import { startExperience } from './utils/startExperience'
+import { readBundleFootprint } from './utils/performanceMetrics'
 
 interface PerformanceMetrics {
   fps: number
@@ -171,60 +172,18 @@ test.describe('Performance Tests', () => {
     await page.goto('/')
     await startExperience(page, { waitForAudio: false })
     await page.waitForLoadState('networkidle')
-    
-    // Get all JS resources
-    const resourceSizes = await page.evaluate(() => {
-      // Get all script resources using initiatorType
-      const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[]
-      const jsResources = resources.filter(r => r.initiatorType === 'script')
 
-      // Get all <script src="..."> from the initial HTML
-      const initialScriptSrcs = Array.from(document.querySelectorAll('script[src]'))
-        .map((el: HTMLScriptElement) => el.src)
-
-      let totalSize = 0
-      let initialSize = 0
-
-      jsResources.forEach(resource => {
-        const size =
-          resource.transferSize ||
-          resource.encodedBodySize ||
-          resource.decodedBodySize ||
-          0
-        totalSize += size
-
-        // If the resource was loaded as an initial script (present in HTML)
-        // Use URL comparison (ignoring query/hash for robustness)
-        const resourceUrl = new URL(resource.name, location.origin)
-        const isInitial = initialScriptSrcs.some(src => {
-          try {
-            const srcUrl = new URL(src, location.origin)
-            return srcUrl.pathname === resourceUrl.pathname
-          } catch {
-            return false
-          }
-        })
-        if (isInitial) {
-          initialSize += size
-        }
-      })
-      return {
-        totalSize,
-        initialSize,
-        resourceCount: jsResources.length,
-      }
-    })
-    
-    const totalSizeMB = resourceSizes.totalSize / (1024 * 1024)
-    const initialSizeMB = resourceSizes.initialSize / (1024 * 1024)
+    const resourceSizes = await readBundleFootprint(page)
+    const totalSizeMB = resourceSizes.totalJsMb
+    const initialSizeMB = resourceSizes.initialJsMb
     
     console.log(`Total Bundle Size: ${totalSizeMB.toFixed(2)}MB`)
     console.log(`Initial Load Size: ${initialSizeMB.toFixed(2)}MB`)
     console.log(`Resource Count: ${resourceSizes.resourceCount}`)
     
     expect(resourceSizes.resourceCount).toBeGreaterThan(0)
-    expect(resourceSizes.totalSize).toBeGreaterThan(1024)
-    expect(resourceSizes.initialSize).toBeGreaterThan(0)
+    expect(resourceSizes.totalJsMb).toBeGreaterThan(0.001)
+    expect(resourceSizes.initialJsMb).toBeGreaterThan(0)
   })
 
   test('frame time consistency', async ({ page }) => {
