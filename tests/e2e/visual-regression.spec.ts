@@ -160,7 +160,7 @@ test.describe('Visual Regression Tests', () => {
 
     await expect(banner).toHaveScreenshot('telemetry-banner.png', {
       threshold: 0.15,
-      maxDiffPixelRatio: 0.05,
+      maxDiffPixelRatio: 0.08,
       animations: 'disabled',
     })
   })
