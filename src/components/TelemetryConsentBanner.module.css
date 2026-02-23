@@ -141,4 +141,11 @@
   .deny {
     box-shadow: none;
   }
+
+  .allow:hover,
+  .allow:focus-visible,
+  .deny:hover,
+  .deny:focus-visible {
+    transform: none;
+  }
 }

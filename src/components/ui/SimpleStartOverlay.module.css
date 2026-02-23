@@ -226,4 +226,9 @@
       0 8px 14px rgba(0, 238, 255, 0.18),
       0 0 0 1px rgba(255, 255, 255, 0.32) inset;
   }
+
+  .cta:hover:not(:disabled),
+  .cta:focus-visible:not(:disabled) {
+    transform: none;
+  }
 }

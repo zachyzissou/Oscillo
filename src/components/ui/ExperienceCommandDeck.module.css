@@ -516,6 +516,8 @@
       0 0 0 1px rgba(143, 247, 255, 0.14) inset;
   }
 
+  .railButton:hover,
+  .railButton:focus-visible,
   .iconButton:hover,
   .iconButton:focus-visible,
   .openButton:hover,
