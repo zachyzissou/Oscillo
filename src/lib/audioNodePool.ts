@@ -1,10 +1,24 @@
 // src/lib/audioNodePool.ts
 // Removed unused ToneType import
+import { logger } from '@/lib/logger'
 
 interface PooledAudioNode {
   node: any
   inUse: boolean
   createdAt: number
+}
+
+function toErrorDetails(error: unknown): Record<string, string | undefined> {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+    }
+  }
+
+  return {
+    message: String(error),
+  }
 }
 
 class AudioNodePool {
@@ -75,7 +89,10 @@ class AudioNodePool {
         node.releaseAll()
       }
     } catch (error) {
-      console.warn('Failed to reset audio node:', error)
+      logger.warn({
+        event: 'audio-node-pool.reset-failed',
+        error: toErrorDetails(error),
+      })
     }
   }
 
@@ -94,7 +111,11 @@ class AudioNodePool {
               item.node.dispose()
             }
           } catch (error) {
-            console.warn('Failed to dispose audio node:', error)
+            logger.warn({
+              event: 'audio-node-pool.cleanup-dispose-failed',
+              nodeType,
+              error: toErrorDetails(error),
+            })
           }
         }
         
@@ -128,7 +149,10 @@ class AudioNodePool {
             item.node.dispose()
           }
         } catch (error) {
-          console.warn('Failed to dispose audio node during cleanup:', error)
+          logger.warn({
+            event: 'audio-node-pool.dispose-failed',
+            error: toErrorDetails(error),
+          })
         }
       }
     }

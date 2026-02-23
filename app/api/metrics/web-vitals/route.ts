@@ -14,6 +14,54 @@ type WebVitalsBody = {
 
 const FORWARD_ENDPOINT = process.env.ANALYTICS_FORWARD_URL
 const FORWARD_TOKEN = process.env.ANALYTICS_FORWARD_TOKEN
+const WEB_VITAL_NAMES = new Set(['CLS', 'FCP', 'FID', 'INP', 'LCP', 'TTFB'])
+
+const isFiniteNumber = (value: unknown): value is number =>
+  typeof value === 'number' && Number.isFinite(value)
+
+const isNonEmptyString = (value: unknown): value is string =>
+  typeof value === 'string' && value.trim().length > 0
+
+const isValidHttpUrl = (value: unknown): value is string => {
+  if (!isNonEmptyString(value)) return false
+  return (
+    value.length <= 2048 &&
+    (value.startsWith('https://') || value.startsWith('http://'))
+  )
+}
+
+const isValidTimestamp = (value: unknown): value is string =>
+  isNonEmptyString(value) && !Number.isNaN(Date.parse(value))
+
+const toErrorDetails = (error: unknown): Record<string, string | undefined> => {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+    }
+  }
+
+  return {
+    message: String(error),
+  }
+}
+
+export function isWebVitalsBody(value: unknown): value is WebVitalsBody {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false
+
+  const body = value as Record<string, unknown>
+  if (!isNonEmptyString(body.id) || body.id.length > 256) return false
+  if (!isNonEmptyString(body.name) || !WEB_VITAL_NAMES.has(body.name)) return false
+  if (!isNonEmptyString(body.label) || body.label.length > 64) return false
+  if (!isFiniteNumber(body.value) || body.value < 0) return false
+
+  if (body.delta !== undefined && !isFiniteNumber(body.delta)) return false
+  if (body.url !== undefined && !isValidHttpUrl(body.url)) return false
+  if (body.timestamp !== undefined && !isValidTimestamp(body.timestamp)) return false
+  if (body.entries !== undefined && !Array.isArray(body.entries)) return false
+
+  return true
+}
 
 async function forwardMetric(body: WebVitalsBody) {
   if (!FORWARD_ENDPOINT) return
@@ -27,14 +75,24 @@ async function forwardMetric(body: WebVitalsBody) {
       body: JSON.stringify(body),
     })
   } catch (error) {
-    logger.warn(`web vitals forward failed: ${error}`)
+    logger.warn({
+      event: 'web-vitals-forward-failed',
+      error: toErrorDetails(error),
+      endpoint: FORWARD_ENDPOINT,
+      metric: body.name,
+    })
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as WebVitalsBody
-    if (!body?.id || !body?.name || typeof body.value !== 'number') {
+    const body = (await request.json()) as unknown
+    if (!isWebVitalsBody(body)) {
+      logger.warn({
+        event: 'web-vitals-rejected',
+        reason: 'invalid-payload-shape',
+        payloadType: Array.isArray(body) ? 'array' : typeof body,
+      })
       return NextResponse.json({ status: 'ignored' }, { status: 400 })
     }
 
@@ -43,7 +101,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ status: 'ok' })
   } catch (error) {
-    logger.error(`web vitals handler failed: ${error}`)
+    logger.error({ event: 'web-vitals-handler-failed', error: toErrorDetails(error) })
     return NextResponse.json({ status: 'error' }, { status: 500 })
   }
 }
