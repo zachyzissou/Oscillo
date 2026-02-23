@@ -2,6 +2,25 @@ import { test, expect } from '@playwright/test'
 import { startExperience } from './utils/startExperience'
 
 const ONBOARDING_KEY = 'oscillo.v2.deck-onboarded'
+const BUNDLE_BUDGETS_MB = {
+  maxTotalJs: 35,
+  maxInitialJs: 18,
+}
+
+const RUNTIME_BUDGETS = {
+  constrainedRenderer: {
+    minFps: 14,
+    maxFrameTimeMs: 80,
+    maxMemoryMb: 240,
+    maxAudioLatencyMs: 120,
+  },
+  standardRenderer: {
+    minFps: 24,
+    maxFrameTimeMs: 55,
+    maxMemoryMb: 220,
+    maxAudioLatencyMs: 100,
+  },
+}
 
 test.describe('Essential Functionality Verification - Smoke Tests', () => {
   test.beforeEach(async ({ page }) => {
@@ -131,5 +150,104 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
     const loadTime = Date.now() - startTime
 
     expect(loadTime).toBeLessThan(8000) // Reduced from 10s to 8s for faster tests
+  })
+
+  test('runtime and bundle budgets stay within smoke guardrails', async ({ page }) => {
+    await page.goto('/?perf=1')
+    await startExperience(page)
+    await page.waitForLoadState('networkidle')
+    await page.waitForTimeout(1500)
+
+    const snapshot = await page.evaluate(() => {
+      const monitor = (window as any).performanceMonitor
+      const avg = monitor?.getAverageMetrics?.(10) ?? {}
+      const latest = monitor?.getLatestMetrics?.() ?? {}
+
+      const resources = performance.getEntriesByType('resource') as PerformanceResourceTiming[]
+      const scriptResources = resources.filter(resource => resource.initiatorType === 'script')
+      const initialScriptSrcs = Array.from(document.querySelectorAll('script[src]')).map(
+        (element: HTMLScriptElement) => element.src
+      )
+
+      let totalJsBytes = 0
+      let initialJsBytes = 0
+
+      scriptResources.forEach(resource => {
+        const resourceSize =
+          resource.transferSize || resource.encodedBodySize || resource.decodedBodySize || 0
+        totalJsBytes += resourceSize
+
+        const resourceUrl = new URL(resource.name, location.origin)
+        const loadedInInitialHtml = initialScriptSrcs.some(scriptSrc => {
+          try {
+            const scriptUrl = new URL(scriptSrc, location.origin)
+            return scriptUrl.pathname === resourceUrl.pathname
+          } catch {
+            return false
+          }
+        })
+
+        if (loadedInInitialHtml) {
+          initialJsBytes += resourceSize
+        }
+      })
+
+      return {
+        runtime: {
+          fps: Number(avg?.fps ?? latest?.fps ?? 0),
+          frameTimeMs: Number(avg?.frameTime ?? latest?.frameTime ?? 0),
+          memoryMb: Number((avg?.memoryUsed ?? latest?.memoryUsed ?? 0) / (1024 * 1024)),
+          audioLatencyMs: Number(avg?.audioLatency ?? latest?.audioLatency ?? 0),
+          renderer: String(latest?.webglRenderer ?? ''),
+        },
+        bundle: {
+          resourceCount: scriptResources.length,
+          totalJsMb: Number(totalJsBytes / (1024 * 1024)),
+          initialJsMb: Number(initialJsBytes / (1024 * 1024)),
+        },
+      }
+    })
+
+    const renderer = snapshot.runtime.renderer.toLowerCase()
+    const constrainedRenderer =
+      renderer.includes('swiftshader') || renderer.includes('software') || renderer === 'unknown'
+    const runtimeBudget = constrainedRenderer
+      ? RUNTIME_BUDGETS.constrainedRenderer
+      : RUNTIME_BUDGETS.standardRenderer
+
+    const debugContext = JSON.stringify(
+      {
+        renderer: snapshot.runtime.renderer || 'unknown',
+        constrainedRenderer,
+        runtimeBudget,
+        bundleBudgetsMb: BUNDLE_BUDGETS_MB,
+        snapshot,
+      },
+      null,
+      2
+    )
+
+    expect(snapshot.bundle.resourceCount, `No script resources captured.\n${debugContext}`).toBeGreaterThan(0)
+    expect(snapshot.runtime.fps, `FPS budget regression.\n${debugContext}`).toBeGreaterThanOrEqual(
+      runtimeBudget.minFps
+    )
+    expect(
+      snapshot.runtime.frameTimeMs,
+      `Frame-time budget regression.\n${debugContext}`
+    ).toBeLessThanOrEqual(runtimeBudget.maxFrameTimeMs)
+    expect(snapshot.runtime.memoryMb, `Memory budget regression.\n${debugContext}`).toBeLessThanOrEqual(
+      runtimeBudget.maxMemoryMb
+    )
+    expect(
+      snapshot.runtime.audioLatencyMs,
+      `Audio-latency budget regression.\n${debugContext}`
+    ).toBeLessThanOrEqual(runtimeBudget.maxAudioLatencyMs)
+    expect(snapshot.bundle.totalJsMb, `Total JS bundle budget regression.\n${debugContext}`).toBeLessThanOrEqual(
+      BUNDLE_BUDGETS_MB.maxTotalJs
+    )
+    expect(
+      snapshot.bundle.initialJsMb,
+      `Initial JS bundle budget regression.\n${debugContext}`
+    ).toBeLessThanOrEqual(BUNDLE_BUDGETS_MB.maxInitialJs)
   })
 })

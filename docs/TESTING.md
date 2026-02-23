@@ -51,6 +51,24 @@ full-tests:
 - **Files:** `essential-functionality.spec.ts`, `home.spec.ts`
 - **Browsers:** Chromium only
 
+#### Smoke Performance Budgets (Enforced in CI)
+- **Test:** `tests/e2e/essential-functionality.spec.ts` → `runtime and bundle budgets stay within smoke guardrails`
+- **Bundle guardrails (dev server):**
+  - Total JS transfer: `<= 35MB`
+  - Initial HTML-linked JS transfer: `<= 18MB`
+- **Runtime guardrails (renderer-aware):**
+  - Constrained/SwiftShader or unknown renderer:
+    - FPS `>= 14`
+    - Frame time `<= 80ms`
+    - Memory `<= 240MB`
+    - Audio latency `<= 120ms`
+  - Standard renderer:
+    - FPS `>= 24`
+    - Frame time `<= 55ms`
+    - Memory `<= 220MB`
+    - Audio latency `<= 100ms`
+- **Failure mode:** test exits with a JSON snapshot of renderer, measured values, and violated budget for direct triage.
+
 ### E2E Tests (Comprehensive)
 - **Duration:** 15-20 minutes
 - **Coverage:** All features and user flows
@@ -120,8 +138,9 @@ graph TD
 ### Application Performance
 - **Page Load:** <3 seconds initial load
 - **Frame Rate:** >60 FPS desktop, >30 FPS mobile
-- **Bundle Size:** <2.5MB total, <500KB initial
-- **Memory Usage:** <200MB active state
+- **Smoke (CI/dev-server) bundle budgets:** <=35MB total JS, <=18MB initial JS
+- **Smoke (CI/dev-server) runtime budgets:** renderer-aware thresholds defined in `tests/e2e/essential-functionality.spec.ts`
+- **Memory Usage:** <=240MB constrained renderer, <=220MB standard renderer during smoke budgets
 
 ## Usage Examples
 
