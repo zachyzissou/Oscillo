@@ -172,3 +172,9 @@
     font-size: 22px;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .cta {
+    transition: none;
+  }
+}

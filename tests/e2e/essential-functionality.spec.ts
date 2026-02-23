@@ -27,7 +27,7 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
     await startExperience(page);
     
     // Wait for overlay to disappear
-    await expect(startOverlay).not.toBeVisible({ timeout: 5000 });
+    await expect(startOverlay).toBeHidden({ timeout: 5000 });
     
     // Check that we have a successful app initialization
     // Safari/WebKit may have audio issues but basic UI should still work
@@ -39,12 +39,26 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
     } else {
       // For other browsers, check main content area appears after start
       await page.waitForTimeout(1500); // Brief wait for initialization
-      
+
       // Check that main content area is available after starting
-      const hasMainContent = await page.locator('#main-content').isVisible();
-      expect(hasMainContent).toBe(true);
+      await expect(page.locator('#main-content')).toBeVisible({ timeout: 5000 });
       console.log('App initialized successfully with interactive content');
     }
+  });
+
+  test('keyboard start flow is accessible and deterministic', async ({ page }) => {
+    await page.goto('/');
+
+    const startOverlay = page.getByTestId('start-overlay');
+    const startButton = page.getByTestId('start-button');
+
+    await expect(startOverlay).toBeVisible({ timeout: 8000 });
+    await expect(startButton).toBeVisible({ timeout: 5000 });
+    await expect(startButton).toBeFocused({ timeout: 5000 });
+
+    await page.keyboard.press('Enter');
+    await expect(startOverlay).toBeHidden({ timeout: 5000 });
+    await expect(page.locator('#main-content')).toBeVisible({ timeout: 5000 });
   });
 
   test('no critical console errors on load', async ({ page }) => {

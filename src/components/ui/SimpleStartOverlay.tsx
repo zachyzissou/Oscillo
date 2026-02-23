@@ -1,14 +1,36 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { startAudio } from '@/lib/audio/startAudio'
 import { useAudioEngine } from '@/store/useAudioEngine'
 import styles from './SimpleStartOverlay.module.css'
+import { logger } from '@/lib/logger'
 
 export default function SimpleStartOverlay() {
-  const [isVisible, setIsVisible] = useState(true)
+  const [isHydrated, setIsHydrated] = useState(false)
+  const [isVisible, setIsVisible] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const setUserInteracted = useAudioEngine((s) => s.setUserInteracted)
   const setAudioContextState = useAudioEngine((s) => s.setAudioContext)
+  const startButtonRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    let hasSeenOverlay = false
+    try {
+      hasSeenOverlay = localStorage.getItem('hasSeenOverlay') === 'true'
+    } catch {
+      hasSeenOverlay = false
+    }
+
+    const shouldShowOverlay = process.env.NODE_ENV === 'development' || !hasSeenOverlay
+    setIsVisible(shouldShowOverlay)
+    setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (isHydrated && isVisible) {
+      startButtonRef.current?.focus()
+    }
+  }, [isHydrated, isVisible])
 
   const handleStart = async () => {
     if (isLoading) return
@@ -23,7 +45,10 @@ export default function SimpleStartOverlay() {
         setAudioContextState('suspended')
       }
     } catch (error) {
-      console.error('Audio init failed:', error)
+      logger.error({
+        event: 'start-overlay.audio-init-failed',
+        error: error instanceof Error ? error.message : String(error),
+      })
       setAudioContextState('suspended')
     }
 
@@ -32,6 +57,7 @@ export default function SimpleStartOverlay() {
     setIsLoading(false)
   }
 
+  if (!isHydrated) return null
   if (!isVisible) return null
 
   return (
@@ -67,10 +93,12 @@ export default function SimpleStartOverlay() {
           </li>
         </ul>
         <button
+          ref={startButtonRef}
           onClick={handleStart}
           disabled={isLoading}
           data-testid="start-button"
           aria-label="Start creating music"
+          aria-busy={isLoading ? 'true' : 'false'}
           className={styles.cta}
         >
           {isLoading ? 'Starting...' : 'Start Creating'}
