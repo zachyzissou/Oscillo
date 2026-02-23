@@ -8,7 +8,7 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
     })
   })
 
-  test('core application loads and starts correctly', async ({ page, browserName }) => {
+  test('core application loads and starts correctly', async ({ page }) => {
     // Navigate to the app
     await page.goto('/');
     
@@ -29,22 +29,8 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
     // Wait for overlay to disappear
     await expect(startOverlay).not.toBeVisible({ timeout: 5000 });
     
-    // Check that we have a successful app initialization
-    // Safari/WebKit may have audio issues but basic UI should still work
-    if (browserName === 'webkit') {
-      // For Safari, just verify basic UI structure exists
-      const body = page.locator('body');
-      await expect(body).toBeVisible();
-      console.log('Safari/WebKit: Basic app structure verified (audio may be limited)');
-    } else {
-      // For other browsers, check main content area appears after start
-      await page.waitForTimeout(1500); // Brief wait for initialization
-      
-      // Check that main content area is available after starting
-      const hasMainContent = await page.locator('#main-content').isVisible();
-      expect(hasMainContent).toBe(true);
-      console.log('App initialized successfully with interactive content');
-    }
+    // Check that main content area is available after starting
+    await expect(page.locator('#main-content')).toBeVisible({ timeout: 5000 });
   });
 
   test('no critical console errors on load', async ({ page }) => {
