@@ -83,10 +83,9 @@ test.describe('Oscillo Enhanced Audio-Reactive Features', () => {
     }
 
     const performanceSelect = page.locator('[data-testid="performance-level"]')
-    if (await performanceSelect.isVisible()) {
-      await performanceSelect.selectOption('high')
-      await page.waitForTimeout(1000)
-    }
+    await expect(performanceSelect).toBeVisible({ timeout: 5000 })
+    await performanceSelect.selectOption('high')
+    await page.waitForTimeout(1000)
   })
 
   test('should display 3D audio-reactive orbs', async ({ page }) => {

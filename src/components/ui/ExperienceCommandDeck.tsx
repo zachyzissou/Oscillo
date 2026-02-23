@@ -14,6 +14,19 @@ const SCALE_OPTIONS = ['major', 'minor', 'dorian', 'mixolydian', 'pentatonic', '
 const MODE_OPTIONS = ['play', 'edit', 'record', 'sequence'] as const
 const PERF_OPTIONS = ['low', 'medium', 'high'] as const
 
+const readStoredDesktopExpanded = () => {
+  if (typeof window === 'undefined') return true
+  return window.localStorage.getItem(DECK_EXPANDED_KEY) !== 'false'
+}
+
+const getInitialIsMobile = () =>
+  typeof window !== 'undefined' && window.matchMedia(MOBILE_BREAKPOINT).matches
+
+const getInitialIsExpanded = () => {
+  if (typeof window === 'undefined') return true
+  return getInitialIsMobile() ? false : readStoredDesktopExpanded()
+}
+
 export default function ExperienceCommandDeck() {
   const key = useMusicalPalette((s) => s.key)
   const scale = useMusicalPalette((s) => s.scale)
@@ -27,8 +40,8 @@ export default function ExperienceCommandDeck() {
   const perfLevel = usePerformanceSettings((s) => s.level)
   const setPerfLevel = usePerformanceSettings((s) => s.setLevel)
 
-  const [isMobile, setIsMobile] = useState(false)
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isMobile, setIsMobile] = useState(getInitialIsMobile)
+  const [isExpanded, setIsExpanded] = useState(getInitialIsExpanded)
   const [showHint, setShowHint] = useState(false)
 
   useEffect(() => {
@@ -46,11 +59,6 @@ export default function ExperienceCommandDeck() {
     if (typeof window !== 'undefined') {
       window.localStorage.setItem(ONBOARDING_KEY, 'true')
     }
-  }
-
-  const readStoredDesktopExpanded = () => {
-    if (typeof window === 'undefined') return true
-    return window.localStorage.getItem(DECK_EXPANDED_KEY) !== 'false'
   }
 
   const wrapperClass = `${styles.deck} ${isMobile ? styles.mobile : styles.desktop}`
