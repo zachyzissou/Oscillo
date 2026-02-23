@@ -59,7 +59,7 @@ full-tests:
 - **Runtime guardrails (renderer-aware):**
   - Constrained/SwiftShader or unknown renderer:
     - FPS `>= 14`
-    - Frame time `<= 170ms`
+    - Frame time `<= 200ms`
     - Memory `<= 240MB`
     - Audio latency `<= 120ms`
   - Standard renderer:
