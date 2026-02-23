@@ -27,6 +27,13 @@ const suppressTelemetryBanner = async (page: Page) => {
   })
 }
 
+const clearActiveFocus = async (page: Page) => {
+  await page.evaluate(() => {
+    const active = document.activeElement as HTMLElement | null
+    active?.blur()
+  })
+}
+
 test.describe('Visual Regression Tests', () => {
   test.skip(!runVisualRegression, 'Set RUN_VISUAL_REGRESSION=1 and update baselines intentionally.')
 
@@ -102,6 +109,7 @@ test.describe('Visual Regression Tests', () => {
 
     await expect(page.getByTestId('deck-open-button')).toBeVisible({ timeout: 10000 })
     await expect(page.getByTestId('deck-collapse-button')).toHaveCount(0)
+    await clearActiveFocus(page)
 
     await expect(page.getByTestId('experience-deck')).toHaveScreenshot(
       'experience-deck-mobile-initial.png',

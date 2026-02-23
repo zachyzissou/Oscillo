@@ -9,6 +9,16 @@ import { logger } from '@/lib/logger'
 
 const MIN_STARTUP_FEEDBACK_MS = 480
 const FINALIZE_FEEDBACK_MS = 140
+const FOCUS_RESTORE_RETRY_MS = 50
+const MAX_FOCUS_RESTORE_RETRIES = 20
+const FOCUSABLE_SELECTOR =
+  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+const POST_START_FOCUS_TARGETS = [
+  '[data-testid="telemetry-allow"]',
+  '[data-testid="deck-rail-toggle"]',
+  '[data-testid="deck-open-button"]',
+]
+const FINAL_FOCUS_FALLBACK_SELECTOR = '#main-content'
 
 const now = () => (typeof performance !== 'undefined' ? performance.now() : Date.now())
 
@@ -16,6 +26,30 @@ const wait = (durationMs: number) =>
   new Promise<void>(resolve => {
     globalThis.setTimeout(resolve, durationMs)
   })
+
+const isVisibleAndFocusable = (element: HTMLElement | null) => {
+  if (!element || typeof element.focus !== 'function') return false
+  const computed = globalThis.getComputedStyle(element)
+  if (computed.visibility === 'hidden' || computed.display === 'none') return false
+  return !element.hasAttribute('hidden') && !element.hasAttribute('disabled')
+}
+
+const getFocusableElements = (container: HTMLElement | null) => {
+  if (!container) return []
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+    isVisibleAndFocusable
+  )
+}
+
+const findPostStartFocusTarget = () => {
+  for (const selector of POST_START_FOCUS_TARGETS) {
+    const candidate = globalThis.document.querySelector(selector) as HTMLElement | null
+    if (isVisibleAndFocusable(candidate)) {
+      return candidate
+    }
+  }
+  return null
+}
 
 export default function SimpleStartOverlay() {
   const [isHydrated, setIsHydrated] = useState(false)
@@ -29,6 +63,8 @@ export default function SimpleStartOverlay() {
   const setAudioContextState = useAudioEngine((s) => s.setAudioContext)
   const announcePolite = useAccessibilityAnnouncements((state) => state.announcePolite)
   const startButtonRef = useRef<HTMLButtonElement>(null)
+  const overlayRef = useRef<HTMLDivElement>(null)
+  const preOverlayFocusedElementRef = useRef<HTMLElement | null>(null)
 
   useEffect(() => {
     let hasSeenOverlay = false
@@ -45,10 +81,104 @@ export default function SimpleStartOverlay() {
 
   useEffect(() => {
     if (isHydrated && isVisible) {
-      startButtonRef.current?.focus()
+      preOverlayFocusedElementRef.current =
+        globalThis.document.activeElement instanceof HTMLElement
+          ? globalThis.document.activeElement
+          : null
+      globalThis.requestAnimationFrame(() => {
+        startButtonRef.current?.focus()
+      })
       announcePolite('Start overlay ready. Press Start Creating to begin.')
     }
   }, [announcePolite, isHydrated, isVisible])
+
+  useEffect(() => {
+    if (!isVisible) return
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const overlayElement = overlayRef.current
+      if (!overlayElement) return
+
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        event.stopPropagation()
+        event.stopImmediatePropagation()
+        if (isLoading) {
+          announcePolite('Startup in progress. Please wait.')
+          return
+        }
+        announcePolite('Start overlay remains open. Press Start Creating to continue.')
+        startButtonRef.current?.focus()
+        return
+      }
+
+      if (event.key !== 'Tab') return
+
+      const focusableElements = getFocusableElements(overlayElement)
+      if (focusableElements.length === 0) {
+        event.preventDefault()
+        return
+      }
+
+      const firstElement = focusableElements[0]
+      const lastElement = focusableElements[focusableElements.length - 1]
+      const activeElement = globalThis.document.activeElement as HTMLElement | null
+      const activeInsideOverlay = !!activeElement && overlayElement.contains(activeElement)
+
+      if (event.shiftKey) {
+        if (!activeInsideOverlay || activeElement === firstElement) {
+          event.preventDefault()
+          lastElement.focus()
+        }
+        return
+      }
+
+      if (!activeInsideOverlay || activeElement === lastElement) {
+        event.preventDefault()
+        firstElement.focus()
+      }
+    }
+
+    globalThis.document.addEventListener('keydown', handleKeyDown, true)
+    return () => globalThis.document.removeEventListener('keydown', handleKeyDown, true)
+  }, [announcePolite, isLoading, isVisible])
+
+  const restoreFocusAfterOverlayClose = () => {
+    let attempts = 0
+
+    const attemptFocusRestore = () => {
+      const target = findPostStartFocusTarget()
+      if (target) {
+        target.focus()
+        return
+      }
+
+      if (attempts < MAX_FOCUS_RESTORE_RETRIES) {
+        attempts += 1
+        globalThis.setTimeout(() => {
+          globalThis.requestAnimationFrame(attemptFocusRestore)
+        }, FOCUS_RESTORE_RETRY_MS)
+        return
+      }
+
+      if (
+        isVisibleAndFocusable(preOverlayFocusedElementRef.current) &&
+        preOverlayFocusedElementRef.current?.isConnected
+      ) {
+        preOverlayFocusedElementRef.current.focus()
+        return
+      }
+
+      const fallbackTarget = globalThis.document.querySelector(
+        FINAL_FOCUS_FALLBACK_SELECTOR
+      ) as HTMLElement | null
+      if (isVisibleAndFocusable(fallbackTarget)) {
+        fallbackTarget.focus()
+      }
+    }
+
+    globalThis.requestAnimationFrame(attemptFocusRestore)
+  }
 
   const handleStart = async () => {
     if (isLoading) return
@@ -98,6 +228,7 @@ export default function SimpleStartOverlay() {
 
     setUserInteracted(true)
     setIsVisible(false)
+    restoreFocusAfterOverlayClose()
     try {
       localStorage.setItem('hasSeenOverlay', 'true')
     } catch {
@@ -113,6 +244,7 @@ export default function SimpleStartOverlay() {
 
   return (
     <UIOverlay
+      ref={overlayRef}
       id="start-overlay"
       data-testid="start-overlay"
       role="dialog"

@@ -34,14 +34,22 @@ test.describe('Accessibility Tests', () => {
     expect(criticalOrSerious).toEqual([])
   })
 
-  test('supports keyboard path from skip link into start control', async ({ page }) => {
+  test('traps keyboard focus within the start overlay while it is open', async ({ page }) => {
     await loadWithDeniedTelemetry(page)
 
     await expect(page.getByTestId('start-button')).toBeFocused()
-    await page.keyboard.press('Shift+Tab')
-    await expect(page.locator('.skip-link')).toBeFocused()
-
     await page.keyboard.press('Tab')
+    await expect(page.getByTestId('start-button')).toBeFocused()
+    await page.keyboard.press('Shift+Tab')
+    await expect(page.getByTestId('start-button')).toBeFocused()
+  })
+
+  test('escape keeps start overlay active and returns focus to start control', async ({ page }) => {
+    await loadWithDeniedTelemetry(page)
+
+    await expect(page.getByTestId('start-button')).toBeFocused()
+    await page.keyboard.press('Escape')
+    await expect(page.getByTestId('start-overlay')).toBeVisible()
     await expect(page.getByTestId('start-button')).toBeFocused()
   })
 
@@ -93,6 +101,14 @@ test.describe('Accessibility Tests', () => {
     )
     await expect(progress).toHaveAttribute('aria-valuenow', /(?:[1-9]\d?|100)/)
     await expect(page.getByTestId('start-overlay')).toBeHidden({ timeout: 10000 })
+  })
+
+  test('focus restores to persistent controls when start overlay closes', async ({ page }) => {
+    await loadWithDeniedTelemetry(page)
+
+    await page.getByTestId('start-button').click()
+    await expect(page.getByTestId('start-overlay')).toBeHidden({ timeout: 10000 })
+    await expect(page.getByTestId('deck-rail-toggle')).toBeFocused({ timeout: 10000 })
   })
 
   test('telemetry banner keyboard path is deterministic and returns focus to deck controls', async ({
