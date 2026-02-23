@@ -31,6 +31,7 @@ Theme overrides write HSL strings (e.g. `171 73% 57%`). Tailwind consumes these 
 - Custom utilities include `.text-shadow-neon`, `.glass-morphism`, and animated gradients built on top of the neon/glass tokens.
 - When introducing new palette entries, add the color to `NEON_PALETTE`/`GLASS_PALETTE` in `theme-tokens.ts`, update Tailwind’s `extend.colors`, and document usage here.
 - Surface shades (`--surface`, `--surface-contrast`) now control panels, cards, and popovers; avoid hardcoding component backgrounds.
+- Motion tokens and reduced-motion rules are documented in `docs/motion-system.md`.
 
 ## 4. Component Guidelines
 

@@ -9,6 +9,7 @@
     radial-gradient(70% 60% at 10% 85%, rgba(0, 242, 255, 0.1), transparent 60%),
     radial-gradient(80% 70% at 90% 20%, rgba(63, 94, 251, 0.16), transparent 60%),
     linear-gradient(160deg, #01050f 0%, #030817 60%, #01040d 100%);
+  animation: overlayFadeIn var(--motion-duration-slow) var(--motion-ease-standard);
 }
 
 .overlay::before,
@@ -53,6 +54,10 @@
     0 0 32px rgba(0, 255, 255, 0.35),
     0 0 70px rgba(0, 172, 255, 0.22);
   backdrop-filter: blur(12px);
+  animation: overlayPanelIn var(--motion-duration-slow) var(--motion-ease-emphasis);
+  transition:
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
 .eyebrow {
@@ -123,12 +128,17 @@
     0 10px 22px rgba(0, 238, 255, 0.28),
     0 0 0 1px rgba(255, 255, 255, 0.32) inset;
   cursor: pointer;
-  transition: transform 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+  transition:
+    transform var(--motion-duration-fast) var(--motion-ease-emphasis),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-standard),
+    filter var(--motion-duration-fast) var(--motion-ease-standard),
+    opacity var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
 .cta:hover:not(:disabled),
 .cta:focus-visible:not(:disabled) {
-  transform: translateY(-1px);
+  transform: translateY(var(--motion-lift-distance));
+  filter: brightness(var(--motion-focus-brightness));
   box-shadow:
     0 16px 28px rgba(0, 238, 255, 0.34),
     0 0 0 2px rgba(194, 250, 255, 0.9) inset;
@@ -145,6 +155,26 @@
   font-size: 12px;
   color: rgba(205, 237, 255, 0.62);
   letter-spacing: 0.04em;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes overlayPanelIn {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-enter-distance)) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @media (max-width: 640px) {
@@ -174,7 +204,26 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation: none;
+  }
+
+  .overlay::before,
+  .overlay::after {
+    display: none;
+  }
+
+  .panel {
+    animation: none;
+    border-color: rgba(169, 245, 255, 0.9);
+    box-shadow:
+      0 0 0 1px rgba(126, 240, 255, 0.22) inset,
+      0 10px 18px rgba(0, 0, 0, 0.52);
+  }
+
   .cta {
-    transition: none;
+    box-shadow:
+      0 8px 14px rgba(0, 238, 255, 0.18),
+      0 0 0 1px rgba(255, 255, 255, 0.32) inset;
   }
 }

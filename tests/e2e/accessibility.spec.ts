@@ -72,20 +72,37 @@ test.describe('Accessibility Tests', () => {
   test('remains functional when reduced-motion is requested', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await loadWithDeniedTelemetry(page)
+    const overlayOrnamentDisplay = await page
+      .getByTestId('start-overlay')
+      .evaluate(node => getComputedStyle(node, '::before').display)
+    expect(overlayOrnamentDisplay).toBe('none')
+
     await startExperience(page)
     await expect(page.getByTestId('start-overlay')).toBeHidden()
     await expect(page.getByTestId('main-content')).toBeVisible()
 
     const deckCollapse = page.getByTestId('deck-collapse-button')
     await expect(deckCollapse).toBeVisible()
-    const transitionDuration = await deckCollapse.evaluate(
-      node => getComputedStyle(node).transitionDuration
-    )
+    const transitionDurationSeconds = await deckCollapse.evaluate(node => {
+      const firstValue = getComputedStyle(node).transitionDuration.split(',')[0]?.trim() ?? '0s'
+      if (firstValue.endsWith('ms')) {
+        return Number.parseFloat(firstValue) / 1000
+      }
+      return Number.parseFloat(firstValue)
+    })
+    await deckCollapse.hover()
+    const hoverTranslateY = await deckCollapse.evaluate(node => {
+      const transformValue = getComputedStyle(node).transform
+      if (transformValue === 'none') return 0
+      const matrix = new DOMMatrixReadOnly(transformValue)
+      return matrix.m42
+    })
     const pulseAnimationName = await page
       .getByTestId('deck-pulse-indicator')
       .evaluate(node => getComputedStyle(node).animationName)
 
-    expect(transitionDuration).toBe('0s')
+    expect(transitionDurationSeconds).toBeLessThanOrEqual(0.12)
+    expect(Math.abs(hoverTranslateY)).toBeLessThanOrEqual(0.1)
     expect(pulseAnimationName).toBe('none')
   })
 

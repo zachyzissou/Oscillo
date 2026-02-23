@@ -28,6 +28,7 @@
   flex-wrap: wrap;
   gap: 7px;
   justify-content: flex-end;
+  animation: railEnter var(--motion-duration-standard) var(--motion-ease-standard);
 }
 
 .railButton {
@@ -41,9 +42,10 @@
   padding: 6px 11px;
   cursor: pointer;
   transition:
-    border-color 130ms ease,
-    background 130ms ease,
-    color 130ms ease;
+    transform var(--motion-duration-fast) var(--motion-ease-emphasis),
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    background var(--motion-duration-fast) var(--motion-ease-standard),
+    color var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
 .railPrimary {
@@ -53,6 +55,7 @@
 
 .railButton:hover,
 .railButton:focus-visible {
+  transform: translateY(var(--motion-lift-distance));
   border-color: rgba(134, 241, 255, 0.84);
   color: #ffffff;
   background: rgba(19, 45, 69, 0.95);
@@ -73,6 +76,11 @@
     0 0 0 1px rgba(143, 247, 255, 0.1) inset,
     0 0 24px rgba(0, 209, 255, 0.2);
   overflow: hidden;
+  animation: deckEnter var(--motion-duration-slow) var(--motion-ease-standard);
+  transition:
+    max-height var(--motion-duration-standard) var(--motion-ease-standard),
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    box-shadow var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
 .shellPeek {
@@ -120,6 +128,10 @@
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
+  transition:
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    background var(--motion-duration-fast) var(--motion-ease-standard),
+    color var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
 .snapPoints button:focus-visible {
@@ -167,7 +179,7 @@
   border-radius: 999px;
   background: #2ef2ff;
   box-shadow: 0 0 8px #2ef2ff;
-  animation: pulse 1.8s ease-in-out infinite;
+  animation: pulse 1.8s var(--motion-ease-standard) infinite;
 }
 
 @keyframes pulse {
@@ -180,6 +192,28 @@
   50% {
     transform: scale(1.06);
     opacity: 1;
+  }
+}
+
+@keyframes deckEnter {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-enter-distance));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes railEnter {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--motion-enter-distance) * -0.6));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
@@ -211,9 +245,10 @@
   color: #d7f9ff;
   cursor: pointer;
   transition:
-    transform 140ms ease,
-    border-color 140ms ease,
-    background 140ms ease;
+    transform var(--motion-duration-fast) var(--motion-ease-emphasis),
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    background var(--motion-duration-fast) var(--motion-ease-standard),
+    filter var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
 .iconButton {
@@ -234,7 +269,8 @@
 .iconButton:focus-visible,
 .openButton:hover,
 .openButton:focus-visible {
-  transform: translateY(-1px);
+  transform: translateY(var(--motion-lift-distance));
+  filter: brightness(var(--motion-focus-brightness));
   border-color: rgba(123, 246, 255, 0.8);
   background: rgba(12, 42, 61, 0.92);
   outline: none;
@@ -314,9 +350,9 @@
   text-transform: capitalize;
   cursor: pointer;
   transition:
-    border-color 130ms ease,
-    background 130ms ease,
-    color 130ms ease;
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    background var(--motion-duration-fast) var(--motion-ease-standard),
+    color var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
 .segment button:hover,
@@ -347,6 +383,10 @@
   text-transform: uppercase;
   padding: 6px 11px;
   cursor: pointer;
+  transition:
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    background var(--motion-duration-fast) var(--motion-ease-standard),
+    color var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
 .modePills button:focus-visible {
@@ -409,9 +449,9 @@
   cursor: pointer;
   padding: 5px 11px;
   transition:
-    border-color 120ms ease,
-    color 120ms ease,
-    background 120ms ease;
+    border-color var(--motion-duration-fast) var(--motion-ease-standard),
+    color var(--motion-duration-fast) var(--motion-ease-standard),
+    background var(--motion-duration-fast) var(--motion-ease-standard);
 }
 
 .linkButton:hover,
@@ -458,15 +498,22 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .deck *,
-  .deck *::before,
-  .deck *::after {
-    animation: none !important;
-    transition: none !important;
+  .actionRail,
+  .shell {
+    animation: none;
   }
 
   .pulse {
     animation: none;
+    box-shadow: none;
+    background: rgba(124, 241, 255, 0.9);
+  }
+
+  .shell {
+    border-color: rgba(167, 242, 255, 0.58);
+    box-shadow:
+      0 10px 20px rgba(0, 0, 0, 0.5),
+      0 0 0 1px rgba(143, 247, 255, 0.14) inset;
   }
 
   .iconButton:hover,
