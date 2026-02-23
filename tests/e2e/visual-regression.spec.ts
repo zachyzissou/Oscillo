@@ -1,8 +1,19 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 import { startExperience } from './utils/startExperience'
 
 const runVisualRegression = process.env.RUN_VISUAL_REGRESSION === '1'
 const CONSENT_KEY = 'oscillo.analytics-consent'
+
+const hideWebglCanvas = async (page: Page) => {
+  const canvas = page.locator('[data-testid="webgl-canvas"]')
+  if (await canvas.count()) {
+    await canvas.evaluateAll((nodes) => {
+      nodes.forEach((node) => {
+        ;(node as HTMLCanvasElement).style.display = 'none'
+      })
+    })
+  }
+}
 
 test.describe('Visual Regression Tests', () => {
   test.skip(!runVisualRegression, 'Set RUN_VISUAL_REGRESSION=1 and update baselines intentionally.')
@@ -65,15 +76,26 @@ test.describe('Visual Regression Tests', () => {
     })
   })
 
+  test('mobile command deck initializes without expanded flash', async ({ page }) => {
+    await page.setViewportSize({ width: 393, height: 851 })
+    await startExperience(page)
+
+    await hideWebglCanvas(page)
+
+    await expect(page.getByTestId('deck-open-button')).toBeVisible({ timeout: 10000 })
+    await expect(page.getByTestId('deck-collapse-button')).toHaveCount(0)
+
+    await expect(page.getByTestId('experience-deck')).toHaveScreenshot('experience-deck-mobile-initial.png', {
+      threshold: 0.15,
+      maxDiffPixelRatio: 0.05,
+      animations: 'disabled',
+    })
+  })
+
   test('telemetry consent banner visual', async ({ page }) => {
     await startExperience(page)
 
-    const canvas = page.locator('[data-testid="webgl-canvas"]')
-    if (await canvas.count()) {
-      await canvas.evaluate((node) => {
-        ;(node as HTMLCanvasElement).style.display = 'none'
-      })
-    }
+    await hideWebglCanvas(page)
 
     const banner = page.getByTestId('telemetry-banner')
     await expect(banner).toBeVisible({ timeout: 10000 })

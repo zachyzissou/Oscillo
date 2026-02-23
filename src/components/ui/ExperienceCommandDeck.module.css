@@ -5,6 +5,11 @@
   font-family: 'Space Grotesk', 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
 }
 
+.unresolved {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .desktop {
   top: 20px;
   right: 20px;
