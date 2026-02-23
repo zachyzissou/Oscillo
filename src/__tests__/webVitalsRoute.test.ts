@@ -40,7 +40,7 @@ describe('web vitals payload guard', () => {
   it.each([
     [{ ...validPayload, name: 'UNKNOWN' }, 'unsupported metric name'],
     [{ ...validPayload, value: '0.12' }, 'non-numeric metric value'],
-    [{ ...validPayload, url: 'ftp://oscillo.app' }, 'invalid URL protocol'],
+    [{ ...validPayload, url: '/relative-path' }, 'invalid URL protocol'],
     [{ ...validPayload, timestamp: 'not-a-date' }, 'invalid timestamp'],
     [{ ...validPayload, entries: {} }, 'non-array entries'],
     [null, 'null payload'],
