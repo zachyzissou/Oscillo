@@ -13,7 +13,6 @@ function toErrorDetails(error: unknown): Record<string, string | undefined> {
     return {
       name: error.name,
       message: error.message,
-      stack: error.stack,
     }
   }
 

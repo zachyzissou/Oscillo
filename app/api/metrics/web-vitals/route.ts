@@ -24,12 +24,10 @@ const isNonEmptyString = (value: unknown): value is string =>
 
 const isValidHttpUrl = (value: unknown): value is string => {
   if (!isNonEmptyString(value)) return false
-  try {
-    const parsed = new URL(value)
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
-  } catch {
-    return false
-  }
+  return (
+    value.length <= 2048 &&
+    (value.startsWith('https://') || value.startsWith('http://'))
+  )
 }
 
 const isValidTimestamp = (value: unknown): value is string =>
