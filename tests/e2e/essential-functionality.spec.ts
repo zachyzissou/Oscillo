@@ -153,9 +153,21 @@ test.describe('Essential Functionality Verification - Smoke Tests', () => {
   })
 
   test('runtime and bundle budgets stay within smoke guardrails', async ({ page }) => {
+    test.slow()
     await page.goto('/?perf=1')
     await startExperience(page)
     await page.waitForLoadState('networkidle')
+
+    // Wait until the performance monitor has collected at least one frame before
+    // reading metrics; avoids a misleading "FPS budget regression" failure when
+    // the monitor simply hasn't started yet.
+    await page.waitForFunction(
+      () => {
+        const monitor = (window as any).performanceMonitor
+        return monitor?.getLatestMetrics?.() !== null
+      },
+      { timeout: 5000 }
+    )
     await page.waitForTimeout(1500)
 
     const snapshot = await page.evaluate(() => {
