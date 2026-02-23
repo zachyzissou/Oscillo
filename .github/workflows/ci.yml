@@ -36,6 +36,42 @@ jobs:
         env:
           CI: true
 
+  security-audit:
+    runs-on: ubuntu-latest
+    env:
+      SECURITY_AUDIT_LEVEL: ${{ vars.SECURITY_AUDIT_LEVEL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - name: Run security audit gate
+        run: |
+          level="${SECURITY_AUDIT_LEVEL:-high}"
+          echo "Running npm audit with threshold: ${level}"
+          npm audit --audit-level "${level}" --json > security-audit-report.json
+      - name: Summarize security audit report
+        if: always()
+        run: |
+          if [ ! -s security-audit-report.json ]; then
+            if [ -f security-audit-report.json ]; then
+              echo "security-audit-report.json exists but is empty. npm audit may have failed before producing valid JSON."
+            else
+              echo "security-audit-report.json was not generated."
+            fi
+            exit 1
+          fi
+          node -e "const fs=require('fs');const p='security-audit-report.json';let raw='';try{raw=fs.readFileSync(p,'utf8');}catch(e){console.error('Error reading security-audit-report.json:',e.message);process.exit(1);}if(!raw||!raw.trim()){console.error('security-audit-report.json is empty or only whitespace.');process.exit(1);}let parsed;try{parsed=JSON.parse(raw);}catch(e){console.error('Failed to parse security-audit-report.json as JSON:',e.message);console.error('Raw content of security-audit-report.json:');console.error(raw);process.exit(1);}const v=(parsed.metadata&&parsed.metadata.vulnerabilities)||{};console.log('vulnerabilities:',JSON.stringify(v));"
+      - name: Upload security audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-audit-report
+          path: security-audit-report.json
+          retention-days: 14
+
   # Full test suite - only runs on staging branch
   full-tests:
     runs-on: ubuntu-latest
@@ -128,17 +164,19 @@ jobs:
 
   baseline-ci:
     runs-on: ubuntu-latest
-    needs: [quick-checks, visual-regression, full-tests]
+    needs: [quick-checks, visual-regression, security-audit, full-tests]
     if: always()
     steps:
       - name: Enforce baseline CI signal
         run: |
           quick="${{ needs.quick-checks.result }}"
           visual="${{ needs.visual-regression.result }}"
+          security="${{ needs.security-audit.result }}"
           full="${{ needs.full-tests.result }}"
 
           echo "quick-checks: ${quick}"
           echo "visual-regression: ${visual}"
+          echo "security-audit: ${security}"
           echo "full-tests: ${full}"
 
           if [ "${quick}" != "success" ]; then
@@ -148,6 +186,11 @@ jobs:
 
           if [ "${visual}" != "success" ]; then
             echo "visual-regression must pass."
+            exit 1
+          fi
+
+          if [ "${security}" != "success" ]; then
+            echo "security-audit must pass."
             exit 1
           fi
 

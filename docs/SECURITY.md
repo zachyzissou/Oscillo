@@ -1,6 +1,8 @@
 
 # Security Guide
 
+For CI audit thresholds and protected-branch governance decisions, see [`docs/security-governance.md`](./security-governance.md).
+
 ## Current Security Issues
 
 > For a release-ready verification flow, follow the step-by-step checklist in [`docs/security-checklist.md`](./security-checklist.md).
