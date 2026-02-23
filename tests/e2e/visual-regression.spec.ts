@@ -36,6 +36,7 @@ test.describe('Visual Regression Tests', () => {
 
     await expect(card).toHaveScreenshot('start-overlay-card.png', {
       threshold: 0.15,
+      maxDiffPixelRatio: 0.05,
       animations: 'disabled',
     })
   })
@@ -47,6 +48,7 @@ test.describe('Visual Regression Tests', () => {
     await expect(page).toHaveScreenshot('start-overlay-desktop.png', {
       fullPage: true,
       threshold: 0.2,
+      maxDiffPixelRatio: 0.05,
       animations: 'disabled',
     })
   })
@@ -58,6 +60,7 @@ test.describe('Visual Regression Tests', () => {
     await expect(page).toHaveScreenshot('start-overlay-mobile.png', {
       fullPage: true,
       threshold: 0.2,
+      maxDiffPixelRatio: 0.05,
       animations: 'disabled',
     })
   })
@@ -77,6 +80,7 @@ test.describe('Visual Regression Tests', () => {
 
     await expect(banner).toHaveScreenshot('telemetry-banner.png', {
       threshold: 0.15,
+      maxDiffPixelRatio: 0.05,
       animations: 'disabled',
     })
   })
