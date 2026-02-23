@@ -3,12 +3,13 @@ import { startExperience } from './utils/startExperience'
 
 const runVisualRegression = process.env.RUN_VISUAL_REGRESSION === '1'
 const CONSENT_KEY = 'oscillo.analytics-consent'
+const ONBOARDING_KEY = 'oscillo.v2.deck-onboarded'
 
 const hideWebglCanvas = async (page: Page) => {
   const canvas = page.locator('[data-testid="webgl-canvas"]')
   if (await canvas.count()) {
-    await canvas.evaluateAll((nodes) => {
-      nodes.forEach((node) => {
+    await canvas.evaluateAll(nodes => {
+      nodes.forEach(node => {
         ;(node as HTMLCanvasElement).style.display = 'none'
       })
     })
@@ -19,9 +20,13 @@ test.describe('Visual Regression Tests', () => {
   test.skip(!runVisualRegression, 'Set RUN_VISUAL_REGRESSION=1 and update baselines intentionally.')
 
   test.beforeEach(async ({ page }) => {
-    await page.addInitScript((key) => {
-      window.localStorage.removeItem(key)
-    }, CONSENT_KEY)
+    await page.addInitScript(
+      ({ consentKey, onboardingKey }) => {
+        globalThis.localStorage.removeItem(consentKey)
+        globalThis.localStorage.setItem(onboardingKey, 'true')
+      },
+      { consentKey: CONSENT_KEY, onboardingKey: ONBOARDING_KEY }
+    )
 
     await page.goto('/')
 
@@ -85,11 +90,14 @@ test.describe('Visual Regression Tests', () => {
     await expect(page.getByTestId('deck-open-button')).toBeVisible({ timeout: 10000 })
     await expect(page.getByTestId('deck-collapse-button')).toHaveCount(0)
 
-    await expect(page.getByTestId('experience-deck')).toHaveScreenshot('experience-deck-mobile-initial.png', {
-      threshold: 0.15,
-      maxDiffPixelRatio: 0.05,
-      animations: 'disabled',
-    })
+    await expect(page.getByTestId('experience-deck')).toHaveScreenshot(
+      'experience-deck-mobile-initial.png',
+      {
+        threshold: 0.15,
+        maxDiffPixelRatio: 0.05,
+        animations: 'disabled',
+      }
+    )
   })
 
   test('telemetry consent banner visual', async ({ page }) => {

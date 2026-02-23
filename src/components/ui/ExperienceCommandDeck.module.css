@@ -2,7 +2,7 @@
   position: fixed;
   z-index: 70;
   color: #ecf7ff;
-  font-family: 'Space Grotesk', 'Sora', 'Avenir Next', 'Segoe UI', sans-serif;
+  font-family: "Space Grotesk", "Sora", "Avenir Next", "Segoe UI", sans-serif;
 }
 
 .unresolved {
@@ -101,7 +101,10 @@
   background: rgba(8, 29, 43, 0.78);
   color: #d7f9ff;
   cursor: pointer;
-  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease;
+  transition:
+    transform 140ms ease,
+    border-color 140ms ease,
+    background 140ms ease;
 }
 
 .iconButton {
@@ -198,7 +201,10 @@
   font-weight: 600;
   text-transform: capitalize;
   cursor: pointer;
-  transition: border-color 130ms ease, background 130ms ease, color 130ms ease;
+  transition:
+    border-color 130ms ease,
+    background 130ms ease,
+    color 130ms ease;
 }
 
 .segment button:hover,
@@ -242,6 +248,7 @@
 }
 
 .hint {
+  display: block;
   border: 1px solid rgba(123, 241, 255, 0.24);
   border-radius: 14px;
   padding: 10px 12px;
@@ -255,18 +262,52 @@
   color: #7cf4ff;
 }
 
+.hintTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.hintProgress {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(187, 235, 255, 0.65);
+}
+
+.hintCopy {
+  margin: 6px 0 0;
+}
+
 .hintActions {
   margin-top: 8px;
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  gap: 8px;
 }
 
 .linkButton {
-  border: 0;
-  background: transparent;
-  color: #7cf4ff;
+  border-radius: 999px;
+  background: rgba(10, 24, 40, 0.82);
+  border: 1px solid rgba(126, 236, 255, 0.24);
+  color: #b4f8ff;
   font-size: 12px;
   cursor: pointer;
+  padding: 5px 11px;
+  transition:
+    border-color 120ms ease,
+    color 120ms ease,
+    background 120ms ease;
+}
+
+.linkButton:hover,
+.linkButton:focus-visible {
+  color: #e5fcff;
+  border-color: rgba(126, 236, 255, 0.72);
+  background: rgba(16, 44, 67, 0.86);
+  outline: none;
 }
 
 .floatingOpen {

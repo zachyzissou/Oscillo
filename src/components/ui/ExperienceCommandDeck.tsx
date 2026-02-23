@@ -13,56 +13,72 @@ const KEY_OPTIONS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#',
 const SCALE_OPTIONS = ['major', 'minor', 'dorian', 'mixolydian', 'pentatonic', 'blues'] as const
 const MODE_OPTIONS = ['play', 'edit', 'record', 'sequence'] as const
 const PERF_OPTIONS = ['low', 'medium', 'high'] as const
+const ONBOARDING_TOTAL_STEPS = 3
 
 const readStoredDesktopExpanded = () => {
-  if (typeof window === 'undefined') return true
-  return window.localStorage.getItem(DECK_EXPANDED_KEY) !== 'false'
+  if (!('localStorage' in globalThis)) return true
+  return globalThis.localStorage.getItem(DECK_EXPANDED_KEY) !== 'false'
+}
+
+interface OnboardingStep {
+  id: 'scene' | 'palette' | 'tempo'
+  title: string
+  description: string
 }
 
 export default function ExperienceCommandDeck() {
-  const key = useMusicalPalette((s) => s.key)
-  const scale = useMusicalPalette((s) => s.scale)
-  const tempo = useMusicalPalette((s) => s.tempo)
-  const mode = useMusicalPalette((s) => s.mode)
-  const setKey = useMusicalPalette((s) => s.setKey)
-  const setScale = useMusicalPalette((s) => s.setScale)
-  const setTempo = useMusicalPalette((s) => s.setTempo)
-  const setMode = useMusicalPalette((s) => s.setMode)
+  const key = useMusicalPalette(s => s.key)
+  const scale = useMusicalPalette(s => s.scale)
+  const tempo = useMusicalPalette(s => s.tempo)
+  const mode = useMusicalPalette(s => s.mode)
+  const setKey = useMusicalPalette(s => s.setKey)
+  const setScale = useMusicalPalette(s => s.setScale)
+  const setTempo = useMusicalPalette(s => s.setTempo)
+  const setMode = useMusicalPalette(s => s.setMode)
 
-  const perfLevel = usePerformanceSettings((s) => s.level)
-  const setPerfLevel = usePerformanceSettings((s) => s.setLevel)
+  const perfLevel = usePerformanceSettings(s => s.level)
+  const setPerfLevel = usePerformanceSettings(s => s.setLevel)
 
   const [isMobile, setIsMobile] = useState(false)
   const [isExpanded, setIsExpanded] = useState(true)
   const [viewportReady, setViewportReady] = useState(false)
-  const [showHint, setShowHint] = useState(false)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+  const [onboardingStep, setOnboardingStep] = useState(0)
   const openButtonRef = useRef<HTMLButtonElement>(null)
   const keySelectRef = useRef<HTMLSelectElement>(null)
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
-    const seen = window.localStorage.getItem(ONBOARDING_KEY)
+    if (!('localStorage' in globalThis)) return
+
+    const params = new URLSearchParams(globalThis.location.search)
+    if (params.get('onboarding') === 'reset') {
+      globalThis.localStorage.removeItem(ONBOARDING_KEY)
+    }
+
+    const seen = globalThis.localStorage.getItem(ONBOARDING_KEY) === 'true'
     if (!seen) {
-      setShowHint(true)
+      setShowOnboarding(true)
+      setOnboardingStep(0)
     }
   }, [])
 
   const modeLabel = useMemo(() => mode.charAt(0).toUpperCase() + mode.slice(1), [mode])
 
-  const dismissHint = () => {
-    setShowHint(false)
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem(ONBOARDING_KEY, 'true')
+  const completeOnboarding = useCallback(() => {
+    setShowOnboarding(false)
+    setOnboardingStep(0)
+    if ('localStorage' in globalThis) {
+      globalThis.localStorage.setItem(ONBOARDING_KEY, 'true')
     }
-  }
+  }, [])
 
   const wrapperClass = `${styles.deck} ${isMobile ? styles.mobile : styles.desktop} ${
     viewportReady ? '' : styles.unresolved
   }`
 
   const queueFocus = useCallback((target: 'open' | 'primary') => {
-    if (typeof window === 'undefined') return
-    window.requestAnimationFrame(() => {
+    if (!('requestAnimationFrame' in globalThis)) return
+    globalThis.requestAnimationFrame(() => {
       if (target === 'open') {
         openButtonRef.current?.focus()
         return
@@ -82,10 +98,52 @@ export default function ExperienceCommandDeck() {
     queueFocus('open')
   }
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
+  const onboardingSteps = useMemo<OnboardingStep[]>(
+    () => [
+      {
+        id: 'scene',
+        title: 'Step 1: Trigger the scene',
+        description: isMobile
+          ? 'Tap glowing particles to hear notes and wake the atmosphere.'
+          : 'Click glowing particles to hear notes and wake the atmosphere.',
+      },
+      {
+        id: 'palette',
+        title: 'Step 2: Shape harmony',
+        description: isExpanded
+          ? 'Use Key and Scale controls to instantly shift the tonal mood.'
+          : 'Open the deck, then use Key and Scale to shift the tonal mood.',
+      },
+      {
+        id: 'tempo',
+        title: 'Step 3: Set momentum',
+        description: isExpanded
+          ? 'Adjust Tempo and performance profile to match your device and vibe.'
+          : 'Open the deck, then adjust Tempo and performance profile to lock your groove.',
+      },
+    ],
+    [isExpanded, isMobile]
+  )
 
-    const media = window.matchMedia(MOBILE_BREAKPOINT)
+  const currentOnboardingStep = onboardingSteps[onboardingStep]
+  const needsExpandedDeckForStep =
+    currentOnboardingStep?.id === 'palette' || currentOnboardingStep?.id === 'tempo'
+  const adjustedTempo = tempo >= 188 ? Math.max(60, tempo - 12) : Math.min(200, tempo + 12)
+  const tempoNudgeLabel =
+    adjustedTempo > tempo ? `Boost to ${adjustedTempo} BPM` : `Ease to ${adjustedTempo} BPM`
+
+  const handleOnboardingNext = () => {
+    if (onboardingStep >= ONBOARDING_TOTAL_STEPS - 1) {
+      completeOnboarding()
+      return
+    }
+    setOnboardingStep(prev => Math.min(prev + 1, ONBOARDING_TOTAL_STEPS - 1))
+  }
+
+  useEffect(() => {
+    if (!('matchMedia' in globalThis)) return
+
+    const media = globalThis.matchMedia(MOBILE_BREAKPOINT)
     const applyMode = (matches: boolean) => {
       setIsMobile(matches)
       setIsExpanded(matches ? false : readStoredDesktopExpanded())
@@ -100,12 +158,12 @@ export default function ExperienceCommandDeck() {
   }, [])
 
   useEffect(() => {
-    if (typeof window === 'undefined' || isMobile || !viewportReady) return
-    window.localStorage.setItem(DECK_EXPANDED_KEY, String(isExpanded))
+    if (!('localStorage' in globalThis) || isMobile || !viewportReady) return
+    globalThis.localStorage.setItem(DECK_EXPANDED_KEY, String(isExpanded))
   }, [isExpanded, isMobile, viewportReady])
 
   useEffect(() => {
-    if (typeof window === 'undefined') return
+    if (!('addEventListener' in globalThis)) return
 
     const onKeyDown = (event: KeyboardEvent) => {
       const target = event.target as HTMLElement | null
@@ -117,7 +175,7 @@ export default function ExperienceCommandDeck() {
 
       if (event.key === 'Escape') {
         if (isTypingContext) return
-        setIsExpanded((prev) => {
+        setIsExpanded(prev => {
           if (!prev) return prev
           queueFocus('open')
           return false
@@ -129,15 +187,15 @@ export default function ExperienceCommandDeck() {
 
       if (isTypingContext) return
       event.preventDefault()
-      setIsExpanded((prev) => {
+      setIsExpanded(prev => {
         const next = !prev
         queueFocus(next ? 'primary' : 'open')
         return next
       })
     }
 
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+    globalThis.addEventListener('keydown', onKeyDown)
+    return () => globalThis.removeEventListener('keydown', onKeyDown)
   }, [queueFocus])
 
   return (
@@ -167,7 +225,11 @@ export default function ExperienceCommandDeck() {
         <div className={styles.shell} id="experience-deck-shell">
           <header className={styles.header}>
             <div className={styles.titleWrap}>
-              <span className={styles.pulse} data-testid="deck-pulse-indicator" aria-hidden="true" />
+              <span
+                className={styles.pulse}
+                data-testid="deck-pulse-indicator"
+                aria-hidden="true"
+              />
               <div>
                 <h2 className={styles.title}>Command Deck</h2>
                 <p className={styles.subtitle}>{modeLabel} mode | Press T to toggle</p>
@@ -196,9 +258,9 @@ export default function ExperienceCommandDeck() {
                   value={key}
                   className={styles.select}
                   data-testid="key-select"
-                  onChange={(event) => setKey(event.target.value as (typeof KEY_OPTIONS)[number])}
+                  onChange={event => setKey(event.target.value as (typeof KEY_OPTIONS)[number])}
                 >
-                  {KEY_OPTIONS.map((value) => (
+                  {KEY_OPTIONS.map(value => (
                     <option key={value} value={value}>
                       {value}
                     </option>
@@ -212,9 +274,9 @@ export default function ExperienceCommandDeck() {
                   value={scale}
                   className={styles.select}
                   data-testid="scale-select"
-                  onChange={(event) => setScale(event.target.value as (typeof SCALE_OPTIONS)[number])}
+                  onChange={event => setScale(event.target.value as (typeof SCALE_OPTIONS)[number])}
                 >
-                  {SCALE_OPTIONS.map((value) => (
+                  {SCALE_OPTIONS.map(value => (
                     <option key={value} value={value}>
                       {value.charAt(0).toUpperCase() + value.slice(1)}
                     </option>
@@ -236,7 +298,7 @@ export default function ExperienceCommandDeck() {
                 value={tempo}
                 data-testid="tempo-slider"
                 className={styles.slider}
-                onChange={(event) => setTempo(Number(event.target.value))}
+                onChange={event => setTempo(Number(event.target.value))}
                 aria-label="Tempo"
               />
             </div>
@@ -248,9 +310,11 @@ export default function ExperienceCommandDeck() {
                 data-testid="performance-level"
                 className={styles.select}
                 aria-label="Performance level"
-                onChange={(event) => setPerfLevel(event.target.value as (typeof PERF_OPTIONS)[number])}
+                onChange={event =>
+                  setPerfLevel(event.target.value as (typeof PERF_OPTIONS)[number])
+                }
               >
-                {PERF_OPTIONS.map((value) => (
+                {PERF_OPTIONS.map(value => (
                   <option key={value} value={value}>
                     {value.charAt(0).toUpperCase() + value.slice(1)}
                   </option>
@@ -261,7 +325,7 @@ export default function ExperienceCommandDeck() {
             <div className={styles.field}>
               <span className={styles.label}>Quick Quality Switch</span>
               <div className={styles.segment}>
-                {PERF_OPTIONS.map((value) => (
+                {PERF_OPTIONS.map(value => (
                   <button
                     key={value}
                     type="button"
@@ -278,7 +342,7 @@ export default function ExperienceCommandDeck() {
             <div className={styles.field}>
               <span className={styles.label}>Mode</span>
               <div className={styles.modePills}>
-                {MODE_OPTIONS.map((value) => (
+                {MODE_OPTIONS.map(value => (
                   <button
                     key={value}
                     type="button"
@@ -293,16 +357,64 @@ export default function ExperienceCommandDeck() {
               </div>
             </div>
 
-            {showHint && (
-              <div className={styles.hint} role="status" aria-live="polite">
-                <strong>First move:</strong> click a few particles, then switch scale and tempo to hear the
-                scene evolve in real time.
+            {showOnboarding && currentOnboardingStep && (
+              <output className={styles.hint} aria-live="polite" data-testid="deck-onboarding">
+                <div className={styles.hintTop}>
+                  <strong>{currentOnboardingStep.title}</strong>
+                  <span className={styles.hintProgress}>
+                    {onboardingStep + 1}/{ONBOARDING_TOTAL_STEPS}
+                  </span>
+                </div>
+                <p className={styles.hintCopy}>{currentOnboardingStep.description}</p>
                 <div className={styles.hintActions}>
-                  <button type="button" className={styles.linkButton} onClick={dismissHint}>
-                    Got it
+                  <button
+                    type="button"
+                    className={styles.linkButton}
+                    data-testid="deck-onboarding-skip"
+                    onClick={completeOnboarding}
+                  >
+                    Skip
+                  </button>
+                  {needsExpandedDeckForStep && !isExpanded && (
+                    <button
+                      type="button"
+                      className={styles.linkButton}
+                      data-testid="deck-onboarding-open-controls"
+                      onClick={handleExpand}
+                    >
+                      Open controls
+                    </button>
+                  )}
+                  {currentOnboardingStep.id === 'palette' && isExpanded && (
+                    <button
+                      type="button"
+                      className={styles.linkButton}
+                      data-testid="deck-onboarding-focus-key"
+                      onClick={() => keySelectRef.current?.focus()}
+                    >
+                      Focus key
+                    </button>
+                  )}
+                  {currentOnboardingStep.id === 'tempo' && isExpanded && (
+                    <button
+                      type="button"
+                      className={styles.linkButton}
+                      data-testid="deck-onboarding-tempo-nudge"
+                      onClick={() => setTempo(adjustedTempo)}
+                    >
+                      {tempoNudgeLabel}
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className={styles.linkButton}
+                    data-testid="deck-onboarding-next"
+                    onClick={handleOnboardingNext}
+                  >
+                    {onboardingStep >= ONBOARDING_TOTAL_STEPS - 1 ? 'Finish' : 'Next'}
                   </button>
                 </div>
-              </div>
+              </output>
             )}
           </div>
         </div>
