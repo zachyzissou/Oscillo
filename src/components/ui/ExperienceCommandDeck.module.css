@@ -102,6 +102,10 @@
 .snapPoints {
   display: flex;
   gap: 7px;
+  border: 0;
+  margin: 0;
+  min-inline-size: 0;
+  padding: 0;
 }
 
 .snapPoints button {
@@ -126,7 +130,19 @@
 .snapActive {
   border-color: rgba(117, 244, 255, 0.74) !important;
   background: linear-gradient(140deg, rgba(31, 208, 255, 0.2), rgba(59, 129, 255, 0.22)) !important;
-  color: #ffffff !important;
+  color: #051722 !important;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  border: 0;
+  padding: 0;
+  clip-path: inset(100%);
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .header {

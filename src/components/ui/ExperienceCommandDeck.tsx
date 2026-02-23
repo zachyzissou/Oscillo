@@ -42,6 +42,98 @@ interface OnboardingStep {
   description: string
 }
 
+interface DeckHotkeyHandlers {
+  adjustTempo: (delta: number) => void
+  cycleMode: () => void
+  isExpanded: boolean
+  isMobile: boolean
+  queueFocus: (target: 'open' | 'primary') => void
+  setDesktopExpanded: (value: boolean | ((prev: boolean) => boolean)) => void
+  setMobileSnapPoint: (nextSnap: MobileSnapPoint) => void
+}
+
+const isTypingContextTarget = (target: EventTarget | null) => {
+  if (!(target instanceof HTMLElement)) return false
+  return (
+    target.tagName === 'INPUT' ||
+    target.tagName === 'TEXTAREA' ||
+    target.tagName === 'SELECT' ||
+    target.isContentEditable
+  )
+}
+
+const handleDeckHotkeys = (event: KeyboardEvent, handlers: DeckHotkeyHandlers) => {
+  if (isTypingContextTarget(event.target)) return
+
+  if (event.key === 'Escape') {
+    if (!handlers.isExpanded) return
+    if (handlers.isMobile) {
+      handlers.setMobileSnapPoint('collapsed')
+      return
+    }
+
+    handlers.setDesktopExpanded(false)
+    handlers.queueFocus('open')
+    return
+  }
+
+  if (event.key.toLowerCase() === 'm') {
+    event.preventDefault()
+    handlers.cycleMode()
+    return
+  }
+
+  if (event.key === '[') {
+    event.preventDefault()
+    handlers.adjustTempo(-TEMPO_STEP)
+    return
+  }
+
+  if (event.key === ']') {
+    event.preventDefault()
+    handlers.adjustTempo(TEMPO_STEP)
+    return
+  }
+
+  if (event.key.toLowerCase() !== 't') return
+
+  event.preventDefault()
+  if (handlers.isMobile) {
+    handlers.setMobileSnapPoint(handlers.isExpanded ? 'collapsed' : 'peek')
+    return
+  }
+
+  handlers.setDesktopExpanded(prev => {
+    const next = !prev
+    handlers.queueFocus(next ? 'primary' : 'open')
+    return next
+  })
+}
+
+const buildOnboardingSteps = (isMobile: boolean, isExpanded: boolean): OnboardingStep[] => [
+  {
+    id: 'scene',
+    title: 'Step 1: Trigger the scene',
+    description: isMobile
+      ? 'Tap glowing particles to hear notes and wake the atmosphere.'
+      : 'Click glowing particles to hear notes and wake the atmosphere.',
+  },
+  {
+    id: 'palette',
+    title: 'Step 2: Shape harmony',
+    description: isExpanded
+      ? 'Use Key and Scale controls to instantly shift the tonal mood.'
+      : 'Open the deck, then use Key and Scale to shift the tonal mood.',
+  },
+  {
+    id: 'tempo',
+    title: 'Step 3: Set momentum',
+    description: isExpanded
+      ? 'Adjust Tempo and performance profile to match your device and vibe.'
+      : 'Open the deck, then adjust Tempo and performance profile to lock your groove.',
+  },
+]
+
 export default function ExperienceCommandDeck() {
   const key = useMusicalPalette(s => s.key)
   const scale = useMusicalPalette(s => s.scale)
@@ -149,29 +241,7 @@ export default function ExperienceCommandDeck() {
   }, [mode, setMode])
 
   const onboardingSteps = useMemo<OnboardingStep[]>(
-    () => [
-      {
-        id: 'scene',
-        title: 'Step 1: Trigger the scene',
-        description: isMobile
-          ? 'Tap glowing particles to hear notes and wake the atmosphere.'
-          : 'Click glowing particles to hear notes and wake the atmosphere.',
-      },
-      {
-        id: 'palette',
-        title: 'Step 2: Shape harmony',
-        description: isExpanded
-          ? 'Use Key and Scale controls to instantly shift the tonal mood.'
-          : 'Open the deck, then use Key and Scale to shift the tonal mood.',
-      },
-      {
-        id: 'tempo',
-        title: 'Step 3: Set momentum',
-        description: isExpanded
-          ? 'Adjust Tempo and performance profile to match your device and vibe.'
-          : 'Open the deck, then adjust Tempo and performance profile to lock your groove.',
-      },
-    ],
+    () => buildOnboardingSteps(isMobile, isExpanded),
     [isExpanded, isMobile]
   )
 
@@ -225,68 +295,35 @@ export default function ExperienceCommandDeck() {
   useEffect(() => {
     if (!('addEventListener' in globalThis)) return
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      const target = event.target as HTMLElement | null
-      const isTypingContext =
-        target?.tagName === 'INPUT' ||
-        target?.tagName === 'TEXTAREA' ||
-        target?.tagName === 'SELECT' ||
-        target?.isContentEditable
-
-      if (isTypingContext) return
-
-      if (event.key === 'Escape') {
-        if (!isExpanded) return
-        if (isMobile) {
-          setMobileSnapPoint('collapsed')
-          return
-        }
-
-        setDesktopExpanded(false)
-        queueFocus('open')
-        return
-      }
-
-      if (event.key.toLowerCase() === 'm') {
-        event.preventDefault()
-        cycleMode()
-        return
-      }
-
-      if (event.key === '[') {
-        event.preventDefault()
-        adjustTempo(-TEMPO_STEP)
-        return
-      }
-
-      if (event.key === ']') {
-        event.preventDefault()
-        adjustTempo(TEMPO_STEP)
-        return
-      }
-
-      if (event.key.toLowerCase() === 't') {
-        event.preventDefault()
-        if (isMobile) {
-          setMobileSnapPoint(isExpanded ? 'collapsed' : 'peek')
-          return
-        }
-
-        setDesktopExpanded(prev => {
-          const next = !prev
-          queueFocus(next ? 'primary' : 'open')
-          return next
-        })
-      }
-    }
+    const onKeyDown = (event: KeyboardEvent) =>
+      handleDeckHotkeys(event, {
+        adjustTempo,
+        cycleMode,
+        isExpanded,
+        isMobile,
+        queueFocus,
+        setDesktopExpanded,
+        setMobileSnapPoint,
+      })
 
     globalThis.addEventListener('keydown', onKeyDown)
     return () => globalThis.removeEventListener('keydown', onKeyDown)
   }, [adjustTempo, cycleMode, isExpanded, isMobile, queueFocus, setMobileSnapPoint])
 
-  const shellClass = `${styles.shell} ${
-    isMobile ? (mobileSnap === 'full' ? styles.shellFull : styles.shellPeek) : ''
-  }`
+  const mobileShellClass = useMemo(() => {
+    if (!isMobile) return ''
+    if (mobileSnap === 'full') return styles.shellFull
+    return styles.shellPeek
+  }, [isMobile, mobileSnap])
+
+  const shellClass = `${styles.shell} ${mobileShellClass}`
+
+  const railToggleLabel = useMemo(() => {
+    if (isMobile) {
+      return isExpanded ? 'Hide sheet' : 'Show sheet'
+    }
+    return isExpanded ? 'Hide controls' : 'Show controls'
+  }, [isExpanded, isMobile])
 
   return (
     <aside
@@ -309,13 +346,7 @@ export default function ExperienceCommandDeck() {
           aria-controls="experience-deck-shell"
           onClick={isExpanded ? handleCollapse : handleExpand}
         >
-          {isExpanded
-            ? isMobile
-              ? 'Hide sheet'
-              : 'Hide controls'
-            : isMobile
-              ? 'Show sheet'
-              : 'Show controls'}
+          {railToggleLabel}
         </button>
         <button
           type="button"
@@ -367,12 +398,8 @@ export default function ExperienceCommandDeck() {
           {isMobile && (
             <div className={styles.sheetControls}>
               <span className={styles.sheetHandle} aria-hidden="true" />
-              <div
-                className={styles.snapPoints}
-                role="group"
-                aria-label="Bottom sheet snap points"
-                data-testid="deck-snap-points"
-              >
+              <fieldset className={styles.snapPoints} data-testid="deck-snap-points">
+                <legend className={styles.visuallyHidden}>Bottom sheet snap points</legend>
                 <button
                   type="button"
                   data-testid="deck-snap-collapsed"
@@ -397,7 +424,7 @@ export default function ExperienceCommandDeck() {
                 >
                   Full
                 </button>
-              </div>
+              </fieldset>
             </div>
           )}
           <header className={styles.header}>
