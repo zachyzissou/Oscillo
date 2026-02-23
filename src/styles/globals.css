@@ -63,6 +63,33 @@
   --oscillo-secondary: 217 91% 60%;
   --oscillo-warning: 38 92% 50%;
   --oscillo-danger: 0 84% 60%;
+
+  /* Tokenized primitive layer */
+  --ui-radius-sm: 14px;
+  --ui-radius-md: 18px;
+  --ui-radius-lg: 22px;
+  --ui-radius-xl: 28px;
+  --ui-border-subtle: rgba(120, 236, 255, 0.28);
+  --ui-surface-elevated:
+    linear-gradient(155deg, rgba(10, 16, 32, 0.95), rgba(6, 10, 20, 0.94)),
+    rgba(0, 0, 0, 0.5);
+  --ui-shadow-elevated:
+    0 14px 30px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(138, 246, 255, 0.1) inset,
+    0 0 24px rgba(0, 208, 255, 0.14);
+  --ui-button-primary-bg: linear-gradient(140deg, #43f5ff 0%, #1bd7f4 65%, #47f6ff 100%);
+  --ui-button-primary-fg: #001017;
+  --ui-button-primary-shadow:
+    0 8px 20px rgba(0, 219, 255, 0.28),
+    0 0 0 1px rgba(255, 255, 255, 0.28) inset;
+  --ui-button-secondary-bg: rgba(12, 23, 40, 0.5);
+  --ui-button-secondary-fg: #e4f7ff;
+  --ui-button-secondary-border: rgba(188, 234, 255, 0.45);
+  --ui-button-secondary-border-hover: rgba(180, 238, 255, 0.8);
+  --ui-button-ghost-bg: rgba(14, 28, 48, 0.42);
+  --ui-button-ghost-fg: rgba(218, 244, 255, 0.92);
+  --ui-button-ghost-border: rgba(188, 234, 255, 0.35);
+  --ui-button-ghost-border-hover: rgba(180, 238, 255, 0.66);
 }
 
 /* Accessibility-aware motion */
@@ -93,6 +120,11 @@
     --a11y-focus-outline-color: #ffffff;
     --a11y-focus-outline-width: 3px;
     --a11y-focus-outline-offset: 3px;
+    --ui-border-subtle: rgba(255, 255, 255, 0.82);
+    --ui-button-secondary-border: rgba(255, 255, 255, 0.82);
+    --ui-button-secondary-border-hover: rgba(255, 255, 255, 1);
+    --ui-button-ghost-border: rgba(255, 255, 255, 0.78);
+    --ui-button-ghost-border-hover: rgba(255, 255, 255, 1);
   }
 }
 
