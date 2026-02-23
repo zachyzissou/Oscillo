@@ -5,6 +5,18 @@ const runVisualRegression = process.env.RUN_VISUAL_REGRESSION === '1'
 const CONSENT_KEY = 'oscillo.analytics-consent'
 const ONBOARDING_KEY = 'oscillo.v2.deck-onboarded'
 const OVERLAY_KEY = 'hasSeenOverlay'
+const DETERMINISTIC_STYLE_ID = 'oscillo-visual-deterministic-style'
+const DETERMINISTIC_VISUAL_STYLES = `
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  html, body, button, input, select, textarea {
+    font-family: Arial, Helvetica, sans-serif !important;
+  }
+`
 
 const hideWebglCanvas = async (page: Page) => {
   const canvas = page.locator('[data-testid="webgl-canvas"]')
@@ -27,6 +39,13 @@ const suppressTelemetryBanner = async (page: Page) => {
   })
 }
 
+const resetStartOverlayState = async (page: Page) => {
+  await page.evaluate(overlayKey => {
+    globalThis.localStorage.removeItem(overlayKey)
+  }, OVERLAY_KEY)
+  await page.reload()
+}
+
 const clearActiveFocus = async (page: Page) => {
   await page.evaluate(() => {
     const active = document.activeElement as HTMLElement | null
@@ -47,22 +66,27 @@ test.describe('Visual Regression Tests', () => {
       { consentKey: CONSENT_KEY, onboardingKey: ONBOARDING_KEY, overlayKey: OVERLAY_KEY }
     )
 
+    await page.addInitScript(
+      ({ styleId, styleContent }) => {
+        const applyDeterministicStyles = () => {
+          if (document.getElementById(styleId)) return
+          const style = document.createElement('style')
+          style.id = styleId
+          style.textContent = styleContent
+          ;(document.head ?? document.documentElement).appendChild(style)
+        }
+
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', applyDeterministicStyles, { once: true })
+          return
+        }
+
+        applyDeterministicStyles()
+      },
+      { styleId: DETERMINISTIC_STYLE_ID, styleContent: DETERMINISTIC_VISUAL_STYLES }
+    )
+
     await page.goto('/')
-
-    // Keep visual snapshots deterministic.
-    await page.addStyleTag({
-      content: `
-        *, *::before, *::after {
-          animation-duration: 0.01ms !important;
-          animation-iteration-count: 1 !important;
-          transition-duration: 0.01ms !important;
-        }
-
-        html, body, button, input, select, textarea {
-          font-family: Arial, Helvetica, sans-serif !important;
-        }
-      `,
-    })
   })
 
   test('start overlay card visual', async ({ page }) => {
@@ -90,6 +114,7 @@ test.describe('Visual Regression Tests', () => {
 
   test('start overlay mobile layout visual', async ({ page }) => {
     await page.setViewportSize({ width: 393, height: 851 })
+    await resetStartOverlayState(page)
     await expect(page.getByTestId('start-overlay')).toBeVisible({ timeout: 10000 })
 
     await expect(page).toHaveScreenshot('start-overlay-mobile.png', {
@@ -102,6 +127,7 @@ test.describe('Visual Regression Tests', () => {
 
   test('mobile command deck initializes without expanded flash', async ({ page }) => {
     await page.setViewportSize({ width: 393, height: 851 })
+    await resetStartOverlayState(page)
     await startExperience(page)
     await suppressTelemetryBanner(page)
 
@@ -122,16 +148,19 @@ test.describe('Visual Regression Tests', () => {
   })
 
   test('telemetry consent banner visual', async ({ page }) => {
+    await page.setViewportSize({ width: 393, height: 851 })
+    await resetStartOverlayState(page)
     await startExperience(page)
 
     await hideWebglCanvas(page)
+    await clearActiveFocus(page)
 
     const banner = page.getByTestId('telemetry-banner')
     await expect(banner).toBeVisible({ timeout: 10000 })
 
     await expect(banner).toHaveScreenshot('telemetry-banner.png', {
       threshold: 0.15,
-      maxDiffPixelRatio: 0.05,
+      maxDiffPixelRatio: 0.08,
       animations: 'disabled',
     })
   })

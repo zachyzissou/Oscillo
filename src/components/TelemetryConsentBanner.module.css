@@ -4,17 +4,12 @@
   bottom: 16px;
   z-index: 90;
   width: min(340px, calc(100vw - 32px));
-  border-radius: 18px;
+  border-radius: var(--ui-radius-md);
   padding: 14px;
-  color: #f3fbff;
-  border: 1px solid rgba(119, 241, 255, 0.22);
-  background:
-    linear-gradient(155deg, rgba(10, 16, 32, 0.95), rgba(6, 10, 20, 0.94)),
-    rgba(0, 0, 0, 0.5);
-  box-shadow:
-    0 14px 30px rgba(0, 0, 0, 0.5),
-    0 0 0 1px rgba(138, 246, 255, 0.1) inset,
-    0 0 24px rgba(0, 208, 255, 0.14);
+  color: var(--ui-text-primary);
+  border: 1px solid var(--ui-border-subtle);
+  background: var(--ui-surface-elevated);
+  box-shadow: var(--ui-shadow-elevated);
   backdrop-filter: blur(12px);
   animation: bannerEnter var(--motion-duration-slow) var(--motion-ease-standard);
   transition:
@@ -24,6 +19,7 @@
 
 .title {
   margin: 0;
+  font-family: var(--ui-font-display);
   font-size: 16px;
   line-height: 1.3;
 }
@@ -33,7 +29,7 @@
   margin-bottom: 0;
   font-size: 13px;
   line-height: 1.45;
-  color: rgba(224, 244, 255, 0.82);
+  color: var(--ui-text-secondary);
 }
 
 .actions {
@@ -48,54 +44,11 @@
 .details {
   border-radius: 999px;
   padding: 7px 14px;
+  font-family: var(--ui-font-display);
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.01em;
-  cursor: pointer;
-  transition:
-    transform var(--motion-duration-fast) var(--motion-ease-emphasis),
-    box-shadow var(--motion-duration-fast) var(--motion-ease-standard),
-    border-color var(--motion-duration-fast) var(--motion-ease-standard),
-    background var(--motion-duration-fast) var(--motion-ease-standard),
-    filter var(--motion-duration-fast) var(--motion-ease-standard);
-}
-
-.allow {
-  border: 0;
-  color: #001017;
-  background: linear-gradient(140deg, #43f5ff 0%, #1bd7f4 65%, #47f6ff 100%);
-  box-shadow:
-    0 8px 20px rgba(0, 219, 255, 0.28),
-    0 0 0 1px rgba(255, 255, 255, 0.28) inset;
-}
-
-.deny {
-  border: 1px solid rgba(188, 234, 255, 0.45);
-  color: #e4f7ff;
-  background: rgba(12, 23, 40, 0.5);
-}
-
-.details {
-  border: 1px solid rgba(188, 234, 255, 0.35);
-  color: rgba(218, 244, 255, 0.92);
-  background: rgba(14, 28, 48, 0.42);
   padding-inline: 12px;
-}
-
-.allow:hover,
-.deny:hover,
-.deny:focus-visible,
-.details:hover,
-.details:focus-visible {
-  transform: translateY(var(--motion-lift-distance));
-  filter: brightness(var(--motion-focus-brightness));
-}
-
-.allow:hover,
-.allow:focus-visible {
-  box-shadow:
-    0 10px 22px rgba(0, 219, 255, 0.36),
-    0 0 0 2px rgba(198, 249, 255, 0.85) inset;
 }
 
 .allow:focus-visible,
@@ -105,26 +58,14 @@
   outline-offset: var(--a11y-focus-outline-offset);
 }
 
-.deny:hover,
-.deny:focus-visible {
-  border-color: rgba(180, 238, 255, 0.8);
-  background: rgba(24, 38, 62, 0.72);
-}
-
-.details:hover,
-.details:focus-visible {
-  border-color: rgba(180, 238, 255, 0.66);
-  background: rgba(26, 42, 68, 0.66);
-}
-
 .detailsPanel {
   margin-top: 10px;
   display: grid;
   gap: 6px;
   padding: 9px 10px;
-  border-radius: 12px;
+  border-radius: var(--ui-radius-sm);
   border: 1px solid rgba(126, 227, 255, 0.24);
-  background: rgba(8, 19, 34, 0.74);
+  background: var(--ui-surface-subtle);
 }
 
 .footnote {
@@ -132,7 +73,7 @@
   margin-bottom: 0;
   font-size: 12px;
   line-height: 1.4;
-  color: rgba(208, 236, 255, 0.7);
+  color: var(--ui-text-muted);
 }
 
 @keyframes bannerEnter {
@@ -165,10 +106,5 @@
     box-shadow:
       0 10px 18px rgba(0, 0, 0, 0.54),
       0 0 0 1px rgba(166, 245, 255, 0.22) inset;
-  }
-
-  .allow,
-  .deny {
-    box-shadow: none;
   }
 }

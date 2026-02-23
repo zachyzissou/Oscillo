@@ -1,8 +1,8 @@
 .deck {
   position: fixed;
   z-index: 70;
-  color: #ecf7ff;
-  font-family: "Space Grotesk", "Sora", "Avenir Next", "Segoe UI", sans-serif;
+  color: var(--ui-text-primary);
+  font-family: var(--ui-font-display);
 }
 
 .unresolved {
@@ -33,9 +33,9 @@
 
 .railButton {
   border-radius: 999px;
-  border: 1px solid rgba(136, 227, 255, 0.28);
-  background: rgba(9, 24, 41, 0.84);
-  color: #d9f5ff;
+  border: 1px solid var(--ui-border-subtle);
+  background: var(--ui-surface-subtle);
+  color: var(--ui-text-secondary);
   font-size: 11px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -49,22 +49,22 @@
 }
 
 .railPrimary {
-  border-color: rgba(113, 240, 255, 0.52);
-  background: linear-gradient(130deg, rgba(19, 102, 155, 0.9), rgba(4, 69, 111, 0.86));
+  border-color: var(--ui-border-strong);
+  background: linear-gradient(130deg, rgba(16, 84, 128, 0.92), rgba(6, 54, 88, 0.88));
 }
 
 .railButton:hover {
   transform: translateY(var(--motion-lift-distance));
-  border-color: rgba(134, 241, 255, 0.84);
-  color: #ffffff;
-  background: rgba(19, 45, 69, 0.95);
+  border-color: var(--ui-border-strong);
+  color: var(--ui-text-primary);
+  background: rgba(15, 35, 58, 0.9);
 }
 
 .railButton:focus-visible {
   transform: translateY(var(--motion-lift-distance));
-  border-color: rgba(134, 241, 255, 0.84);
-  color: #ffffff;
-  background: rgba(19, 45, 69, 0.95);
+  border-color: var(--ui-border-strong);
+  color: var(--ui-text-primary);
+  background: rgba(15, 35, 58, 0.9);
   outline: var(--a11y-focus-outline-width) solid var(--a11y-focus-outline-color);
   outline-offset: var(--a11y-focus-outline-offset);
 }
@@ -72,16 +72,11 @@
 .shell {
   display: flex;
   flex-direction: column;
-  border-radius: 20px;
-  border: 1px solid rgba(118, 237, 255, 0.35);
-  background:
-    linear-gradient(165deg, rgba(14, 20, 38, 0.94) 0%, rgba(8, 11, 24, 0.93) 100%),
-    rgba(0, 0, 0, 0.5);
+  border-radius: var(--ui-radius-lg);
+  border: 1px solid var(--ui-border-subtle);
+  background: var(--ui-surface-elevated);
   backdrop-filter: blur(16px);
-  box-shadow:
-    0 14px 28px rgba(0, 0, 0, 0.46),
-    0 0 0 1px rgba(143, 247, 255, 0.1) inset,
-    0 0 24px rgba(0, 209, 255, 0.2);
+  box-shadow: var(--ui-shadow-elevated);
   overflow: hidden;
   animation: deckEnter var(--motion-duration-slow) var(--motion-ease-standard);
   transition:
@@ -102,7 +97,7 @@
   display: grid;
   gap: 8px;
   padding: 10px 12px 8px;
-  background: linear-gradient(150deg, rgba(10, 20, 34, 0.9), rgba(10, 18, 30, 0.9));
+  background: var(--ui-surface-subtle);
   border-bottom: 1px solid rgba(144, 235, 255, 0.1);
 }
 
@@ -170,7 +165,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px 14px;
-  background: linear-gradient(120deg, rgba(9, 25, 40, 0.9), rgba(11, 17, 31, 0.9));
+  background: var(--ui-surface-subtle);
   border-bottom: 1px solid rgba(146, 246, 255, 0.12);
 }
 
@@ -235,7 +230,7 @@
   margin: 0;
   font-size: 11px;
   letter-spacing: 0.06em;
-  color: rgba(202, 237, 255, 0.62);
+  color: var(--ui-text-muted);
 }
 
 .headerActions {
@@ -246,10 +241,10 @@
 
 .iconButton,
 .openButton {
-  border: 1px solid rgba(145, 240, 255, 0.4);
+  border: 1px solid var(--ui-border-subtle);
   border-radius: 999px;
-  background: rgba(8, 29, 43, 0.78);
-  color: #d7f9ff;
+  background: var(--ui-surface-subtle);
+  color: var(--ui-text-secondary);
   cursor: pointer;
   transition:
     transform var(--motion-duration-fast) var(--motion-ease-emphasis),
@@ -276,7 +271,7 @@
 .openButton:hover {
   transform: translateY(var(--motion-lift-distance));
   filter: brightness(var(--motion-focus-brightness));
-  border-color: rgba(123, 246, 255, 0.8);
+  border-color: var(--ui-border-strong);
   background: rgba(12, 42, 61, 0.92);
 }
 
@@ -284,7 +279,7 @@
 .openButton:focus-visible {
   transform: translateY(var(--motion-lift-distance));
   filter: brightness(var(--motion-focus-brightness));
-  border-color: rgba(123, 246, 255, 0.8);
+  border-color: var(--ui-border-strong);
   background: rgba(12, 42, 61, 0.92);
   outline: var(--a11y-focus-outline-width) solid var(--a11y-focus-outline-color);
   outline-offset: var(--a11y-focus-outline-offset);
@@ -300,10 +295,10 @@
 }
 
 .primaryWorkflow {
-  border: 1px solid rgba(98, 234, 255, 0.42);
+  border: 1px solid var(--ui-border-strong);
   border-radius: 14px;
   padding: 11px 12px;
-  background: linear-gradient(140deg, rgba(10, 38, 59, 0.8), rgba(8, 17, 32, 0.9));
+  background: var(--ui-surface-subtle);
   box-shadow:
     0 0 0 1px rgba(130, 240, 255, 0.12) inset,
     0 0 18px rgba(46, 229, 255, 0.12);
@@ -321,7 +316,7 @@
   margin: 6px 0 0;
   font-size: 15px;
   letter-spacing: 0.03em;
-  color: #f2fbff;
+  color: var(--ui-text-primary);
 }
 
 .primaryList {
@@ -336,7 +331,7 @@
   gap: 2px;
   font-size: 12px;
   line-height: 1.4;
-  color: rgba(224, 247, 255, 0.84);
+  color: var(--ui-text-secondary);
 }
 
 .primaryList li strong {
@@ -361,7 +356,7 @@
   font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 0.09em;
-  color: rgba(197, 235, 255, 0.64);
+  color: var(--ui-text-muted);
 }
 
 .select,
@@ -370,10 +365,10 @@
 }
 
 .select {
-  border: 1px solid rgba(135, 226, 255, 0.28);
+  border: 1px solid var(--ui-border-subtle);
   border-radius: 10px;
-  background: rgba(7, 16, 33, 0.88);
-  color: #ecf7ff;
+  background: var(--ui-surface-subtle);
+  color: var(--ui-text-primary);
   font-size: 13px;
   padding: 8px 10px;
 }
@@ -467,10 +462,10 @@
 .secondaryControls {
   display: grid;
   gap: 12px;
-  border: 1px solid rgba(121, 209, 238, 0.2);
+  border: 1px solid var(--ui-border-subtle);
   border-radius: 12px;
   padding: 12px;
-  background: rgba(8, 17, 29, 0.66);
+  background: rgba(8, 17, 29, 0.48);
 }
 
 .secondaryHeader {
@@ -489,7 +484,7 @@
 .secondaryHeader p {
   margin: 0;
   font-size: 11px;
-  color: rgba(178, 217, 230, 0.62);
+  color: var(--ui-text-muted);
 }
 
 .hint {
