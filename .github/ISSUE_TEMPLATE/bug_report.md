@@ -1,34 +1,29 @@
----
-name: Bug report
-about: Create a report to help us improve
-title: "bug: <short description>"
-labels: bug
-assignees: ''
----
+## Bug report
 
-## Description
+**Checklist**
+- [ ] I checked existing issues and this is not a duplicate
+- [ ] I included repo branch, commit, and repro steps
+- [ ] I can reproduce this behavior consistently
 
-What happened? What did you expect to happen?
+### Expected behavior
+A clear and concise description of what should happen.
 
-## Steps To Reproduce
+### Actual behavior
+What happened instead.
 
-1. Go to ...
-2. Click ...
-3. Observe ...
+### Environment
+- OS:
+- Branch/default branch:
+- Repo/commit:
+- Runtime versions (e.g., Node/Python/.NET):
 
-## Environment
+### Reproduction steps
+1. 
+2. 
+3. 
 
-- OS / Device:
-- Browser + version:
-- GPU (if relevant):
-- App version/commit:
+### Logs / screenshots
+Paste relevant logs or upload screenshot files here.
 
-## Logs / Screenshots
-
-Console output, stack traces, screenshots, or screen recordings.
-
-## Additional Context
-
-- Regression? If yes, from which version/commit?
-- Does this affect audio initialization, SSR/hydration, or mobile performance?
-
+### Additional context
+Anything else that helps narrow root cause.

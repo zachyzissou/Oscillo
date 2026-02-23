@@ -1,0 +1,28 @@
+name: baseline-ci
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-typecheck-test-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint
+        run: npm run -s lint:check || npm run -s lint
+      - name: Type check
+        run: npm run -s type-check
+      - name: Test
+        run: npm run -s test -- --run
+      - name: Build
+        run: npm run -s build
