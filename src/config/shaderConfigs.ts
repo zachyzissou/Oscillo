@@ -30,13 +30,13 @@ export type ShaderId = (typeof SHADER_IDS)[number]
 
 const shaderIdSet: ReadonlySet<string> = new Set(SHADER_IDS)
 
-export function isShaderId(value: string): value is ShaderId {
-  return shaderIdSet.has(value)
+export function isShaderId(value: unknown): value is ShaderId {
+  return typeof value === 'string' && shaderIdSet.has(value)
 }
 
-export function assertShaderId(value: string): ShaderId {
+export function assertShaderId(value: unknown): ShaderId {
   if (!isShaderId(value)) {
-    throw new Error(`Invalid shader id: ${value}`)
+    throw new Error(`Invalid shader id: ${String(value)}`)
   }
   return value
 }
