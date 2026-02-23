@@ -18,6 +18,7 @@ tsconfig.tsbuildinfo
 # Test artifacts and build results
 test-results/
 playwright-report/
+security-audit-report.json
 coverage/
 *.tgz
 .nyc_output/

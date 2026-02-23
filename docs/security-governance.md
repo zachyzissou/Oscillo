@@ -2,7 +2,7 @@
 
 ## CI Security Audit Gate
 
-Security is enforced as a first-class CI job in `/Users/zachgonser/Oscillo/.github/workflows/ci.yml`:
+Security is enforced as a first-class CI job in `.github/workflows/ci.yml`:
 
 - Job: `security-audit`
 - Command: `npm audit --audit-level <threshold> --json`
@@ -30,7 +30,7 @@ If a transitive high cannot be fixed immediately (for example, upstream-blocked)
 
 ## Main Branch Protection Decision
 
-Decision for `/Users/zachgonser/Oscillo` `main`:
+Decision for `main`:
 - `main` remains protected by required status checks (including baseline and security gates).
 - Merges should use policy-compliant flow first (standard merge/auto-merge when available).
 - Admin override merges are allowed only as an exception path and must include a PR comment describing why policy-compliant merge could not be used.
