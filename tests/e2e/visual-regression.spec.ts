@@ -27,6 +27,13 @@ const suppressTelemetryBanner = async (page: Page) => {
   })
 }
 
+const resetStartOverlayState = async (page: Page) => {
+  await page.evaluate(overlayKey => {
+    globalThis.localStorage.removeItem(overlayKey)
+  }, OVERLAY_KEY)
+  await page.reload()
+}
+
 const clearActiveFocus = async (page: Page) => {
   await page.evaluate(() => {
     const active = document.activeElement as HTMLElement | null
@@ -90,6 +97,7 @@ test.describe('Visual Regression Tests', () => {
 
   test('start overlay mobile layout visual', async ({ page }) => {
     await page.setViewportSize({ width: 393, height: 851 })
+    await resetStartOverlayState(page)
     await expect(page.getByTestId('start-overlay')).toBeVisible({ timeout: 10000 })
 
     await expect(page).toHaveScreenshot('start-overlay-mobile.png', {
@@ -102,6 +110,7 @@ test.describe('Visual Regression Tests', () => {
 
   test('mobile command deck initializes without expanded flash', async ({ page }) => {
     await page.setViewportSize({ width: 393, height: 851 })
+    await resetStartOverlayState(page)
     await startExperience(page)
     await suppressTelemetryBanner(page)
 
@@ -122,6 +131,7 @@ test.describe('Visual Regression Tests', () => {
   })
 
   test('telemetry consent banner visual', async ({ page }) => {
+    await resetStartOverlayState(page)
     await startExperience(page)
 
     await hideWebglCanvas(page)

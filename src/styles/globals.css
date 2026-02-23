@@ -65,18 +65,37 @@
   --oscillo-danger: 0 84% 60%;
 
   /* Tokenized primitive layer */
+  --ui-font-display: "Space Grotesk", "Sora", "Avenir Next", "Segoe UI", sans-serif;
+  --ui-font-body: "Sora", "Avenir Next", "Segoe UI", sans-serif;
   --ui-radius-sm: 14px;
   --ui-radius-md: 18px;
   --ui-radius-lg: 22px;
   --ui-radius-xl: 28px;
+  --ui-spacing-xs: 8px;
+  --ui-spacing-sm: 12px;
+  --ui-spacing-md: 16px;
+  --ui-spacing-lg: 24px;
+  --ui-text-primary: #f3fbff;
+  --ui-text-secondary: rgba(220, 241, 255, 0.84);
+  --ui-text-muted: rgba(199, 234, 251, 0.66);
   --ui-border-subtle: rgba(120, 236, 255, 0.28);
+  --ui-border-strong: rgba(120, 236, 255, 0.58);
   --ui-surface-elevated:
     linear-gradient(155deg, rgba(10, 16, 32, 0.95), rgba(6, 10, 20, 0.94)),
     rgba(0, 0, 0, 0.5);
+  --ui-surface-hero:
+    linear-gradient(155deg, rgba(17, 24, 47, 0.96), rgba(14, 15, 33, 0.94) 55%, rgba(13, 31, 52, 0.88)),
+    rgba(0, 0, 0, 0.5);
+  --ui-surface-subtle: rgba(8, 19, 34, 0.72);
   --ui-shadow-elevated:
     0 14px 30px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(138, 246, 255, 0.1) inset,
     0 0 24px rgba(0, 208, 255, 0.14);
+  --ui-shadow-hero:
+    0 0 0 1px rgba(94, 234, 255, 0.16) inset,
+    0 16px 42px rgba(0, 0, 0, 0.6),
+    0 0 32px rgba(0, 255, 255, 0.35),
+    0 0 70px rgba(0, 172, 255, 0.22);
   --ui-button-primary-bg: linear-gradient(140deg, #43f5ff 0%, #1bd7f4 65%, #47f6ff 100%);
   --ui-button-primary-fg: #001017;
   --ui-button-primary-shadow:

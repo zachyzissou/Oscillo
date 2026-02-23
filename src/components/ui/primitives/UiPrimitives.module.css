@@ -11,6 +11,7 @@
   background: var(--ui-surface-elevated);
   box-shadow: var(--ui-shadow-elevated);
   backdrop-filter: blur(12px);
+  color: var(--ui-text-primary);
 }
 
 .surfaceDialog {
@@ -27,6 +28,7 @@
 
 .button {
   border: 1px solid transparent;
+  font-family: var(--ui-font-display);
   font-weight: 700;
   letter-spacing: 0.01em;
   transition:
