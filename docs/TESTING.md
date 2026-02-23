@@ -143,6 +143,7 @@ graph TD
 - Primitive architecture reference and adoption rules live in `docs/ui-primitives.md`.
 - Start flow and core overlays (`SimpleStartOverlay`, `TelemetryConsentBanner`, `AudioRecoveryBanner`, deck shell) are protected by `tests/e2e/visual-regression.spec.ts`.
 - Mobile deck snapshots now suppress telemetry during capture to keep visual baselines deterministic across CI and local runs.
+- Epic-level integration status and DoD mapping are tracked in `docs/ui-ux-v2-status.md`.
 
 ### Local Development
 ```bash

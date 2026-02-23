@@ -20,7 +20,7 @@ const csp = [
   "media-src 'self' data: blob:",
   "script-src 'self' 'unsafe-eval' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
-  "connect-src 'self' https: ws: wss:",
+  "connect-src 'self' https: ws: wss: blob:",
   "worker-src 'self' blob:",
   'upgrade-insecure-requests',
 ].join('; ')
