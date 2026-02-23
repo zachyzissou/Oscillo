@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useMusicalPalette } from '@/store/useMusicalPalette'
 import { usePerformanceSettings } from '@/store/usePerformanceSettings'
 import styles from './ExperienceCommandDeck.module.css'
@@ -60,7 +60,7 @@ export default function ExperienceCommandDeck() {
     viewportReady ? '' : styles.unresolved
   }`
 
-  const queueFocus = (target: 'open' | 'primary') => {
+  const queueFocus = useCallback((target: 'open' | 'primary') => {
     if (typeof window === 'undefined') return
     window.requestAnimationFrame(() => {
       if (target === 'open') {
@@ -70,7 +70,7 @@ export default function ExperienceCommandDeck() {
 
       keySelectRef.current?.focus()
     })
-  }
+  }, [])
 
   const handleExpand = () => {
     setIsExpanded(true)
@@ -108,7 +108,15 @@ export default function ExperienceCommandDeck() {
     if (typeof window === 'undefined') return
 
     const onKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement | null
+      const isTypingContext =
+        target?.tagName === 'INPUT' ||
+        target?.tagName === 'TEXTAREA' ||
+        target?.tagName === 'SELECT' ||
+        target?.isContentEditable
+
       if (event.key === 'Escape') {
+        if (isTypingContext) return
         setIsExpanded((prev) => {
           if (!prev) return prev
           queueFocus('open')
@@ -118,13 +126,6 @@ export default function ExperienceCommandDeck() {
       }
 
       if (event.key.toLowerCase() !== 't') return
-
-      const target = event.target as HTMLElement | null
-      const isTypingContext =
-        target?.tagName === 'INPUT' ||
-        target?.tagName === 'TEXTAREA' ||
-        target?.tagName === 'SELECT' ||
-        target?.isContentEditable
 
       if (isTypingContext) return
       event.preventDefault()
@@ -137,7 +138,7 @@ export default function ExperienceCommandDeck() {
 
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
+  }, [queueFocus])
 
   return (
     <aside
@@ -155,7 +156,6 @@ export default function ExperienceCommandDeck() {
             className={styles.openButton}
             onClick={handleExpand}
             aria-expanded={isExpanded}
-            aria-controls="experience-deck-shell"
             aria-label="Open command deck"
           >
             Open Deck
@@ -180,7 +180,6 @@ export default function ExperienceCommandDeck() {
                 className={styles.iconButton}
                 onClick={handleCollapse}
                 aria-expanded={isExpanded}
-                aria-controls="experience-deck-shell"
                 aria-label="Collapse command deck"
               >
                 -
