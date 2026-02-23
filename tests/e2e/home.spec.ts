@@ -18,32 +18,14 @@ test.describe('Oscillo Application', () => {
     await expect(page.locator('[data-testid="start-overlay"]')).toBeVisible({ timeout: 10000 });
   });
 
-  test('canvas renders after start', async ({ page, browserName }) => {
-    // Try to find and click start button
-    const startButton = page.locator('button:has-text("Start"), button:has-text("Begin"), button:has-text("Enter"), [data-testid="start-button"]').first();
-    
-    if (await startButton.isVisible({ timeout: 5000 })) {
-      await startExperience(page);
-      
-      // Wait a bit for content to load
-      await page.waitForTimeout(1500);
-      
-      // Check that main content area is visible (more reliable than canvas check)
-      await expect(page.locator('#main-content')).toBeVisible({ timeout: 10000 });
-      
-      // Safari/WebKit may show fallback instead of canvas due to WebGL limitations
-      if (browserName !== 'webkit') {
-        // For non-Safari browsers, check specifically for the main Three.js canvas (avoid multiple canvas elements)
-        const hasMainCanvas = await page.locator('[data-testid="webgl-canvas"]').isVisible({ timeout: 8000 });
-        // Don't fail if canvas doesn't appear - this is a known timing issue
-        if (!hasMainCanvas) {
-          console.warn('Main Three.js canvas did not appear - this is a known timing issue but does not affect functionality');
-        }
-      }
-    } else {
-      // If no start button, main content should be directly visible
-      await expect(page.locator('#main-content')).toBeVisible({ timeout: 10000 });
-    }
+  test('canvas renders after start with required controls', async ({ page }) => {
+    await expect(page.locator('[data-testid="start-overlay"]')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('start-button')).toBeVisible({ timeout: 10000 });
+
+    await startExperience(page);
+
+    await expect(page.locator('#main-content')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByTestId('webgl-canvas')).toBeVisible({ timeout: 10000 });
   });
 
   test('ui elements are responsive', async ({ page }) => {
