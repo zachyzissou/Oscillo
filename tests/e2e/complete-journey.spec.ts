@@ -3,6 +3,11 @@ import { startExperience } from './utils/startExperience';
 
 test.describe('Oscillo Application - Complete Functional Test', () => {
   test('complete user journey with start overlay interaction', async ({ page }) => {
+    await page.addInitScript(() => {
+      globalThis.localStorage.setItem('oscillo.v2.deck-expanded', 'true');
+      globalThis.localStorage.setItem('oscillo.v2.deck-mobile-snap', 'peek');
+    });
+
     await page.goto('/');
     
     // Wait for the page to be fully loaded
@@ -124,14 +129,17 @@ test.describe('Oscillo Application - Complete Functional Test', () => {
       console.log('Canvas not directly visible but application is running - acceptable for some browsers');
     }
     
-    // Verify some UI elements are present
-    const bottomDrawer = page.locator('div').filter({ hasText: /volume|tempo|scale/i }).first();
-    if (await bottomDrawer.isVisible({ timeout: 5000 })) {
-      await page.screenshot({ 
-        path: 'test-results/04-ui-elements-visible.png',
-        fullPage: true 
-      });
-    }
+    // Deterministic assertions: these controls must exist after startup.
+    const deckRail = page.getByTestId('deck-action-rail');
+    const deckCollapse = page.getByTestId('deck-collapse-button');
+    const tempoSlider = page.getByTestId('tempo-slider');
+    await expect(deckRail).toBeVisible({ timeout: 10000 });
+    await expect(deckCollapse).toBeVisible({ timeout: 10000 });
+    await expect(tempoSlider).toBeVisible({ timeout: 10000 });
+    await page.screenshot({ 
+      path: 'test-results/04-ui-elements-visible.png',
+      fullPage: true 
+    });
     
     // Test responsive behavior
     await page.setViewportSize({ width: 768, height: 1024 });
