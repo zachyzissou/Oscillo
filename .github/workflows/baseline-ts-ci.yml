@@ -1,0 +1,55 @@
+name: baseline-ts-ci
+
+on:
+  push:
+    branches: ['main', 'master']
+  pull_request:
+    branches: ['main', 'master']
+
+jobs:
+  baseline-ts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: |
+          if [ -f package.json ]; then
+            npm ci
+          else
+            echo "No package.json found; skipping install."
+          fi
+      - name: Lint
+        run: |
+          if [ -f package.json ] && node -e "const s=require('./package.json').scripts||{}; process.exit(s.lint ? 0 : 1)"; then
+            npm run lint
+          else
+            echo "Skipping lint (script absent)."
+          fi
+      - name: Type check
+        run: |
+          if [ -f package.json ] && node -e "const s=require('./package.json').scripts||{}; process.exit(s.typecheck ? 0 : 1)"; then
+            npm run typecheck
+          else
+            echo "Skipping typecheck (script absent)."
+          fi
+      - name: Test
+        run: |
+          if [ ! -f package.json ]; then
+            echo "No package.json found; skipping install."
+          elif [ -z "${STANTON_TIMES_DISCORD_WEBHOOK_URL:-}" ] && [ -z "${STANTON_TIMES_DISCORD_WEBHOOK_FILE:-}" ]; then
+            echo "No webhook target configured; skipping repository test step."
+          elif node -e "const s=require('./package.json').scripts||{}; process.exit(s.test ? 0 : 1)"; then
+            npm test
+          else
+            echo "Skipping test (script absent)."
+          fi
+      - name: Build
+        run: |
+          if [ -f package.json ] && node -e "const s=require('./package.json').scripts||{}; process.exit(s.build ? 0 : 1)"; then
+            npm run build
+          else
+            echo "Skipping build (script absent)."
+          fi
