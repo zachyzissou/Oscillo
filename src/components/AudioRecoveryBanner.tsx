@@ -68,7 +68,7 @@ export default function AudioRecoveryBanner() {
     <aside
       className={styles.banner}
       data-testid="audio-recovery-banner"
-      role="alert"
+      role="status"
       aria-live="polite"
       aria-labelledby="audio-recovery-title"
       aria-describedby="audio-recovery-description"

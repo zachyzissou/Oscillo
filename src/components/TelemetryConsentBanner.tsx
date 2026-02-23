@@ -81,7 +81,7 @@ export function TelemetryConsentBanner() {
     <div
       className={styles.banner}
       role="dialog"
-      aria-live="polite"
+      aria-modal="false"
       aria-labelledby="telemetry-consent-title"
       aria-describedby="telemetry-consent-description"
       data-testid="telemetry-banner"
