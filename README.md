@@ -1,188 +1,176 @@
-# Interactive Music 3D (Oscillo)
+# Oscillo
 
-Next-generation audio-reactive 3D music playground with AI composition, WebGPU rendering, and collaborative jam sessions.
+> Interactive 3D music sandbox with AI composition, spatial rendering, and collaborative WebSocket sessions.
+> Status: `Production` (actively maintained)
 
----
+![CI](https://github.com/zachyzissou/Oscillo/actions/workflows/baseline-ts-ci.yml/badge.svg?branch=main)
+![License](https://img.shields.io/github/license/zachyzissou/Oscillo)
+![Security](https://img.shields.io/badge/security-SECURITY.md-green)
 
-## 🛠️ Prerequisites
+## Overview
+
+Oscillo is a Next.js-based music + visual playground that merges AI-driven composition with real-time WebGL/WebGPU interaction.
+Users can manipulate 3D entities, trigger synthesis/audio layers, and collaborate in shared jam sessions.
+This repository also provides a release-oriented workflow (build/publish + deploy) for self-hosted Docker environments.
+
+## Problem / value
+
+- **Problem:** Creating expressive browser-based music visuals and collaborative sessions usually requires many disconnected tools and manual tuning paths.
+- **Value:** Oscillo ships an integrated scene, control surface, and deployment pipeline with repeatable checks and documented operator flows.
+- **Users:** Indie creators, contributors, maintainers, and self-host operators deploying to Unraid/home infra.
+
+## Architecture
+
+```text
+Browser (App Router UI) --> Next.js server --> API routes/plugins --> audio engine
+             |                                  |
+             +--> 3D scene (R3F/three.js)         +--> Jam WebSocket server (Node)
+             |                                  |
+             +--> logs + analytics --> observability artifacts
+```
+
+## Features
+
+- ✅ Three-dimensional scene controls with audio-reactive behavior.
+- ✅ AI composition tools powered by Magenta.js.
+- ✅ Jam session controls and tokenized collaboration endpoints.
+- ✅ Playwright + Vitest validation for smoke/e2e/visual/security/perf tracks.
+- ✅ Docker and GHCR publishing workflow.
+- ⏳ Planned: stricter release gate matrix for long-tail regressions and baseline governance docs.
+
+## Tech Stack
+
+- Runtime: Node.js 20+, npm
+- Framework: Next.js 15 (App Router), React 19, TypeScript
+- Rendering: three.js, @react-three/fiber, @react-three/drei
+- Audio: Tone.js, Magenta.js
+- Tooling: Vitest, Playwright, ESLint, Prettier, Husky, GitHub Actions
+- Deployment: Docker, GHCR
+
+## Prerequisites
 
 - Node.js 20.17+
-- npm 10.8+
-- Optional: Docker 24+, Playwright browsers (`npx playwright install`)
+- npm 10+
+- Docker 24+ (for local deployment testing)
+- Optional: Playwright browser dependencies if running E2E locally
 
-### **Initial Setup**
+## Installation
 
-1. **Install dependencies**
-   ```bash
-   npm install
-   ```
-
-2. **Install Playwright browsers** (optional when not touching E2E)
-   ```bash
-   npx playwright install
-   ```
-
-3. **Security audit**
-   ```bash
-   npm audit fix
-   # Review and apply security patches
-   ```
-
-### **Development**
-
-1. **Local development server**
-   ```bash
-   npm run dev
-   # → http://localhost:3000
-   # Hot reload enabled with TypeScript checking
-   ```
-
-2. **Production build & test**
-   ```bash
-   npm run build
-   npm run start
-   # → http://localhost:3000 (production mode)
-   ```
-
-3. **Testing & validation**
-   ```bash
-   npm run lint:check   # ESLint (no warnings allowed)
-   npm run type-check   # TypeScript (tsc --noEmit)
-   npm run test -- --run   # Vitest test suites
-   ```
-
-4. **Full smoke script**
-   ```bash
-   ./scripts/pipeline-smoke.sh   # runs lint → type-check → tests → build and stores logs in artifacts/pipeline/
-   ```
-
-5. **Release automation**
-   ```bash
-   npx changeset           # document version changes
-   npm run release:prepare  # version bump + build sanity check
-   ```
-   See `docs/release-checklist.md` for the regression matrix and final steps.
-
-### **PWA Installation**
-
-- Desktop: Look for "Install" button in address bar
-- Mobile: Use "Add to Home Screen" from browser menu
-- Offline mode: Basic caching via service worker
-  Service worker files (`public/sw.js`, `public/workbox-*.js`) are generated during `next build` and are ignored in version control.
-
-### **Environment Configuration**
-
-Environment defaults live in **`.env.example`**. Copy it to `.env.local` (or the deployment secret store) and adjust as needed.
-
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| `NEXT_PUBLIC_ENABLE_PWA` | `false` | Toggle service worker registration; keep disabled until PWA is vetted |
-| `NEXT_PUBLIC_WEB_VITALS_ENDPOINT` | _(blank)_ | Optional client override for Web Vitals ingestion route |
-| `ANALYTICS_FORWARD_URL` | _(blank)_ | Optional server-to-server forwarding target for Web Vitals metrics |
-| `ANALYTICS_FORWARD_TOKEN` | _(blank)_ | Bearer token paired with `ANALYTICS_FORWARD_URL` when required |
-| `LOG_DIR` | `./logs` | Directory where server-side log files are written (containers should override to `/app/logs`) |
-| `LOG_FILE` | `app.log` | Log filename when `LOG_TO_FILE=true` |
-| `LOG_LEVEL` | `info` | Structured logging level (`info`, `debug`, `error`, etc.) |
-| `LOG_TO_FILE` | `true` | Persist logs to disk; set `false` when shipping logs via stdout collectors |
-| `LOG_PRETTY` | `false` | Pretty-print logs locally; leave `false` in production for JSON ingestion |
-| `JAM_SERVER_PORT` | `3030` | Jam WebSocket server port (Node service) |
-| `JAM_ALLOWED_ORIGINS` | `http://localhost:3000,https://localhost:3000` | Comma-separated list of allowed WebSocket origins |
-| `JAM_SERVER_TOKEN` | _(blank)_ | Optional shared secret required for Jam WebSocket joins |
-| `NEXT_PUBLIC_JAM_SERVER_URL` | _(blank)_ | Override WebSocket URL in the browser (defaults to same host + `JAM_SERVER_PORT`) |
-| `NEXT_PUBLIC_JAM_SERVER_PORT` | _(blank)_ | Override only the port portion of the WebSocket URL |
-| `NEXT_PUBLIC_JAM_TOKEN` | _(blank)_ | Client-side copy of `JAM_SERVER_TOKEN` when token auth is enabled |
-| `GITLAB_URL` / `GITLAB_PROJECT_ID` | `http://192.168.4.225:9080` / `2` | Used by automation scripts to interact with the self-hosted GitLab |
-| `GITLAB_TOKEN` | _(blank)_ | Personal access token (`read_api`/`write_api`) for GitLab automation scripts |
-
-See `docs/SECURITY.md`, `docs/logging-strategy.md`, and `docs/DEPLOYMENT.md` for per-environment guidance and hardening steps. For a complete list of tooling expectations, refer to `docs/environment-assumptions.md`.
-
-### **Operational Checklists**
-- `docs/security-checklist.md` — release security runbook and WS auth verification
-- `docs/DEPLOYMENT.md` — build/publish/rollback workflow
-- `docs/release-checklist.md` — final regression matrix + release automation steps
-- `docs/metrics/README.md` — template for capturing performance/bundle deltas per phase
-- `docs/design-system.md` — canonical design tokens and theming guidelines
-- `unraid/oscillo.xml` — Unraid Docker template referencing `ghcr.io/zachgonser/oscillo:latest`
-- Docker: See `docker-compose.yml` for container deployment
-
----
-
-## 🎮 User Interface & Controls
-
-### **3D Scene Interaction**
-- **Spawn Button** — 3D "+" mesh in bottom-left corner for creating new musical objects
-- **Shape Selection** — Left-click any shape to select and trigger its audio
-- **3D Manipulation** — Drag shapes around the scene with physics-based movement
-- **Camera Controls** — Mouse/touch to orbit, zoom, and pan the 3D view
-
-### **Bottom Drawer UI**
-- **Collapsed State** — Shows only the spawn control when no shape is selected
-- **Expanded State** — Slides up when a shape is selected, revealing:
-  - **Mode Tabs**: Note | Chord | Beat | Loop
-  - **Playback Controls**: Play/Pause, volume, tempo
-  - **Effect Controls**: Simple vs. Advanced effect chain
-  - **Performance Presets**: Eco | Balanced | Pro quality modes
-  - **Settings Tab**: Performance level chooser, haptic/FPS toggles, telemetry consent, and jam connection status
-  - **AI Generation**: Magenta.js composition controls
-
-### **Audio Controls Panel**
-- **Master Volume** — Global audio output level
-- **Audio Analyzer** — Real-time frequency spectrum visualization
-- **Effect Chain** — Reverb, delay, chorus, distortion, bitcrusher controls
-- **Recording** — Capture and export your musical creations
-- **Bass Sensitivity** — Adjust shader response to low frequencies
-
----
-
-## 🏛️ Architecture & Tech Stack
-- Next.js 15 (App Router), React 19 concurrent features
-- Three.js 0.178, @react-three/fiber/drei/postprocessing
-- Tone.js 15, Magenta.js for music generation
-- Zustand 5 (stateless selectors, persisted stores)
-- Tailwind CSS + custom utilities for neon/glass aesthetics
-- Pino logging (JSON stdout + optional file sink)
-- Playwright + Vitest for regression suites
-
-```
-app/                    # App Router entrypoints, layouts, API routes
-src/
-  components/          # UI, R3F objects, HUD layers
-  lib/                 # Audio engine, utilities, events, logging
-  plugins/             # Runtime plugin framework and loader
-  store/               # Zustand stores (primitives + derived selectors)
-  shaders/             # GLSL/WGSL assets
-  types/               # Shared TypeScript definitions
+```bash
+git clone https://github.com/zachyzissou/Oscillo.git
+cd Oscillo
+npm ci
+npm run dev
 ```
 
-## Testing Philosophy
-- Unit/integration: Vitest in `src/__tests__` and alongside modules
-- E2E: Playwright suites (`npm run test:smoke`, `npm run test:e2e`, `npm run test:visual`, `npm run test:a11y`, `npm run test:performance`)
-- Release gating: run the final regression checklist (`docs/release-checklist.md`) before tagging/publishing
+Application defaults to `http://localhost:3000`.
 
----
+## Configuration
 
-## 📦 Deployment
-- Multi-stage Dockerfile produces standalone Next build
-- Health endpoint: `/api/health`
-- Logs written to stdout + `${LOG_DIR}/${LOG_FILE}` (default `./logs/app.log`)
-- Jam WebSocket service (`server/jam-server.js`) defaults to `ws://localhost:3030`; secure via VPN/token when exposed
+| Key | Required | Default | Notes |
+| --- | --- | --- | --- |
+| `NEXT_PUBLIC_ENABLE_PWA` | no | `false` | Service worker toggle |
+| `NEXT_PUBLIC_WEB_VITALS_ENDPOINT` | no | (none) | Optional Web Vitals sink |
+| `ANALYTICS_FORWARD_URL` | no | (none) | Optional telemetry endpoint |
+| `JAM_SERVER_PORT` | no | `3030` | Jam websocket listener |
+| `JAM_ALLOWED_ORIGINS` | no | `http://localhost:3000` | Allowed websocket origins |
+| `LOG_LEVEL` | no | `info` | `info` / `debug` / `warn` |
+| `LOG_TO_FILE` | no | `true` | Toggle file logging |
 
-Refer to `docs/DEPLOYMENT.md` for full rollout/rollback procedures.
+## Usage
 
----
+```bash
+# Standard dev loop
+npm run dev
+```
 
-## 🤝 Contributing
-- Guidelines: `CONTRIBUTING.md`, `AGENTS.md`, `CLAUDE.md`
-- Always run `./scripts/pipeline-smoke.sh` before pushing
-- Document changesets (`npx changeset`) and keep docs in sync with behavior
+```bash
+# Production run
+npm run build && npm run start
+```
 
----
+```bash
+# Release/pipeline smoke path
+./scripts/pipeline-smoke.sh
+```
 
-## 📚 Additional Docs
-- `docs/architecture.md` — high-level diagram and decisions
-- `docs/audio-init.md` — audio engine lifecycle
-- `docs/performance.md` — rendering budgets, profiling guidance
-- `docs/security-checklist.md` — release security steps
-- `docs/testing.md` — testing strategy and environment setup
+```text
+$ npm run test -- --run
+✓  42 passed
+$ npm run lint:check
+✓  No warnings
+```
 
-Stay aligned with the overhaul roadmap in `docs/overhaul-plan.md`. All GitLab issues should cite the relevant phase/task label (`[OSCILLO]` prefix).
+## Testing & quality
+
+```bash
+npm run lint:check
+npm run type-check
+npm run test -- --run
+npm run test:smoke
+```
+
+Recommended additional checks:
+- `npm run test:e2e`
+- `npm run test:visual`
+- `npm run test:performance`
+- `npm run test:a11y`
+
+
+## Security
+
+- Report vulnerabilities through [SECURITY.md](./SECURITY.md)
+- Never commit secrets (`.env`, API keys, jam tokens)
+- Keep branch protections and required checks active on `main`
+- Prefer short-lived tokens for deployment and telemetry services
+
+## Contributing
+
+1. Open/verify an issue before major feature work.
+2. Keep PRs scoped and docs + tests updated.
+3. Run relevant checks and paste results in PR body.
+4. Follow release checklist in `docs/release-checklist.md`.
+5. Include deployment/rollback note for pipeline-impacting changes.
+
+## Deployment / runbook
+
+- Deploy flow includes build, test, publish, and container rollout.
+- Rollback: redeploy previous container image tag and restart service.
+- Emergency actions: pause publish job, keep previous `ghcr.io/...:latest` image in use.
+
+## Troubleshooting
+
+- **Startup warnings about missing env vars**: confirm `NEXT_PUBLIC_*` and `JAM_*` settings.
+- **Playwright failures in CI**: re-run with `CI=true` and clear browser cache artifacts.
+- **Audio crackle/lag**: reduce performance preset and check GPU throttling.
+- **Jam connect failures**: verify origins/token and server port alignments.
+
+## Observability
+
+- Health status endpoints are available from API routes.
+- Build/test artifacts are uploaded by workflows (`playwright-report`, `test-results`).
+- Structured logs available via `LOG_TO_FILE` and stdout for container collection.
+
+## Roadmap
+
+- Baseline README and governance adoption across all delivery docs.
+- Expand chaos/failure-mode testing for collaborative jam sessions.
+- Improve accessibility and performance budgets by endpoint and route.
+- Harden changelog/release hygiene in alignment with template-driven PR gates.
+
+## Known risks
+
+- Browser GPU variability can affect rendering consistency.
+- Unusual device capabilities can alter audio/visual frame budgets.
+- Complex deploy pipeline has multiple long-running jobs and higher transient noise.
+
+## Release notes / changelog
+
+- Current release notes are driven by changesets + release automation.
+- This change adds governance baseline (README/issue/security/ci) with no runtime behavior change.
+
+## License & contact
+
+- License: repository license terms in `LICENSE` / `package.json`
+- Maintainer: `@zachyzissou`
+- Security reporting: see [SECURITY.md](./SECURITY.md)

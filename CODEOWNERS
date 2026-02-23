@@ -1,0 +1,21 @@
+# CODEOWNERS
+# Scope: baseline ownership for review routing
+# Replace handles with actual repo owners/maintainers.
+
+# Global owners
+*       @zachyzissou
+
+# Documentation and automation
+/README.md @zachyzissou
+/.github/** @zachyzissou
+
+# Source ownership (optional split by stack)
+# *.py @python-maintainers
+# *.cs @dotnet-maintainers
+# *.ts @frontend-maintainers
+# *.tsx @frontend-maintainers
+# *.astro @web-maintainers
+
+# Infrastructure and security
+/.github/workflows/** @zachyzissou
+/SECURITY.md @zachyzissou
