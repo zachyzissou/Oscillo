@@ -4,7 +4,6 @@ import { startExperience } from './utils/startExperience'
 const runVisualRegression = process.env.RUN_VISUAL_REGRESSION === '1'
 const CONSENT_KEY = 'oscillo.analytics-consent'
 const ONBOARDING_KEY = 'oscillo.v2.deck-onboarded'
-const OVERLAY_KEY = 'hasSeenOverlay'
 const DETERMINISTIC_STYLE_ID = 'oscillo-visual-deterministic-style'
 const DETERMINISTIC_VISUAL_STYLES = `
   *, *::before, *::after {
@@ -40,9 +39,6 @@ const suppressTelemetryBanner = async (page: Page) => {
 }
 
 const resetStartOverlayState = async (page: Page) => {
-  await page.evaluate(overlayKey => {
-    globalThis.localStorage.removeItem(overlayKey)
-  }, OVERLAY_KEY)
   await page.reload()
 }
 
@@ -58,12 +54,11 @@ test.describe('Visual Regression Tests', () => {
 
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(
-      ({ consentKey, onboardingKey, overlayKey }) => {
+      ({ consentKey, onboardingKey }) => {
         globalThis.localStorage.removeItem(consentKey)
         globalThis.localStorage.setItem(onboardingKey, 'true')
-        globalThis.localStorage.removeItem(overlayKey)
       },
-      { consentKey: CONSENT_KEY, onboardingKey: ONBOARDING_KEY, overlayKey: OVERLAY_KEY }
+      { consentKey: CONSENT_KEY, onboardingKey: ONBOARDING_KEY }
     )
 
     await page.addInitScript(
