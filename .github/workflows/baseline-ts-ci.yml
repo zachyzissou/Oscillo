@@ -23,14 +23,18 @@ jobs:
           fi
       - name: Lint
         run: |
-          if [ -f package.json ] && node -e "const s=require('./package.json').scripts||{}; process.exit(s.lint ? 0 : 1)"; then
+          if [ -f package.json ] && node -e "const s=require('./package.json').scripts||{}; process.exit(s['lint:check'] ? 0 : 1)"; then
+            npm run lint:check
+          elif [ -f package.json ] && node -e "const s=require('./package.json').scripts||{}; process.exit(s.lint ? 0 : 1)"; then
             npm run lint
           else
             echo "Skipping lint (script absent)."
           fi
       - name: Type check
         run: |
-          if [ -f package.json ] && node -e "const s=require('./package.json').scripts||{}; process.exit(s.typecheck ? 0 : 1)"; then
+          if [ -f package.json ] && node -e "const s=require('./package.json').scripts||{}; process.exit(s['type-check'] ? 0 : 1)"; then
+            npm run type-check
+          elif [ -f package.json ] && node -e "const s=require('./package.json').scripts||{}; process.exit(s.typecheck ? 0 : 1)"; then
             npm run typecheck
           else
             echo "Skipping typecheck (script absent)."

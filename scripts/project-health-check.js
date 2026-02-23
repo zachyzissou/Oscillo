@@ -43,7 +43,7 @@ const checks = [
     name: 'Linting',
     test: () => {
       try {
-        const output = execSync('npm run lint', { stdio: 'pipe' }).toString()
+        const output = execSync('npm run lint:check', { stdio: 'pipe' }).toString()
         const warningCount = (output.match(/warning/g) || []).length
         const errorCount = (output.match(/error/g) || []).length
         
