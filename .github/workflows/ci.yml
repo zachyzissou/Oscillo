@@ -155,3 +155,19 @@ jobs:
             echo "full-tests cannot fail when scheduled."
             exit 1
           fi
+
+  ci:
+    name: CI
+    runs-on: ubuntu-latest
+    needs: baseline-ci
+    if: always()
+    steps:
+      - name: Publish legacy CI gate
+        run: |
+          baseline="${{ needs.baseline-ci.result }}"
+          echo "baseline-ci: ${baseline}"
+
+          if [ "${baseline}" != "success" ]; then
+            echo "baseline-ci must pass before CI can pass."
+            exit 1
+          fi
