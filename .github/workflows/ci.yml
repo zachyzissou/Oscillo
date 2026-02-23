@@ -125,3 +125,33 @@ jobs:
           name: visual-test-results
           path: test-results/
           retention-days: 14
+
+  baseline-ci:
+    runs-on: ubuntu-latest
+    needs: [quick-checks, visual-regression, full-tests]
+    if: always()
+    steps:
+      - name: Enforce baseline CI signal
+        run: |
+          quick="${{ needs.quick-checks.result }}"
+          visual="${{ needs.visual-regression.result }}"
+          full="${{ needs.full-tests.result }}"
+
+          echo "quick-checks: ${quick}"
+          echo "visual-regression: ${visual}"
+          echo "full-tests: ${full}"
+
+          if [ "${quick}" != "success" ]; then
+            echo "quick-checks must pass."
+            exit 1
+          fi
+
+          if [ "${visual}" != "success" ]; then
+            echo "visual-regression must pass."
+            exit 1
+          fi
+
+          if [ "${full}" = "failure" ] || [ "${full}" = "cancelled" ]; then
+            echo "full-tests cannot fail when scheduled."
+            exit 1
+          fi
