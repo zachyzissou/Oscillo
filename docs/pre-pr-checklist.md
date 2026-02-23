@@ -12,7 +12,7 @@ Use this checklist before requesting review on any feature/fix PR.
 - [ ] No `console.*` clusters in changed paths; use structured `logger` events.
 - [ ] Runtime guards accept `unknown` and validate shape explicitly.
 - [ ] Guard tests include edge cases (null, array/object mismatch, boundary lengths, negative numeric cases).
-- [ ] No insecure or misleading test fixtures (for example insecure protocol placeholders that trigger security tooling noise).
+- [ ] No insecure or misleading test fixtures (for example, insecure protocol placeholders that trigger security tooling noise).
 - [ ] Hydration-sensitive UI avoids first-frame localStorage/window mismatches.
 - [ ] Accessibility basics covered for changed surfaces:
   - [ ] keyboard path works end-to-end
@@ -33,6 +33,14 @@ Use this checklist before requesting review on any feature/fix PR.
 - [ ] Capture run URL, failing step, and first actionable error snippet in issue/PR thread.
 
 ## Suggested Local Run Sequence
+### Non-UI changes
+```bash
+npm run lint:check
+npm run type-check
+npm test -- --run
+```
+
+### UI-affecting changes
 ```bash
 npm run lint:check
 npm run type-check
