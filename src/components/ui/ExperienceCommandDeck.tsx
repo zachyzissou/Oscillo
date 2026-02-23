@@ -103,7 +103,12 @@ export default function ExperienceCommandDeck() {
   }, [])
 
   return (
-    <aside className={wrapperClass} data-testid="experience-deck" aria-label="Experience controls">
+    <aside
+      className={wrapperClass}
+      data-testid="experience-deck"
+      aria-label="Experience controls"
+      hidden={!viewportReady}
+    >
       {!isExpanded && (
         <div className={styles.floatingOpen}>
           <button
