@@ -79,7 +79,7 @@ const MusicalSceneContent = React.memo<MusicalSceneContentProps>(
         autoRotateSpeed={0.5}
       />
 
-        {postprocessingEnabled ? <ScenePostProcessing /> : null}
+      {postprocessingEnabled ? <ScenePostProcessing /> : null}
       </>
     )
   }
