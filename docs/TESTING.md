@@ -129,6 +129,11 @@ graph TD
 - Run the team checklist before opening a PR: [`docs/pre-pr-checklist.md`](./pre-pr-checklist.md)
 - If CI fails, follow the triage drill: [`docs/ci-failure-triage.md`](./ci-failure-triage.md)
 
+### Persistent Controls Access Paths
+- Touch: the command deck action rail remains visible across deck states with `Show controls`, `-5 BPM`, `+5 BPM`, and `Mode` actions.
+- Keyboard: `T` toggles deck visibility, `M` cycles mode, `[` lowers tempo by 5 BPM, and `]` raises tempo by 5 BPM.
+- Coverage: verified in `tests/e2e/accessibility.spec.ts` via the `persistent action rail keeps touch and keyboard control paths reachable` test.
+
 ### Local Development
 ```bash
 # Quick validation before commit

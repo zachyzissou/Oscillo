@@ -14,11 +14,16 @@ const SCALE_OPTIONS = ['major', 'minor', 'dorian', 'mixolydian', 'pentatonic', '
 const MODE_OPTIONS = ['play', 'edit', 'record', 'sequence'] as const
 const PERF_OPTIONS = ['low', 'medium', 'high'] as const
 const ONBOARDING_TOTAL_STEPS = 3
+const MIN_TEMPO = 60
+const MAX_TEMPO = 200
+const TEMPO_STEP = 5
 
 const readStoredDesktopExpanded = () => {
   if (!('localStorage' in globalThis)) return true
   return globalThis.localStorage.getItem(DECK_EXPANDED_KEY) !== 'false'
 }
+
+const clampTempo = (value: number) => Math.min(MAX_TEMPO, Math.max(MIN_TEMPO, value))
 
 interface OnboardingStep {
   id: 'scene' | 'palette' | 'tempo'
@@ -98,6 +103,19 @@ export default function ExperienceCommandDeck() {
     queueFocus('open')
   }
 
+  const adjustTempo = useCallback(
+    (delta: number) => {
+      setTempo(clampTempo(tempo + delta))
+    },
+    [setTempo, tempo]
+  )
+
+  const cycleMode = useCallback(() => {
+    const currentIndex = MODE_OPTIONS.indexOf(mode)
+    const nextIndex = (currentIndex + 1) % MODE_OPTIONS.length
+    setMode(MODE_OPTIONS[nextIndex])
+  }, [mode, setMode])
+
   const onboardingSteps = useMemo<OnboardingStep[]>(
     () => [
       {
@@ -128,7 +146,7 @@ export default function ExperienceCommandDeck() {
   const currentOnboardingStep = onboardingSteps[onboardingStep]
   const needsExpandedDeckForStep =
     currentOnboardingStep?.id === 'palette' || currentOnboardingStep?.id === 'tempo'
-  const adjustedTempo = tempo >= 188 ? Math.max(60, tempo - 12) : Math.min(200, tempo + 12)
+  const adjustedTempo = tempo >= 188 ? clampTempo(tempo - 12) : clampTempo(tempo + 12)
   const tempoNudgeLabel =
     adjustedTempo > tempo ? `Boost to ${adjustedTempo} BPM` : `Ease to ${adjustedTempo} BPM`
 
@@ -173,8 +191,9 @@ export default function ExperienceCommandDeck() {
         target?.tagName === 'SELECT' ||
         target?.isContentEditable
 
+      if (isTypingContext) return
+
       if (event.key === 'Escape') {
-        if (isTypingContext) return
         setIsExpanded(prev => {
           if (!prev) return prev
           queueFocus('open')
@@ -183,20 +202,37 @@ export default function ExperienceCommandDeck() {
         return
       }
 
-      if (event.key.toLowerCase() !== 't') return
+      if (event.key.toLowerCase() === 'm') {
+        event.preventDefault()
+        cycleMode()
+        return
+      }
 
-      if (isTypingContext) return
-      event.preventDefault()
-      setIsExpanded(prev => {
-        const next = !prev
-        queueFocus(next ? 'primary' : 'open')
-        return next
-      })
+      if (event.key === '[') {
+        event.preventDefault()
+        adjustTempo(-TEMPO_STEP)
+        return
+      }
+
+      if (event.key === ']') {
+        event.preventDefault()
+        adjustTempo(TEMPO_STEP)
+        return
+      }
+
+      if (event.key.toLowerCase() === 't') {
+        event.preventDefault()
+        setIsExpanded(prev => {
+          const next = !prev
+          queueFocus(next ? 'primary' : 'open')
+          return next
+        })
+      }
     }
 
     globalThis.addEventListener('keydown', onKeyDown)
     return () => globalThis.removeEventListener('keydown', onKeyDown)
-  }, [queueFocus])
+  }, [adjustTempo, cycleMode, queueFocus])
 
   return (
     <aside
@@ -205,6 +241,51 @@ export default function ExperienceCommandDeck() {
       aria-label="Experience controls"
       hidden={!viewportReady}
     >
+      <div
+        className={styles.actionRail}
+        data-testid="deck-action-rail"
+        role="toolbar"
+        aria-label="Persistent quick controls"
+      >
+        <button
+          type="button"
+          data-testid="deck-rail-toggle"
+          className={`${styles.railButton} ${styles.railPrimary}`}
+          aria-expanded={isExpanded}
+          aria-controls="experience-deck-shell"
+          onClick={isExpanded ? handleCollapse : handleExpand}
+        >
+          {isExpanded ? 'Hide controls' : 'Show controls'}
+        </button>
+        <button
+          type="button"
+          data-testid="deck-rail-tempo-down"
+          className={styles.railButton}
+          onClick={() => adjustTempo(-TEMPO_STEP)}
+          aria-label="Decrease tempo by 5 BPM"
+        >
+          -5 BPM
+        </button>
+        <button
+          type="button"
+          data-testid="deck-rail-tempo-up"
+          className={styles.railButton}
+          onClick={() => adjustTempo(TEMPO_STEP)}
+          aria-label="Increase tempo by 5 BPM"
+        >
+          +5 BPM
+        </button>
+        <button
+          type="button"
+          data-testid="deck-rail-mode-cycle"
+          className={styles.railButton}
+          onClick={cycleMode}
+          aria-label={`Cycle mode. Current mode ${modeLabel}`}
+        >
+          Mode: {modeLabel}
+        </button>
+      </div>
+
       {!isExpanded && (
         <div className={styles.floatingOpen}>
           <button
@@ -232,7 +313,7 @@ export default function ExperienceCommandDeck() {
               />
               <div>
                 <h2 className={styles.title}>Command Deck</h2>
-                <p className={styles.subtitle}>{modeLabel} mode | Press T to toggle</p>
+                <p className={styles.subtitle}>{modeLabel} mode | T toggle | M mode | [ ] tempo</p>
               </div>
             </div>
             <div className={styles.headerActions}>

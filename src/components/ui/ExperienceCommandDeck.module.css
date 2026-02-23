@@ -22,6 +22,43 @@
   bottom: 8px;
 }
 
+.actionRail {
+  margin-bottom: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  justify-content: flex-end;
+}
+
+.railButton {
+  border-radius: 999px;
+  border: 1px solid rgba(136, 227, 255, 0.28);
+  background: rgba(9, 24, 41, 0.84);
+  color: #d9f5ff;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 6px 11px;
+  cursor: pointer;
+  transition:
+    border-color 130ms ease,
+    background 130ms ease,
+    color 130ms ease;
+}
+
+.railPrimary {
+  border-color: rgba(113, 240, 255, 0.52);
+  background: linear-gradient(130deg, rgba(19, 102, 155, 0.9), rgba(4, 69, 111, 0.86));
+}
+
+.railButton:hover,
+.railButton:focus-visible {
+  border-color: rgba(134, 241, 255, 0.84);
+  color: #ffffff;
+  background: rgba(19, 45, 69, 0.95);
+  outline: none;
+}
+
 .shell {
   border-radius: 20px;
   border: 1px solid rgba(118, 237, 255, 0.35);
@@ -316,6 +353,17 @@
 }
 
 @media (max-width: 900px) {
+  .actionRail {
+    justify-content: center;
+    margin-bottom: 6px;
+  }
+
+  .railButton {
+    min-height: 38px;
+    padding: 7px 12px;
+    font-size: 11px;
+  }
+
   .shell {
     border-radius: 18px;
   }
