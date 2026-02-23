@@ -54,22 +54,33 @@ test.describe('Visual Regression Tests', () => {
       { consentKey: CONSENT_KEY, onboardingKey: ONBOARDING_KEY, overlayKey: OVERLAY_KEY }
     )
 
-    await page.goto('/')
+    // Keep visual snapshots deterministic across navigations and reloads by
+    // injecting styles via addInitScript (which re-runs on every load) rather
+    // than addStyleTag (which is applied once and lost after page.reload()).
+    await page.addInitScript(() => {
+      const injectDeterministicStyles = () => {
+        const style = document.createElement('style')
+        style.textContent = `
+          *, *::before, *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+          }
 
-    // Keep visual snapshots deterministic.
-    await page.addStyleTag({
-      content: `
-        *, *::before, *::after {
-          animation-duration: 0.01ms !important;
-          animation-iteration-count: 1 !important;
-          transition-duration: 0.01ms !important;
-        }
-
-        html, body, button, input, select, textarea {
-          font-family: Arial, Helvetica, sans-serif !important;
-        }
-      `,
+          html, body, button, input, select, textarea {
+            font-family: Arial, Helvetica, sans-serif !important;
+          }
+        `
+        document.head?.appendChild(style)
+      }
+      if (document.head) {
+        injectDeterministicStyles()
+      } else {
+        document.addEventListener('DOMContentLoaded', injectDeterministicStyles)
+      }
     })
+
+    await page.goto('/')
   })
 
   test('start overlay card visual', async ({ page }) => {
