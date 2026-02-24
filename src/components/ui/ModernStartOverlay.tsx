@@ -5,6 +5,7 @@ import { Music, Volume2, Info } from 'lucide-react'
 import gsap from 'gsap'
 import { startAudio } from '@/lib/audio/startAudio'
 import { useAudioEngine } from '@/store/useAudioEngine'
+import { logger } from '@/lib/logger'
 
 const shortcuts = [
   { key: 'Space', action: 'Play/Pause' },
@@ -17,17 +18,27 @@ const shortcuts = [
   { key: 'H', action: 'Toggle help' },
 ]
 
+const shouldDebugOverlay = process.env.NODE_ENV === 'development'
+
+function logOverlayDebug(event: string, context?: Record<string, unknown>) {
+  if (!shouldDebugOverlay) return
+  logger.debug({
+    event: `modern-start-overlay.${event}`,
+    ...(context ?? {}),
+  })
+}
+
 export default function ModernStartOverlay() {
   const [isVisible, setIsVisible] = useState(true)
   const [showHelp, setShowHelp] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
   const [isInitializingAudio, setIsInitializingAudio] = useState(false)
 
-  console.log('[ModernStartOverlay] Component mounted, initial state:', {
+  logOverlayDebug('mounted', {
     isVisible,
     showHelp,
     hasInteracted,
-    NODE_ENV: process.env.NODE_ENV
+    nodeEnv: process.env.NODE_ENV,
   })
 
   const setUserInteracted = useAudioEngine(useCallback((s) => s.setUserInteracted, []))
@@ -40,16 +51,16 @@ export default function ModernStartOverlay() {
     const isDevelopment = process.env.NODE_ENV === 'development'
     const hasSeenOverlay = localStorage.getItem('hasSeenOverlay')
 
-    console.log('[ModernStartOverlay] useEffect check:', {
+    logOverlayDebug('visibility-check', {
       isDevelopment,
       hasSeenOverlay,
-      willHide: !isDevelopment && hasSeenOverlay === 'true'
+      willHide: !isDevelopment && hasSeenOverlay === 'true',
     })
 
     if (!isDevelopment) {
       // Check if user has seen overlay before (only in production)
       if (hasSeenOverlay === 'true') {
-        console.log('[ModernStartOverlay] Hiding overlay (production + hasSeenOverlay)')
+        logOverlayDebug('auto-hide-production')
         setIsVisible(false)
       }
     }
@@ -89,7 +100,10 @@ export default function ModernStartOverlay() {
         setAudioContextState('running')
       }
     } catch (error) {
-      console.warn('Audio initialization failed (continuing without audio):', error)
+      logger.warn({
+        event: 'modern-start-overlay.audio-init-failed',
+        error: error instanceof Error ? error.message : String(error),
+      })
       // Continue without audio for CI environments
       setAudioContextState('suspended')
     }
@@ -114,14 +128,14 @@ export default function ModernStartOverlay() {
     }
   }
   
-  console.log('[ModernStartOverlay] Render check:', {
+  logOverlayDebug('render-check', {
     isVisible,
     showHelp,
-    willRenderNull: !isVisible && !showHelp
+    willRenderNull: !isVisible && !showHelp,
   })
 
   if (!isVisible && !showHelp) {
-    console.log('[ModernStartOverlay] Returning null - component not rendered')
+    logOverlayDebug('return-null')
     return null
   }
   
