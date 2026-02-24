@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { useObjects } from '@/store/useObjects'
 import { useAudioSettings } from '@/store/useAudioSettings'
 import { useSelectedShape } from '@/store/useSelectedShape'
@@ -9,7 +9,6 @@ import FloatingPanel from './FloatingPanel'
 import Knob from '../JSAudioKnobs'
 import LiquidButton from '../LiquidButton'
 import { objectTypes, ObjectType } from '@/config/objectTypes'
-import gsap from 'gsap'
 
 interface DraggableControlPanelProps {
   position?: [number, number, number]
