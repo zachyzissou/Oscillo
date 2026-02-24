@@ -26,7 +26,6 @@ const SceneManager = React.memo<SceneManagerProps>(({ children }) => {
   const profile = QUALITY_PROFILES[perfLevel]
   const [canvasError, setCanvasError] = useState<Error | null>(null)
   const webglRecovery = useWebGLRecovery()
-  const webglRecovery = useWebGLRecovery()
 
   const handleCanvasCreated = useCallback((state: any) => {
     try {
