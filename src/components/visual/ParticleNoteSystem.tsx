@@ -162,7 +162,12 @@ export default function ParticleNoteSystem({
 
   useEffect(() => {
     if (!particlesRef.current) return
+    const previousGeometry = particlesRef.current.geometry
     particlesRef.current.geometry = geometry
+    const isDefaultPlaceholder = Object.keys(previousGeometry.attributes).length === 0
+    if (previousGeometry !== geometry && isDefaultPlaceholder) {
+      previousGeometry.dispose()
+    }
   }, [geometry])
 
   useEffect(() => {
