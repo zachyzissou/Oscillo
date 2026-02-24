@@ -1,5 +1,6 @@
 'use client'
 import { useState, useCallback, useEffect } from 'react'
+import { logger } from '@/lib/logger'
 
 interface RetryOptions {
   maxAttempts?: number
@@ -134,7 +135,11 @@ export function useNetworkRetry<T>(
     exponentialBackoff: true,
     ...options,
     onRetry: (attempt, error) => {
-      console.warn(`Network request failed (attempt ${attempt}):`, error.message)
+      logger.warn({
+        event: 'retry.network.attempt-failed',
+        attempt,
+        error: error.message,
+      })
       options.onRetry?.(attempt, error)
     }
   })
@@ -151,11 +156,18 @@ export function useWebGLRetry<T>(
     exponentialBackoff: false,
     ...options,
     onRetry: (attempt, error) => {
-      console.warn(`WebGL operation failed (attempt ${attempt}):`, error.message)
+      logger.warn({
+        event: 'retry.webgl.attempt-failed',
+        attempt,
+        error: error.message,
+      })
       options.onRetry?.(attempt, error)
     },
     onMaxAttemptsReached: (error) => {
-      console.error('WebGL operations failed after maximum attempts:', error)
+      logger.error({
+        event: 'retry.webgl.max-attempts-reached',
+        error: error.message,
+      })
       options.onMaxAttemptsReached?.(error)
     }
   })
@@ -172,11 +184,19 @@ export function useChunkRetry<T>(
     exponentialBackoff: true,
     ...options,
     onRetry: (attempt, error) => {
-      console.warn(`Chunk loading failed (attempt ${attempt}):`, error.message)
+      logger.warn({
+        event: 'retry.chunk.attempt-failed',
+        attempt,
+        error: error.message,
+      })
       options.onRetry?.(attempt, error)
     },
     onMaxAttemptsReached: (error) => {
-      console.error('Chunk loading failed after maximum attempts. Reloading page...')
+      logger.error({
+        event: 'retry.chunk.max-attempts-reached',
+        error: error.message,
+        action: 'reload-page',
+      })
       // Auto-reload page for chunk errors
       setTimeout(() => window.location.reload(), 1000)
       options.onMaxAttemptsReached?.(error)
