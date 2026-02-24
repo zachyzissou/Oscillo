@@ -30,7 +30,8 @@ jobs:
           if-no-files-found: error
           retention-days: 1
       - name: Install Playwright browser and system dependencies
-        run: npx playwright install --with-deps chromium
+        run: |
+          timeout 300 npx playwright install --with-deps chromium || npx playwright install chromium
       - name: Run Playwright smoke tests
         run: npm run test:smoke
         env:
@@ -141,7 +142,8 @@ jobs:
           cache: 'npm'
       - run: npm ci
       - name: Install Playwright browsers and dependencies
-        run: npx playwright install --with-deps chromium
+        run: |
+          timeout 300 npx playwright install --with-deps chromium || npx playwright install chromium
       - name: Run visual regression suite (chromium)
         run: npx playwright test tests/e2e/visual-regression.spec.ts --project=chromium
         env:
