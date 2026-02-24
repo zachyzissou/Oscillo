@@ -1,4 +1,5 @@
-const { chromium } = require('playwright');
+const { chromium } = require('@playwright/test');
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 (async () => {
   let browser;
@@ -15,10 +16,10 @@ const { chromium } = require('playwright');
     // Set page timeout
     page.setDefaultTimeout(10000);
 
-    console.log('Navigating to http://localhost:3001...');
+    console.log(`Navigating to ${BASE_URL}...`);
 
     try {
-      await page.goto('http://localhost:3001', {
+      await page.goto(BASE_URL, {
         waitUntil: 'domcontentloaded',
         timeout: 10000
       });
