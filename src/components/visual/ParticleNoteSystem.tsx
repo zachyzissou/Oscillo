@@ -116,8 +116,9 @@ export default function ParticleNoteSystem({
       (analysisData.bassEnergy + analysisData.midEnergy + analysisData.trebleEnergy) / 3
     const audioEnergy = Math.min(1, averagedEnergy || analysisData.volume)
     const geometry = particlesRef.current.geometry
-    const positionAttribute = geometry.attributes.position as THREE.BufferAttribute
-    const sizeAttribute = geometry.attributes.size as THREE.BufferAttribute
+    const positionAttribute = geometry.attributes.position as THREE.BufferAttribute | undefined
+    const sizeAttribute = geometry.attributes.size as THREE.BufferAttribute | undefined
+    if (!positionAttribute || !sizeAttribute) return
 
     animateParticleBuffers({
       basePositions: particleData.basePositions,
@@ -160,13 +161,18 @@ export default function ParticleNoteSystem({
   }, [particleData.renderPositions, particleData.renderSizes])
 
   useEffect(() => {
+    if (!particlesRef.current) return
+    particlesRef.current.geometry = geometry
+  }, [geometry])
+
+  useEffect(() => {
     return () => {
       geometry.dispose()
     }
   }, [geometry])
 
   return (
-    <points ref={particlesRef} onClick={handleClick} geometry={geometry}>
+    <points ref={particlesRef} onClick={handleClick}>
       <pointsMaterial
         size={0.1}
         color={threeColor}
