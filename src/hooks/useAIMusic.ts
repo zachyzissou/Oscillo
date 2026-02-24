@@ -7,6 +7,7 @@ import { useState, useCallback, useRef, useEffect } from 'react'
 import { AIMusicGenerator, AIGenerationConfig, AIMusicalPhrase } from '../lib/ai-music-generator'
 import { getAnalyserBands } from '../lib/analyser'
 import { useMusicalPalette } from '../store/useMusicalPalette'
+import { logger } from '@/lib/logger'
 
 export interface AIGenerationState {
   isGenerating: boolean
@@ -32,6 +33,9 @@ export interface AIGenerationOptions {
   harmonicComplexity?: number
   useAudioAnalysis?: boolean
 }
+
+const stringifyError = (error: unknown) =>
+  error instanceof Error ? error.message : String(error)
 
 export function useAIMusic() {
   const { key, scale } = useMusicalPalette()
@@ -98,7 +102,11 @@ export function useAIMusic() {
             energy: (bands.bass + bands.mid + bands.treble) / (3 * 255)
           }
         } catch (error) {
-          console.warn('Audio analysis not available:', error)
+          logger.warn({
+            event: 'ai-music.audio-analysis-unavailable',
+            context: 'generate-phrase',
+            error: stringifyError(error),
+          })
         }
       }
 
@@ -153,7 +161,11 @@ export function useAIMusic() {
             energy: (bands.bass + bands.mid + bands.treble) / (3 * 255)
           }
         } catch (error) {
-          console.warn('Audio analysis not available:', error)
+          logger.warn({
+            event: 'ai-music.audio-analysis-unavailable',
+            context: 'generate-composition',
+            error: stringifyError(error),
+          })
         }
       }
 
