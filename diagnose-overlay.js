@@ -1,6 +1,7 @@
-const { chromium } = require('playwright');
+const { chromium } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 async function diagnoseOverlay() {
   console.log('=== Starting Overlay Diagnostic ===\n');
@@ -40,10 +41,10 @@ async function diagnoseOverlay() {
       console.log(`Page Error: ${err.message}`);
     });
 
-    console.log('1. Navigating to http://localhost:3004...');
+    console.log(`1. Navigating to ${BASE_URL}...`);
 
     // Navigate with network idle wait
-    await page.goto('http://localhost:3004', {
+    await page.goto(BASE_URL, {
       waitUntil: 'networkidle',
       timeout: 30000
     });

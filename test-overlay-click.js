@@ -1,4 +1,5 @@
-const { chromium } = require('playwright');
+const { chromium } = require('@playwright/test');
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 async function testOverlayClick() {
   console.log('=== Testing Overlay Click ===\n');
@@ -17,8 +18,8 @@ async function testOverlayClick() {
       console.log(`Browser: ${msg.text()}`);
     });
 
-    console.log('1. Navigating to app...');
-    await page.goto('http://localhost:3004');
+    console.log(`1. Navigating to app at ${BASE_URL}...`);
+    await page.goto(BASE_URL);
 
     console.log('2. Waiting for page to load...');
     await page.waitForTimeout(3000);

@@ -1,4 +1,5 @@
-const { chromium } = require('playwright');
+const { chromium } = require('@playwright/test');
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -13,8 +14,8 @@ const { chromium } = require('playwright');
     logs.push(text);
   });
 
-  console.log('Navigating to http://localhost:3001...');
-  await page.goto('http://localhost:3001', { waitUntil: 'networkidle' });
+  console.log(`Navigating to ${BASE_URL}...`);
+  await page.goto(BASE_URL, { waitUntil: 'networkidle' });
 
   // Wait a bit for React to render
   await page.waitForTimeout(2000);
