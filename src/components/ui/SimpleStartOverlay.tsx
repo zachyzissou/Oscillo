@@ -220,8 +220,12 @@ export default function SimpleStartOverlay() {
     )
     await wait(FINALIZE_FEEDBACK_MS)
 
-    setUserInteracted(true)
+    // Close the modal first, then unlock consent surfaces on the next frame
+    // so users never see overlapping startup + telemetry dialogs.
     setIsVisible(false)
+    globalThis.requestAnimationFrame(() => {
+      setUserInteracted(true)
+    })
     restoreFocusAfterOverlayClose()
     try {
       localStorage.setItem('hasSeenOverlay', 'true')
