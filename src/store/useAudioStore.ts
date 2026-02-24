@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { getTone, isAudioInitialized, startAudioContext } from '../lib/audio'
+import { logger } from '@/lib/logger'
 
 interface AudioAnalysisData {
   frequencyData: Uint8Array
@@ -45,6 +46,9 @@ const defaultAnalysisData: AudioAnalysisData = {
   mfccs: new Float32Array(13)
 }
 
+const stringifyError = (error: unknown) =>
+  error instanceof Error ? error.message : String(error)
+
 export const useAudioStore = create<AudioStoreState>((set, get) => ({
   isPlaying: false,
   audioContext: null,
@@ -80,7 +84,10 @@ export const useAudioStore = create<AudioStoreState>((set, get) => ({
 
       startAnalysisLoop(analyser)
     } catch (error) {
-      console.error('Failed to initialize audio:', error)
+      logger.error({
+        event: 'audio-store.initialize-failed',
+        error: stringifyError(error),
+      })
       set({ isInitialized: false, analyser: null, audioContext: null })
     }
   },
@@ -103,7 +110,10 @@ export const useAudioStore = create<AudioStoreState>((set, get) => ({
       source.connect(analyser)
       set({ sourceNode: source })
     } catch (error) {
-      console.warn('Failed to connect audio source to analyser:', error)
+      logger.warn({
+        event: 'audio-store.connect-source-failed',
+        error: stringifyError(error),
+      })
     }
   },
 
