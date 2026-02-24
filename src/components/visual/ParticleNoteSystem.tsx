@@ -1,5 +1,5 @@
 'use client'
-import React, { useMemo, useRef, useCallback } from 'react'
+import React, { useMemo, useRef, useCallback, useEffect } from 'react'
 import * as THREE from 'three'
 import { useFrame } from '@react-three/fiber'
 import { playNote, playChord, playBeat } from '@/lib/audio'
@@ -9,6 +9,11 @@ import { useAudioStore } from '@/store/useAudioStore'
 import { animateParticleBuffers, isPlaybackBoostActive } from '@/lib/particleAnimation'
 
 export type ParticleType = 'note' | 'chord' | 'beat'
+
+const deterministicUnitNoise = (seed: number) => {
+  const value = Math.sin(seed * 12.9898 + 78.233) * 43758.5453
+  return value - Math.floor(value)
+}
 
 export default function ParticleNoteSystem({
   id,
@@ -35,7 +40,6 @@ export default function ParticleNoteSystem({
     const base = type === 'chord' ? 2000 : type === 'beat' ? 5000 : 1500
     const count = Math.max(300, Math.floor(base * scale))
     const basePositions = new Float32Array(count * 3)
-    const velocities = new Float32Array(count * 3)
     const baseSizes = new Float32Array(count)
     const phases = new Float32Array(count)
 
@@ -52,25 +56,21 @@ export default function ParticleNoteSystem({
       } else if (type === 'beat') {
         const phi = Math.acos(-1 + (2 * i) / count)
         const theta = Math.sqrt(count * Math.PI) * phi
-        const radius = 1 + Math.random() * 3
+        const radius = 1 + deterministicUnitNoise(i + 11) * 3
         basePositions[i3] = radius * Math.cos(theta) * Math.sin(phi) + position[0]
         basePositions[i3 + 1] = radius * Math.cos(phi) + position[1]
         basePositions[i3 + 2] = radius * Math.sin(theta) * Math.sin(phi) + position[2]
       } else {
         const phi = Math.acos(-1 + (2 * i) / count)
         const theta = Math.sqrt(count * Math.PI) * phi
-        const radius = 1.5 + Math.random() * 0.5
+        const radius = 1.5 + deterministicUnitNoise(i + 23) * 0.5
         basePositions[i3] = radius * Math.cos(theta) * Math.sin(phi) + position[0]
         basePositions[i3 + 1] = radius * Math.cos(phi) + position[1]
         basePositions[i3 + 2] = radius * Math.sin(theta) * Math.sin(phi) + position[2]
       }
 
-      velocities[i3] = (Math.random() - 0.5) * 0.02
-      velocities[i3 + 1] = (Math.random() - 0.5) * 0.02
-      velocities[i3 + 2] = (Math.random() - 0.5) * 0.02
-
-      baseSizes[i] = Math.random() * 0.1 + 0.05
-      phases[i] = Math.random() * Math.PI * 2
+      baseSizes[i] = deterministicUnitNoise(i + 37) * 0.1 + 0.05
+      phases[i] = deterministicUnitNoise(i + 53) * Math.PI * 2
     }
 
     const renderPositions = new Float32Array(basePositions)
@@ -80,7 +80,6 @@ export default function ParticleNoteSystem({
       {
         basePositions,
         renderPositions,
-        velocities,
         baseSizes,
         renderSizes,
         phases,
@@ -153,13 +152,21 @@ export default function ParticleNoteSystem({
   })
 
   const threeColor = useMemo(() => new THREE.Color(color), [color])
+  const geometry = useMemo(() => {
+    const bufferGeometry = new THREE.BufferGeometry()
+    bufferGeometry.setAttribute('position', new THREE.BufferAttribute(particleData.renderPositions, 3))
+    bufferGeometry.setAttribute('size', new THREE.BufferAttribute(particleData.renderSizes, 1))
+    return bufferGeometry
+  }, [particleData.renderPositions, particleData.renderSizes])
+
+  useEffect(() => {
+    return () => {
+      geometry.dispose()
+    }
+  }, [geometry])
 
   return (
-    <points ref={particlesRef} onClick={handleClick}>
-      <bufferGeometry>
-        <bufferAttribute attach="attributes-position" args={[particleData.renderPositions, 3]} />
-        <bufferAttribute attach="attributes-size" args={[particleData.renderSizes, 1]} />
-      </bufferGeometry>
+    <points ref={particlesRef} onClick={handleClick} geometry={geometry}>
       <pointsMaterial
         size={0.1}
         color={threeColor}

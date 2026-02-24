@@ -28,8 +28,8 @@ export function animateParticleBuffers(input: ParticleAnimationInput) {
     isPlaying,
   } = input
 
-  const activeScale = isActive ? 1.5 : 1.0
-  const playingScale = isPlaying ? 2.0 : 1.0
+  const activeScale = isActive ? 1.5 : 1
+  const playingScale = isPlaying ? 2 : 1
   const audioScale = 1 + audioEnergy * 0.6
 
   for (let i = 0; i < count; i += 1) {
