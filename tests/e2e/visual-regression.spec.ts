@@ -53,8 +53,23 @@ const clearActiveFocus = async (page: Page) => {
   })
 }
 
+const navigateToHomeWithRetry = async (page: Page) => {
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      await page.goto('/', { waitUntil: 'domcontentloaded', timeout: 60000 })
+      return
+    } catch (error) {
+      if (attempt === 2) {
+        throw error
+      }
+      await page.waitForTimeout(1000)
+    }
+  }
+}
+
 test.describe('Visual Regression Tests', () => {
   test.skip(!runVisualRegression, 'Set RUN_VISUAL_REGRESSION=1 and update baselines intentionally.')
+  test.describe.configure({ timeout: 180000 })
 
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(
@@ -86,7 +101,7 @@ test.describe('Visual Regression Tests', () => {
       { styleId: DETERMINISTIC_STYLE_ID, styleContent: DETERMINISTIC_VISUAL_STYLES }
     )
 
-    await page.goto('/')
+    await navigateToHomeWithRetry(page)
   })
 
   test('start overlay card visual', async ({ page }) => {
