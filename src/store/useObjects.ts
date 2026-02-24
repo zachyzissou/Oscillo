@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { subscribeWithSelector } from 'zustand/middleware'
 import { addBody } from "../lib/physics"
 import { disposeAllObjectAudio, disposeObjectAudio } from '../lib/audio'
+import { logger } from '@/lib/logger'
 
 /**
  * Store of musical object metadata with modern Zustand patterns.
@@ -37,6 +38,19 @@ export interface ObjectState {
   getObjectsByType: (type: ObjectType) => MusicalObject[]
 }
 
+const logObjectStoreWarning = (
+  event: string,
+  details: Record<string, unknown> = {}
+) => {
+  logger.warn({
+    event: `object-store.${event}`,
+    ...details,
+  })
+}
+
+const stringifyError = (error: unknown) =>
+  error instanceof Error ? error.message : String(error)
+
 export const useObjects = create<ObjectState>()(
   subscribeWithSelector((set, get) => ({
     // Default state
@@ -55,7 +69,10 @@ export const useObjects = create<ObjectState>()(
       
       // Prevent spawning too many objects
       if (objects.length >= maxObjects) {
-        console.warn(`Maximum objects (${maxObjects}) reached`)
+        logObjectStoreWarning('max-objects-reached', {
+          maxObjects,
+          currentObjectCount: objects.length,
+        })
         return ''
       }
       
@@ -88,7 +105,10 @@ export const useObjects = create<ObjectState>()(
         try {
           localStorage.setItem('musical-objects', JSON.stringify(updated))
         } catch (error) {
-          console.warn('Failed to save objects to localStorage:', error)
+          logObjectStoreWarning('storage-save-failed', {
+            context: 'spawn',
+            error: stringifyError(error),
+          })
         }
       }
       
@@ -96,7 +116,10 @@ export const useObjects = create<ObjectState>()(
       try {
         addBody(id, newObj.position)
       } catch (error) {
-        console.warn('Failed to add physics body:', error)
+        logObjectStoreWarning('physics-add-failed', {
+          objectId: id,
+          error: stringifyError(error),
+        })
       }
       
       return id
@@ -112,7 +135,11 @@ export const useObjects = create<ObjectState>()(
         try {
           localStorage.setItem('musical-objects', JSON.stringify(updated))
         } catch (error) {
-          console.warn('Failed to save objects to localStorage:', error)
+          logObjectStoreWarning('storage-save-failed', {
+            context: 'remove',
+            objectId: id,
+            error: stringifyError(error),
+          })
         }
       }
 
@@ -142,7 +169,10 @@ export const useObjects = create<ObjectState>()(
         try {
           localStorage.removeItem('musical-objects')
         } catch (error) {
-          console.warn('Failed to clear objects from localStorage:', error)
+          logObjectStoreWarning('storage-clear-failed', {
+            context: 'clear',
+            error: stringifyError(error),
+          })
         }
       }
 
@@ -179,7 +209,10 @@ export function loadObjectsFromStorage() {
     )
     
     if (validObjects.length !== list.length) {
-      console.warn(`Filtered ${list.length - validObjects.length} invalid objects from storage`)
+      logObjectStoreWarning('invalid-storage-objects-filtered', {
+        filteredCount: list.length - validObjects.length,
+        loadedCount: list.length,
+      })
     }
     
     useObjects.setState({ objects: validObjects })
@@ -189,12 +222,18 @@ export function loadObjectsFromStorage() {
       try {
         addBody(obj.id, obj.position)
       } catch (error) {
-        console.warn(`Failed to restore physics body for object ${obj.id}:`, error)
+        logObjectStoreWarning('physics-restore-failed', {
+          objectId: obj.id,
+          error: stringifyError(error),
+        })
       }
     })
     
   } catch (err) {
-    console.error('Failed to load objects from storage:', err)
+    logger.error({
+      event: 'object-store.storage-load-failed',
+      error: stringifyError(err),
+    })
     // Clear corrupted storage
     localStorage.removeItem('musical-objects')
   }
@@ -208,6 +247,9 @@ export function saveObjectsToStorage() {
     const objects = useObjects.getState().objects
     localStorage.setItem('musical-objects', JSON.stringify(objects))
   } catch (error) {
-    console.warn('Failed to save objects to localStorage:', error)
+    logObjectStoreWarning('storage-save-failed', {
+      context: 'manual-save',
+      error: stringifyError(error),
+    })
   }
 }
