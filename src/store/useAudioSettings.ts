@@ -8,6 +8,7 @@ import {
   setBitcrusherBits as setBitcrusherBitsAudio,
   setFilterFrequency as setFilterFrequencyAudio,
 } from '../lib/audio'
+import { logger } from '@/lib/logger'
 
 /**
  * Audio settings store with modern Zustand patterns.
@@ -45,6 +46,15 @@ export interface AudioSettingsState {
   setFilterFrequency: (frequency: number) => void
 }
 
+const logSettingApplyError = (setting: string, value: number, error: unknown) => {
+  logger.warn({
+    event: 'audio-settings.apply-failed',
+    setting,
+    value,
+    error: error instanceof Error ? error.message : String(error),
+  })
+}
+
 export const useAudioSettings = create<AudioSettingsState>()(
   subscribeWithSelector((set) => ({
     // Default values
@@ -69,7 +79,9 @@ export const useAudioSettings = create<AudioSettingsState>()(
     setVolume: (volume: number) => {
       const clampedVolume = Math.max(0, Math.min(1, volume))
       set({ volume: clampedVolume })
-      setMasterVolumeAudio(clampedVolume).catch(console.error)
+      setMasterVolumeAudio(clampedVolume).catch(error =>
+        logSettingApplyError('volume', clampedVolume, error)
+      )
     },
 
     setBpm: (bpm: number) => {
@@ -84,31 +96,41 @@ export const useAudioSettings = create<AudioSettingsState>()(
     setChorusDepth: (depth: number) => {
       const clampedDepth = Math.max(0, Math.min(1, depth))
       set({ chorusDepth: clampedDepth })
-      setChorusDepthAudio(clampedDepth).catch(console.error)
+      setChorusDepthAudio(clampedDepth).catch(error =>
+        logSettingApplyError('chorusDepth', clampedDepth, error)
+      )
     },
 
     setReverbWet: (wet: number) => {
       const clampedWet = Math.max(0, Math.min(1, wet))
       set({ reverbWet: clampedWet })
-      setReverbWetAudio(clampedWet).catch(console.error)
+      setReverbWetAudio(clampedWet).catch(error =>
+        logSettingApplyError('reverbWet', clampedWet, error)
+      )
     },
 
     setDelayFeedback: (feedback: number) => {
       const clampedFeedback = Math.max(0, Math.min(0.95, feedback))
       set({ delayFeedback: clampedFeedback })
-      setDelayFeedbackAudio(clampedFeedback).catch(console.error)
+      setDelayFeedbackAudio(clampedFeedback).catch(error =>
+        logSettingApplyError('delayFeedback', clampedFeedback, error)
+      )
     },
 
     setBitcrusherBits: (bits: number) => {
       const clampedBits = Math.max(2, Math.min(16, Math.round(bits)))
       set({ bitcrusherBits: clampedBits })
-      setBitcrusherBitsAudio(clampedBits).catch(console.error)
+      setBitcrusherBitsAudio(clampedBits).catch(error =>
+        logSettingApplyError('bitcrusherBits', clampedBits, error)
+      )
     },
 
     setFilterFrequency: (frequency: number) => {
       const clampedFrequency = Math.max(20, Math.min(20000, frequency))
       set({ filterFrequency: clampedFrequency })
-      setFilterFrequencyAudio(clampedFrequency).catch(console.error)
+      setFilterFrequencyAudio(clampedFrequency).catch(error =>
+        logSettingApplyError('filterFrequency', clampedFrequency, error)
+      )
     },
   }))
 )
