@@ -22,7 +22,7 @@ jobs:
       - run: npm run build
       - name: Upload build artifacts
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-files
           path: .next
@@ -66,7 +66,7 @@ jobs:
           node -e "const fs=require('fs');const p='security-audit-report.json';let raw='';try{raw=fs.readFileSync(p,'utf8');}catch(e){console.error('Error reading security-audit-report.json:',e.message);process.exit(1);}if(!raw||!raw.trim()){console.error('security-audit-report.json is empty or only whitespace.');process.exit(1);}let parsed;try{parsed=JSON.parse(raw);}catch(e){console.error('Failed to parse security-audit-report.json as JSON:',e.message);console.error('Raw content of security-audit-report.json:');console.error(raw);process.exit(1);}const v=(parsed.metadata&&parsed.metadata.vulnerabilities)||{};console.log('vulnerabilities:',JSON.stringify(v));"
       - name: Upload security audit report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: security-audit-report
           path: security-audit-report.json
@@ -115,14 +115,14 @@ jobs:
           CI: true
           RUN_VISUAL_REGRESSION: '1'
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: playwright-report
           path: playwright-report/
           retention-days: 30
       - name: Upload test videos
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-videos
@@ -148,14 +148,14 @@ jobs:
           CI: true
           RUN_VISUAL_REGRESSION: '1'
       - name: Upload visual report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: visual-playwright-report
           path: playwright-report/
           retention-days: 14
       - name: Upload visual failures
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: failure()
         with:
           name: visual-test-results
