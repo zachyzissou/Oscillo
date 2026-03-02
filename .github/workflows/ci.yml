@@ -93,7 +93,7 @@ jobs:
       - name: List downloaded build
         run: ls -al .next | head
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
