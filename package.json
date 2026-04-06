@@ -155,7 +155,7 @@
       "minimist": "^1.2.6",
       "static-eval": "^2.1.0"
     },
-    "minimatch": "^10.2.2",
+    "minimatch": "^10.2.5",
     "glob": "^11.1.0",
     "@ducanh2912/next-pwa": {
       "workbox-build": "^7.4.0",
