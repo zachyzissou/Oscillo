@@ -214,7 +214,7 @@ LOG_LEVEL=DEBUG
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This tool is governed by this repository's source-visible license; see the root [LICENSE](../../LICENSE) for details.
 
 ## Acknowledgments
 

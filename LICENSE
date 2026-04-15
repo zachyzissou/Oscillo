@@ -1,4 +1,4 @@
-# SlurpNet Source-Visible License v1.0
+# Oscillo Source-Visible License v1.0
 
 Copyright (c) 2026 Zach Gonser and contributors authorized by Zach Gonser.
 All rights reserved.
@@ -17,7 +17,9 @@ Without prior written permission from Zach Gonser, you may not:
 - remove or alter copyright, attribution, or license notices.
 
 ## Contributions
-Unless explicitly agreed otherwise in writing, any contribution, patch, pull request, or suggestion submitted for this repository may be rejected and does not grant you any rights to this codebase.
+Unless explicitly agreed otherwise in writing, any contribution, patch, pull request, or suggestion submitted for this repository may be rejected.
+By submitting a contribution, you represent that you have the right to do so and, if your contribution is accepted or incorporated into this repository, you grant Zach Gonser a perpetual, irrevocable, worldwide, royalty-free, sublicensable license to use, copy, modify, adapt, distribute, publish, display, perform, and otherwise exploit that contribution as part of this repository and related works.
+Submission of a contribution does not grant you any rights to this codebase except as expressly agreed in writing.
 
 ## Trademark and branding
 No trademark, service mark, trade name, logo, or brand feature license is granted.
