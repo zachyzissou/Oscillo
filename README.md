@@ -1,3 +1,6 @@
+> **License Notice**
+> This repository is source-visible only. No copying, modification, redistribution, deployment, or commercial use is permitted without prior written permission from Zach Gonser. See `LICENSE` for details.
+
 # Oscillo
 
 > Interactive 3D music sandbox with AI composition, spatial rendering, and collaborative WebSocket sessions.
