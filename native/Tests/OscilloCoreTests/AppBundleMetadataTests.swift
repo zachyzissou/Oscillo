@@ -15,6 +15,8 @@ final class AppBundleMetadataTests: XCTestCase {
         XCTAssertEqual(plist["CFBundleExecutable"] as? String, "OscilloMac")
         XCTAssertEqual(plist["CFBundlePackageType"] as? String, "APPL")
         XCTAssertEqual(plist["CFBundleIdentifier"] as? String, "com.zachyzissou.oscillo.native.mac")
+        XCTAssertEqual(plist["CFBundleShortVersionString"] as? String, "0.1.1")
+        XCTAssertEqual(plist["CFBundleVersion"] as? String, "2")
         XCTAssertEqual(
             plist["NSMicrophoneUsageDescription"] as? String,
             "Oscillo uses microphone input to drive real-time audio-reactive visuals."
