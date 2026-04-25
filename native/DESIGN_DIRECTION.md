@@ -4,6 +4,8 @@ The Swift rewrite is not a strict port of the pre-native Three.js experiment.
 
 The web app is useful source material for the domain: audio reactivity, visual synthesis, musical controls, and exploratory play. It should not be treated as the final layout, visual language, interaction model, or feature checklist for the native app.
 
+Google Stitch exploration for this direction lives in [`docs/STITCH_WORKFLOW.md`](../docs/STITCH_WORKFLOW.md).
+
 ## Product North Star
 
 Oscillo Native should feel like a living instrument for sound-driven light.

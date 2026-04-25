@@ -10,6 +10,7 @@ The current slice is intentionally separate from the existing Next/Three.js app.
 - `APPLE_TECH_MAP.md`: current Apple framework research and adoption plan.
 - `DESIGN_DIRECTION.md`: native creative direction and non-parity guidance.
 - `UPDATES.md`: GitHub release update channel and secure OTA path.
+- [`docs/STITCH_WORKFLOW.md`](../docs/STITCH_WORKFLOW.md): Google Stitch project, MCP setup notes, and native visual exploration workflow.
 
 ## Requirements
 
@@ -60,6 +61,8 @@ Native release builds are published by `.github/workflows/native-release.yml` us
 See `UPDATES.md` for the current GitHub Releases update channel and the secure Sparkle OTA install path.
 
 See `DESIGN_DIRECTION.md` before making visual or interaction decisions. The Swift app is allowed to diverge from the old Three.js experiment.
+
+Use [`docs/STITCH_WORKFLOW.md`](../docs/STITCH_WORKFLOW.md) when exploring new native screen directions in Google Stitch.
 
 ## Current Scope
 
