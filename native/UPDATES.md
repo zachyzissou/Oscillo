@@ -49,3 +49,22 @@ GitHub native releases require Apple Developer ID signing and notarization secre
 The matching Sparkle public key lives in `AppBundle/Info.plist` as `SUPublicEDKey`.
 
 Developer ID signing plus notarization is what prevents the recurring Gatekeeper "Open Anyway" approval flow for direct-download builds. Sparkle's EdDSA signature protects the update feed and archive, but it does not replace Apple's Gatekeeper trust chain.
+
+## First-Time Secret Setup
+
+Generate a Developer ID Application certificate from the Apple Developer portal using the CSR at:
+
+```bash
+native/secrets/OscilloDeveloperIDApplication.certSigningRequest
+```
+
+After downloading the `.cer`, store the release secrets:
+
+```bash
+APPLE_ID="you@example.com" \
+APPLE_TEAM_ID="TEAMID" \
+APPLE_APP_SPECIFIC_PASSWORD="xxxx-xxxx-xxxx-xxxx" \
+./Scripts/configure-macos-signing-secrets.sh /path/to/developer_id_application.cer
+```
+
+The script builds a password-protected `.p12` from the local private key, pushes the GitHub secrets, and leaves the generated key material under ignored `native/secrets/`.
