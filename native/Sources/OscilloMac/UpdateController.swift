@@ -9,16 +9,35 @@ final class UpdateController: ObservableObject {
     @Published private(set) var releaseURL: URL?
 
     private let service: GitHubUpdateService
+    private var launchUpdateCheckPolicy = LaunchUpdateCheckPolicy()
 
     init(service: GitHubUpdateService = GitHubUpdateService()) {
         self.service = service
     }
 
     func checkNow() {
+        startCheck(
+            statusText: "Checking GitHub Releases...",
+            failurePrefix: "Update check failed"
+        )
+    }
+
+    func checkAutomaticallyOnLaunch() {
+        guard launchUpdateCheckPolicy.shouldStartAutomaticCheck() else {
+            return
+        }
+
+        startCheck(
+            statusText: "Checking for updates...",
+            failurePrefix: "Automatic update check failed"
+        )
+    }
+
+    private func startCheck(statusText: String, failurePrefix: String) {
         guard !isChecking else { return }
 
         isChecking = true
-        statusText = "Checking GitHub Releases..."
+        self.statusText = statusText
         releaseURL = nil
 
         Task {
@@ -30,7 +49,7 @@ final class UpdateController: ObservableObject {
                 )
                 apply(result)
             } catch {
-                statusText = "Update check failed: \(error.localizedDescription)"
+                self.statusText = "\(failurePrefix): \(error.localizedDescription)"
             }
         }
     }
