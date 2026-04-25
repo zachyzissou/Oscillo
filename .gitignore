@@ -14,6 +14,7 @@ package-lock.json
 .buildcache/*
 !.buildcache/.gitkeep
 native/.build/
+native/.swiftpm/
 native/dist/
 tsconfig.tsbuildinfo
 

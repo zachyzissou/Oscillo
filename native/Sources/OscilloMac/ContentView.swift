@@ -24,6 +24,7 @@ struct ContentView: View {
         }
         .task {
             audioEngine.startPreview()
+            updateController.checkAutomaticallyOnLaunch()
         }
     }
 }
