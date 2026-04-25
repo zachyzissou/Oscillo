@@ -26,7 +26,7 @@ The pre-Swift app defines the domain more than the destination. Its important id
 - Let audio shape motion, topology, color, and camera behavior, not only brightness.
 - Make the first screen the instrument, not an explanatory landing page.
 - Keep controls compact and inspectable; the scene should own most of the window.
-- Maintain a single primary control surface. Secondary overlays should be readouts only, and layout must reserve space so controls never compete with the scene or each other.
+- Maintain a single primary control surface. Do not add secondary HUD panels or bottom docks; fold readouts into the instrument rail so the Metal scene remains the canvas.
 - Use Metal for visual identity, not just as a Three.js replacement.
 - Do not expose controls that imply unfinished features work; represent future capture, export, AI, spatial, and collaboration features only when there is a real implementation path.
 - Design macOS first for testing and iteration, but avoid choices that would make iOS feel bolted on later.
