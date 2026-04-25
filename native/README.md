@@ -8,6 +8,7 @@ The current slice is intentionally separate from the existing Next/Three.js app.
 - `OscilloMac`: a macOS SwiftUI + MetalKit app executable.
 - Core XCTest coverage for the shared model and audio analysis contracts.
 - `APPLE_TECH_MAP.md`: current Apple framework research and adoption plan.
+- `DESIGN_DIRECTION.md`: native creative direction and non-parity guidance.
 - `UPDATES.md`: GitHub release update channel and secure OTA path.
 
 ## Requirements
@@ -57,6 +58,8 @@ Native pull requests are checked by `.github/workflows/native-macos.yml`.
 Native release builds are published by `.github/workflows/native-release.yml` using tags like `native-v0.1.0`.
 
 See `UPDATES.md` for the current GitHub Releases update channel and the secure Sparkle OTA install path.
+
+See `DESIGN_DIRECTION.md` before making visual or interaction decisions. The Swift app is allowed to diverge from the old Three.js experiment.
 
 ## Current Scope
 

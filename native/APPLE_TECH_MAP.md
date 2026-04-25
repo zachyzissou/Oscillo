@@ -11,7 +11,7 @@ Local toolchain checked:
 
 ## Direction
 
-Oscillo should become a native Swift app, not a WebView wrapper. The first build should keep the current web app intact and add a native lane under `native/` with shared `OscilloCore` logic, a macOS SwiftUI shell, and a Metal renderer. iOS should reuse the same core/audio/rendering contracts after the macOS slice is stable.
+Oscillo should become a native Swift app, not a WebView wrapper and not a strict Three.js port. The first build should keep the current web app intact and add a native lane under `native/` with shared `OscilloCore` logic, a macOS SwiftUI shell, and a Metal renderer. iOS should reuse the same core/audio/rendering contracts after the macOS slice is stable.
 
 All items below are Apple-provided platform frameworks or tools available with Xcode. A few capabilities still need OS/device support, user permissions, or entitlements before they can ship, such as microphone capture, SharePlay, Apple Intelligence availability, and iOS haptics.
 
