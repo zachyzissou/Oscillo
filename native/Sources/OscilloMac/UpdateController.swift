@@ -26,7 +26,7 @@ final class UpdateController: ObservableObject {
 
             do {
                 let result = try await service.checkForUpdates(
-                    currentVersionString: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0.1.0"
+                    currentVersionString: Self.bundleShortVersion
                 )
                 apply(result)
             } catch {
@@ -38,6 +38,10 @@ final class UpdateController: ObservableObject {
     func openReleasePage() {
         guard let releaseURL else { return }
         NSWorkspace.shared.open(releaseURL)
+    }
+
+    private static var bundleShortVersion: String {
+        Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? ""
     }
 
     private func apply(_ result: UpdateCheckResult) {
