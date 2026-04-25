@@ -4,6 +4,7 @@ import SwiftUI
 @MainActor
 final class SceneController: ObservableObject {
     @Published private(set) var settings: SceneSettings
+    @Published private(set) var selectedPreset: PerformancePreset?
 
     let settingsStore: SceneSettingsStore
 
@@ -63,8 +64,10 @@ final class SceneController: ObservableObject {
     }
 
     func applyPreset(_ preset: PerformancePreset) {
-        settings = preset.settings
-        settingsStore.update(preset.settings)
+        let next = preset.settings
+        settings = next
+        selectedPreset = preset
+        settingsStore.update(next)
     }
 
     private func update(
@@ -82,6 +85,7 @@ final class SceneController: ObservableObject {
             sceneMode: sceneMode
         )
         settings = next
+        selectedPreset = nil
         settingsStore.update(next)
     }
 }

@@ -111,18 +111,7 @@ public enum PerformancePreset: String, CaseIterable, Equatable, Identifiable, Se
         }
     }
 
-    public var shortName: String {
-        switch self {
-        case .drift:
-            "Drift"
-        case .pulse:
-            "Pulse"
-        case .orbit:
-            "Orbit"
-        case .surge:
-            "Surge"
-        }
-    }
+    public var shortName: String { displayName }
 
     public var settings: SceneSettings {
         switch self {

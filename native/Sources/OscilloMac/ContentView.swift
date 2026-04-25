@@ -153,7 +153,7 @@ private struct InstrumentSpine: View {
                         ForEach(PerformancePreset.allCases) { preset in
                             PerformancePresetPill(
                                 preset: preset,
-                                isSelected: sceneController.settings == preset.settings
+                                isSelected: sceneController.selectedPreset == preset
                             ) {
                                 sceneController.applyPreset(preset)
                             }
