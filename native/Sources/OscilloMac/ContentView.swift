@@ -52,77 +52,33 @@ private struct InstrumentOverlayLayout: View {
 
     private let edgePadding: CGFloat = 18
     private let controlRailWidth: CGFloat = 302
-    private let overlayGap: CGFloat = 14
-    private let minimumRailHeight: CGFloat = 360
 
     var body: some View {
-        if usesCompactLayout {
-            compactLayout
-        } else {
-            performanceLayout
+        HStack(alignment: .top) {
+            InstrumentSpine(
+                audioEngine: audioEngine,
+                sceneController: sceneController,
+                updateController: updateController
+            )
+            .frame(width: railWidth)
+            .frame(maxHeight: railMaxHeight, alignment: .topLeading)
+
+            Spacer(minLength: 0)
         }
-    }
-
-    private var usesCompactLayout: Bool {
-        availableSize.width < 980 || availableSize.height < 620
-    }
-
-    private var railMaxHeight: CGFloat {
-        max(
-            minimumRailHeight,
-            availableSize.height - edgePadding * 2 - BottomSignalConsole.minimumHeight - overlayGap
+        .padding(edgePadding)
+        .frame(
+            maxWidth: .infinity,
+            maxHeight: .infinity,
+            alignment: .topLeading
         )
     }
 
-    private var compactWidth: CGFloat {
+    private var railWidth: CGFloat {
         min(controlRailWidth, max(260, availableSize.width - edgePadding * 2))
     }
 
-    private var performanceLayout: some View {
-        VStack(alignment: .leading, spacing: overlayGap) {
-            HStack(alignment: .top, spacing: overlayGap) {
-                InstrumentSpine(
-                    audioEngine: audioEngine,
-                    sceneController: sceneController,
-                    updateController: updateController
-                )
-                .frame(width: controlRailWidth)
-                .frame(maxHeight: railMaxHeight, alignment: .topLeading)
-
-                Spacer(minLength: 24)
-            }
-
-            Spacer(minLength: 0)
-
-            HStack(alignment: .bottom, spacing: overlayGap) {
-                Color.clear
-                    .frame(width: controlRailWidth)
-
-                BottomSignalConsole(audioEngine: audioEngine, sceneController: sceneController)
-                    .frame(maxWidth: .infinity, alignment: .bottom)
-            }
-        }
-        .padding(edgePadding)
-    }
-
-    private var compactLayout: some View {
-        ScrollView(.vertical) {
-            VStack(alignment: .leading, spacing: overlayGap) {
-                InstrumentSpine(
-                    audioEngine: audioEngine,
-                    sceneController: sceneController,
-                    updateController: updateController,
-                    scrollsInternally: false
-                )
-                .frame(width: compactWidth)
-
-                BottomSignalConsole(audioEngine: audioEngine, sceneController: sceneController)
-                    .frame(width: max(260, availableSize.width - edgePadding * 2), alignment: .leading)
-            }
-            .padding(edgePadding)
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .scrollIndicators(.never)
+    private var railMaxHeight: CGFloat {
+        max(320, availableSize.height - edgePadding * 2)
     }
 }
 
@@ -130,20 +86,13 @@ private struct InstrumentSpine: View {
     @ObservedObject var audioEngine: LiveAudioEngine
     @ObservedObject var sceneController: SceneController
     @ObservedObject var updateController: UpdateController
-    var scrollsInternally = true
     private let buildMetadata = AppBuildMetadata(bundleInfo: Bundle.main.infoDictionary ?? [:])
 
     var body: some View {
-        Group {
-            if scrollsInternally {
-                ScrollView(.vertical) {
-                    spineContent
-                }
-                .scrollIndicators(.never)
-            } else {
-                spineContent
-            }
+        ScrollView(.vertical) {
+            spineContent
         }
+        .scrollIndicators(.never)
         .frame(alignment: .topLeading)
         .signalPanel(cornerRadius: 10)
     }
@@ -192,6 +141,8 @@ private struct InstrumentSpine: View {
                         )
                     }
                 }
+
+                SignalReadoutModule(audioEngine: audioEngine)
 
                 VStack(alignment: .leading, spacing: 8) {
                     ModuleLabel("SCENE")
@@ -281,80 +232,23 @@ private struct InstrumentSpine: View {
     }
 }
 
-private struct BottomSignalConsole: View {
-    static let minimumHeight: CGFloat = 96
-
+private struct SignalReadoutModule: View {
     @ObservedObject var audioEngine: LiveAudioEngine
-    @ObservedObject var sceneController: SceneController
 
     var body: some View {
-        ViewThatFits(in: .horizontal) {
-            expandedConsole
-            compactConsole
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, minHeight: Self.minimumHeight, alignment: .leading)
-        .signalPanel(cornerRadius: 12)
-    }
-
-    private var expandedConsole: some View {
-        HStack(alignment: .center, spacing: 18) {
-            consoleTitle
-                .frame(width: 190, alignment: .leading)
-
-            meterBank
-
-            Divider()
-                .frame(height: 62)
-                .overlay(SignalTheme.gridLine)
-
-            Spacer(minLength: 12)
-
-            statusBadges
-        }
-    }
-
-    private var compactConsole: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                consoleTitle
-                Spacer(minLength: 12)
-                SignalBadge(sceneController.settings.sceneMode.shortName)
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline) {
+                ModuleLabel("SIGNAL")
+                Spacer(minLength: 10)
+                SignalBadge("METAL LIVE")
             }
 
-            meterBank
-            statusBadges
-        }
-    }
-
-    private var consoleTitle: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text("SIGNAL CONSOLE")
-                .font(.system(size: 11, weight: .bold, design: .monospaced))
-                .foregroundStyle(SignalTheme.signalTeal)
-            Text(sceneController.settings.sceneMode.displayName)
-                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                .foregroundStyle(SignalTheme.softWhite)
-                .lineLimit(1)
-                .minimumScaleFactor(0.78)
-        }
-    }
-
-    private var meterBank: some View {
-        HStack(spacing: 12) {
-            HardwareMeter(title: "LVL", value: audioEngine.features.volume, accent: SignalTheme.meterGreen)
-            HardwareMeter(title: "BASS", value: audioEngine.features.bassEnergy, accent: SignalTheme.signalTeal)
-            HardwareMeter(title: "MID", value: audioEngine.features.midEnergy, accent: SignalTheme.oscillatorCyan)
-            HardwareMeter(title: "HI", value: audioEngine.features.trebleEnergy, accent: SignalTheme.warmPeak)
-        }
-    }
-
-    private var statusBadges: some View {
-        HStack(spacing: 8) {
-            SignalBadge("METAL LIVE")
-            SignalBadge("QUALITY AUTO")
-            SignalBadge("OUTPUT LIVE")
+            VStack(spacing: 7) {
+                RailMeter(title: "LVL", value: audioEngine.features.volume, accent: SignalTheme.meterGreen)
+                RailMeter(title: "BASS", value: audioEngine.features.bassEnergy, accent: SignalTheme.signalTeal)
+                RailMeter(title: "MID", value: audioEngine.features.midEnergy, accent: SignalTheme.oscillatorCyan)
+                RailMeter(title: "HI", value: audioEngine.features.trebleEnergy, accent: SignalTheme.warmPeak)
+            }
         }
     }
 }
@@ -408,44 +302,45 @@ private struct SignalSlider: View {
     }
 }
 
-private struct HardwareMeter: View {
+private struct RailMeter: View {
     let title: String
     let value: Float
     let accent: Color
 
     var body: some View {
-        VStack(spacing: 5) {
+        HStack(spacing: 8) {
+            Text(title)
+                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                .foregroundStyle(SignalTheme.softWhite)
+                .frame(width: 34, alignment: .leading)
+
             HStack(spacing: 3) {
-                ForEach(0..<12, id: \.self) { index in
-                    RoundedRectangle(cornerRadius: 1)
+                ForEach(0..<18, id: \.self) { index in
+                    Capsule()
                         .fill(segmentColor(index: index))
-                        .frame(width: 7, height: 26)
+                        .frame(height: 8)
                 }
             }
+            .frame(maxWidth: .infinity)
 
-            HStack(spacing: 5) {
-                Text(title)
-                    .font(.system(size: 10, weight: .bold, design: .monospaced))
-                Text(value.formatted(.number.precision(.fractionLength(2))))
-                    .font(.system(size: 10, weight: .medium, design: .monospaced))
-                    .monospacedDigit()
-                    .foregroundStyle(SignalTheme.mutedSteel)
-            }
+            Text(value.formatted(.number.precision(.fractionLength(2))))
+                .font(.system(size: 10, weight: .medium, design: .monospaced))
+                .monospacedDigit()
+                .foregroundStyle(SignalTheme.mutedSteel)
+                .frame(width: 34, alignment: .trailing)
         }
-        .frame(width: 108)
-        .foregroundStyle(SignalTheme.softWhite)
     }
 
     private func segmentColor(index: Int) -> Color {
         let normalized = CGFloat(min(max(value, 0), 1))
-        let threshold = CGFloat(index + 1) / 12.0
+        let threshold = CGFloat(index + 1) / 18.0
         guard normalized >= threshold else {
-            return SignalTheme.panelCarbon
+            return SignalTheme.raisedGraphite.opacity(0.7)
         }
-        if index > 9 {
+        if index > 14 {
             return SignalTheme.transientCoral
         }
-        if index > 7 {
+        if index > 11 {
             return SignalTheme.warmPeak
         }
         return accent
