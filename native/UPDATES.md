@@ -64,7 +64,7 @@ After downloading the `.cer`, store the release secrets:
 APPLE_ID="you@example.com" \
 APPLE_TEAM_ID="TEAMID" \
 APPLE_APP_SPECIFIC_PASSWORD="xxxx-xxxx-xxxx-xxxx" \
-./Scripts/configure-macos-signing-secrets.sh /path/to/developer_id_application.cer
+native/Scripts/configure-macos-signing-secrets.sh /path/to/developer_id_application.cer
 ```
 
 The script builds a password-protected `.p12` from the local private key, pushes the GitHub secrets, and leaves the generated key material under ignored `native/secrets/`.

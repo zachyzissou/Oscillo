@@ -2,7 +2,6 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-REPOSITORY="${REPOSITORY:-zachyzissou/Oscillo}"
 SECRETS_DIR="$ROOT/secrets"
 KEY_PATH="${KEY_PATH:-$SECRETS_DIR/OscilloDeveloperIDApplication.key}"
 P12_PATH="${P12_PATH:-$SECRETS_DIR/OscilloDeveloperIDApplication.p12}"
@@ -14,7 +13,7 @@ Usage:
   APPLE_ID=you@example.com \
   APPLE_TEAM_ID=TEAMID \
   APPLE_APP_SPECIFIC_PASSWORD=xxxx-xxxx-xxxx-xxxx \
-  ./Scripts/configure-macos-signing-secrets.sh /path/to/developer_id_application.cer
+  native/Scripts/configure-macos-signing-secrets.sh /path/to/developer_id_application.cer
 
 The matching private key must exist at native/secrets/OscilloDeveloperIDApplication.key.
 EOF
@@ -23,6 +22,24 @@ EOF
 if [[ $# -ne 1 ]]; then
   usage
   exit 64
+fi
+
+# Preflight: require gh CLI installed and authenticated before touching key material
+if ! command -v gh >/dev/null 2>&1; then
+  echo "GitHub CLI (gh) is not installed. Install from https://cli.github.com then run: gh auth login" >&2
+  exit 69  # EX_UNAVAILABLE
+fi
+if ! gh auth status >/dev/null 2>&1; then
+  echo "GitHub CLI is not authenticated. Run: gh auth login" >&2
+  exit 77  # EX_NOPERM
+fi
+
+# Derive repository from the current git remote if not explicitly overridden
+if [[ -z "${REPOSITORY:-}" ]]; then
+  REPOSITORY="$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null)" || {
+    echo "Could not determine repository. Set REPOSITORY=owner/repo or run from inside a cloned repository." >&2
+    exit 78  # EX_CONFIG
+  }
 fi
 
 CER_PATH="$1"
@@ -71,7 +88,7 @@ openssl pkcs12 -export \
 chmod 600 "$P12_PATH"
 
 base64_path="$SECRETS_DIR/OscilloDeveloperIDApplication.p12.base64"
-base64 -i "$P12_PATH" | tr -d '\n' > "$base64_path"
+base64 < "$P12_PATH" | tr -d '\n' > "$base64_path"
 chmod 600 "$base64_path"
 
 gh secret set MACOS_DEVELOPER_ID_APPLICATION_P12_BASE64 --repo "$REPOSITORY" < "$base64_path"
