@@ -1,6 +1,5 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Questions & Discussion
-    url: https://github.com/zachyzissou/INTERACTIVE-MUSIC-3D/discussions
-    about: Please use GitHub Discussions for Q&A and ideas.
-
+  - name: Repository
+    url: https://github.com/zachyzissou/Oscillo
+    about: Use issues for actionable bugs, features, native release work, and CI tasks.

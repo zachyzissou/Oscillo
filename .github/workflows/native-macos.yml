@@ -1,0 +1,62 @@
+name: Native macOS
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'native/**'
+      - '.github/workflows/native-macos.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'native/**'
+      - '.github/workflows/native-macos.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-package:
+    name: Swift tests and macOS app bundle
+    runs-on: macos-26
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+          xcrun --sdk macosx --show-sdk-version
+
+      - name: Swift tests
+        working-directory: native
+        run: swift test
+
+      - name: Build signed local app bundle
+        working-directory: native
+        run: ./Scripts/build-macos-app.sh
+
+      - name: Verify app signature
+        working-directory: native
+        run: codesign --verify --deep --strict dist/Oscillo.app
+
+      - name: Zip app artifact
+        working-directory: native
+        run: |
+          rm -f dist/Oscillo-macOS-ci.zip
+          ditto -c -k --keepParent dist/Oscillo.app dist/Oscillo-macOS-ci.zip
+          shasum -a 256 dist/Oscillo-macOS-ci.zip | tee dist/Oscillo-macOS-ci.zip.sha256
+
+      - name: Upload native app artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Oscillo-macOS-ci
+          path: |
+            native/dist/Oscillo-macOS-ci.zip
+            native/dist/Oscillo-macOS-ci.zip.sha256
+          if-no-files-found: error
+          retention-days: 14

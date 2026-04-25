@@ -1,0 +1,46 @@
+name: Native release / update task
+description: Track macOS release, update-channel, signing, or OTA work
+title: "native release: "
+labels: ["native", "release"]
+body:
+  - type: dropdown
+    id: lane
+    attributes:
+      label: Lane
+      options:
+        - GitHub Actions CI
+        - GitHub Release artifact
+        - In-app update check
+        - Sparkle OTA installer
+        - Code signing / notarization
+    validations:
+      required: true
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What outcome should this task produce?
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      value: |
+        - [ ]
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification commands
+      value: |
+        ```bash
+        cd native
+        swift test
+        ./Scripts/build-macos-app.sh
+        ```
+    validations:
+      required: false
