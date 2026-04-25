@@ -22,6 +22,14 @@ enum MetalShaderSource {
         float2 resolution;
     };
 
+    enum SceneModeIndex {
+        sceneModeSpectralTerrain = 0,
+        sceneModeTunnel = 1,
+        sceneModeConstellation = 2,
+        sceneModeLiquidSurface = 3,
+        sceneModeSpectrogramStage = 4
+    };
+
     vertex VertexOut oscilloVertex(uint vertexID [[vertex_id]]) {
         float2 positions[3] = {
             float2(-1.0, -1.0),
@@ -98,10 +106,11 @@ enum MetalShaderSource {
                                float bass,
                                float mids,
                                float treble) {
+        float densityResponse = clamp(density, 0.15, 1.5);
         float grid = 0.0;
         float2 gp = abs(fract((p + float2(0.0, time * 0.035)) * float2(7.0, 5.0)) - 0.5);
-        grid += smoothstep(0.018, 0.0, gp.x) * 0.16;
-        grid += smoothstep(0.014, 0.0, gp.y) * 0.12;
+        grid += smoothstep(0.018, 0.0, gp.x) * (0.12 + densityResponse * 0.035);
+        grid += smoothstep(0.014, 0.0, gp.y) * (0.09 + densityResponse * 0.025);
 
         float terrain = 0.0;
         for (int i = 0; i < 9; i++) {
@@ -109,8 +118,8 @@ enum MetalShaderSource {
             float depth = fi / 8.0;
             float wave = sin(p.x * (2.2 + depth * 4.8) + time * (0.75 + depth) + bass * 5.0);
             wave += sin(p.x * (6.0 + depth * 7.0) - time * 0.6 + mids * 4.0) * 0.28;
-            float y = mix(-0.72, 0.44, depth) + wave * (0.035 + audio * 0.08) - depth * depth * 0.18;
-            terrain += terrainLine(p, y, 0.012 + depth * 0.01) * (1.0 - depth * 0.42);
+            float y = mix(-0.72, 0.44, depth) + wave * (0.035 + audio * 0.08 + densityResponse * 0.01) - depth * depth * 0.18;
+            terrain += terrainLine(p, y, 0.012 + depth * 0.01 + densityResponse * 0.002) * (1.0 - depth * 0.42);
         }
 
         float trace = smoothstep(0.018 + audio * 0.018, 0.0, abs(p.y - sin(p.x * 8.0 + time * 2.0) * (0.16 + bass * 0.12)));
@@ -229,8 +238,8 @@ enum MetalShaderSource {
         float lane = fract(uv.x * bands);
         float profile = sin(band * 0.41 + time * 1.3) * 0.28 + sin(band * 0.13 - time * 0.7) * 0.18;
         float bandEnergy = clamp(audio * 0.38 + bass * (1.0 - uv.x) + mids * (1.0 - abs(uv.x - 0.5)) + treble * uv.x + profile, 0.04, 1.0);
-        float bar = smoothstep(bandEnergy, bandEnergy - 0.045, uv.y);
-        float separator = smoothstep(0.04, 0.0, abs(lane - 0.5)) * 0.12;
+        float bar = 1.0 - smoothstep(bandEnergy - 0.045, bandEnergy, uv.y);
+        float separator = (1.0 - smoothstep(0.0, 0.04, abs(lane - 0.5))) * 0.12;
         float scan = smoothstep(0.012, 0.0, abs(fract(uv.y * 16.0 - time * 0.45) - 0.5)) * 0.18;
         float3 gradient = mix(low, high, uv.x);
         gradient = mix(gradient, mid, 1.0 - abs(uv.x - 0.5));
@@ -252,16 +261,23 @@ enum MetalShaderSource {
         float3 high = paletteColor(uniforms.paletteIndex, 2, audioVector);
 
         float3 color;
-        if (uniforms.sceneModeIndex == 1) {
+        switch (uniforms.sceneModeIndex) {
+        case sceneModeTunnel:
             color = tunnelStage(p, uv, uniforms.time, audio, density, low, mid, high, uniforms.bassEnergy, uniforms.midEnergy, uniforms.trebleEnergy);
-        } else if (uniforms.sceneModeIndex == 2) {
+            break;
+        case sceneModeConstellation:
             color = constellationStage(p, uv, uniforms.time, audio, density, low, mid, high, uniforms.bassEnergy, uniforms.midEnergy, uniforms.trebleEnergy);
-        } else if (uniforms.sceneModeIndex == 3) {
+            break;
+        case sceneModeLiquidSurface:
             color = liquidStage(p, uv, uniforms.time, audio, density, low, mid, high, uniforms.bassEnergy, uniforms.midEnergy, uniforms.trebleEnergy);
-        } else if (uniforms.sceneModeIndex == 4) {
+            break;
+        case sceneModeSpectrogramStage:
             color = spectrogramStage(p, uv, uniforms.time, audio, density, low, mid, high, uniforms.bassEnergy, uniforms.midEnergy, uniforms.trebleEnergy);
-        } else {
+            break;
+        case sceneModeSpectralTerrain:
+        default:
             color = terrainStage(p, uv, uniforms.time, audio, density, low, mid, high, uniforms.bassEnergy, uniforms.midEnergy, uniforms.trebleEnergy);
+            break;
         }
 
         float2 starCell = floor(uv * uniforms.resolution / 3.0);
