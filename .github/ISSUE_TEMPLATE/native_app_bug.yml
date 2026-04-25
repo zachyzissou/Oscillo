@@ -1,0 +1,59 @@
+name: Native macOS bug
+description: Report a reproducible issue in the Swift/Metal macOS app
+title: "native: "
+labels: ["native", "bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this for issues in `native/dist/Oscillo.app`, `native/Sources`, or the native CI/release lane.
+  - type: input
+    id: version
+    attributes:
+      label: App version / build
+      description: Use the app version, release tag, or commit SHA.
+      placeholder: "native-v0.1.0 / c326b43"
+    validations:
+      required: true
+  - type: dropdown
+    id: input_mode
+    attributes:
+      label: Input mode
+      options:
+        - Preview signal
+        - Microphone
+        - Update check
+        - Launch/build
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: What should have happened?
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+      description: What happened instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      value: |
+        1.
+        2.
+        3.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Logs, screenshots, or video
+      description: Attach a screenshot/video or paste relevant terminal output.
+    validations:
+      required: false

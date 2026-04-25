@@ -1,0 +1,116 @@
+name: Native macOS Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Native release tag, for example native-v0.1.0
+        required: true
+        type: string
+  push:
+    tags:
+      - 'native-v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build and publish native macOS release
+    runs-on: macos-26
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve release metadata
+        id: meta
+        env:
+          REQUESTED_TAG: ${{ inputs.tag }}
+        run: |
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            tag="${REQUESTED_TAG}"
+          else
+            tag="${GITHUB_REF_NAME}"
+          fi
+
+          if ! printf '%s' "$tag" | grep -Eq '^native-v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Native release tags must match native-vX.Y.Z" >&2
+            exit 64
+          fi
+
+          version="${tag#native-v}"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+          xcrun --sdk macosx --show-sdk-version
+
+      - name: Test native package
+        working-directory: native
+        run: swift test
+
+      - name: Build app bundle
+        working-directory: native
+        run: ./Scripts/build-macos-app.sh
+
+      - name: Package release assets
+        working-directory: native
+        env:
+          TAG_NAME: ${{ steps.meta.outputs.tag }}
+          VERSION: ${{ steps.meta.outputs.version }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          zip_name="Oscillo-macOS-${VERSION}.zip"
+          zip_path="dist/${zip_name}"
+          download_url="https://github.com/${REPOSITORY}/releases/download/${TAG_NAME}/${zip_name}"
+          release_url="https://github.com/${REPOSITORY}/releases/tag/${TAG_NAME}"
+
+          rm -f "$zip_path" "$zip_path.sha256" dist/oscillo-native-update.json
+          ditto -c -k --keepParent dist/Oscillo.app "$zip_path"
+          sha256="$(shasum -a 256 "$zip_path" | awk '{print $1}')"
+          printf '%s  %s\n' "$sha256" "$zip_name" > "$zip_path.sha256"
+
+          python3 Scripts/generate-update-manifest.py \
+            --version "$VERSION" \
+            --tag "$TAG_NAME" \
+            --download-url "$download_url" \
+            --release-url "$release_url" \
+            --sha256 "$sha256" \
+            --output dist/oscillo-native-update.json
+
+      - name: Create or update GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ steps.meta.outputs.tag }}
+          VERSION: ${{ steps.meta.outputs.version }}
+        run: |
+          notes_file="$(mktemp)"
+          {
+            echo "Native macOS build ${VERSION}"
+            echo
+            echo "Assets:"
+            echo "- Oscillo-macOS-${VERSION}.zip"
+            echo "- Oscillo-macOS-${VERSION}.zip.sha256"
+            echo "- oscillo-native-update.json"
+          } > "$notes_file"
+
+          if gh release view "$TAG_NAME" >/dev/null 2>&1; then
+            gh release upload "$TAG_NAME" \
+              "native/dist/Oscillo-macOS-${VERSION}.zip" \
+              "native/dist/Oscillo-macOS-${VERSION}.zip.sha256" \
+              "native/dist/oscillo-native-update.json" \
+              --clobber
+          else
+            gh release create "$TAG_NAME" \
+              "native/dist/Oscillo-macOS-${VERSION}.zip" \
+              "native/dist/Oscillo-macOS-${VERSION}.zip.sha256" \
+              "native/dist/oscillo-native-update.json" \
+              --target "$GITHUB_SHA" \
+              --title "Oscillo Native ${VERSION}" \
+              --notes-file "$notes_file"
+          fi
