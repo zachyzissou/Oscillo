@@ -1,12 +1,12 @@
 # Oscillo Stitch Workflow
 
-Use Google Stitch as a visual exploration surface for the native Swift/macOS lane. The source of truth for product direction is `native/DESIGN_DIRECTION.md`; Stitch output is reference material, not production code.
+Use Google Stitch as a visual exploration surface for the native Swift/macOS lane. The source of truth for product direction is [`native/DESIGN_DIRECTION.md`](../native/DESIGN_DIRECTION.md); Stitch output is reference material, not production code.
 
 Important distinction:
 
-- `native/DESIGN_DIRECTION.md` describes the native product direction.
-- `native/APPLE_TECH_MAP.md` describes Apple framework adoption opportunities.
-- `native/README.md` describes the current implementation and release lane.
+- [`native/DESIGN_DIRECTION.md`](../native/DESIGN_DIRECTION.md) describes the native product direction.
+- [`native/APPLE_TECH_MAP.md`](../native/APPLE_TECH_MAP.md) describes Apple framework adoption opportunities.
+- [`native/README.md`](../native/README.md) describes the current implementation and release lane.
 - Stitch should explore the destination UI, not recreate the old Three.js layout or the current Swift prototype one-for-one.
 
 ## Stitch Project
@@ -21,7 +21,7 @@ Verification note: `list_design_systems` returns the asset above. `get_project` 
 
 ## Current Local MCP Status
 
-OffScript did not have a repo-local Stitch MCP JSON file to copy. It uses a repo-safe workflow document and a global Codex MCP config.
+Oscillo does not have a repo-local Stitch MCP JSON file to copy. It uses a repo-safe workflow document and a global Codex MCP config.
 
 Codex is configured globally with the Stitch remote MCP endpoint:
 
@@ -39,7 +39,7 @@ For terminal-launched Codex sessions:
 export STITCH_API_KEY="..."
 ```
 
-For the macOS desktop app, set it through launch services, then fully restart Codex:
+For the macOS desktop app, set it via `launchctl` for apps started by `launchd`, then fully restart Codex so it picks up the new environment:
 
 ```sh
 launchctl setenv STITCH_API_KEY "..."
@@ -80,7 +80,7 @@ After `create_design_system`, immediately call `update_design_system` with the r
 
 ## Stitch Prompt Contract
 
-When creating or refining Oscillo screens in Stitch, attach or paste `native/DESIGN_DIRECTION.md` and use this framing:
+When creating or refining Oscillo screens in Stitch, attach or paste [`native/DESIGN_DIRECTION.md`](../native/DESIGN_DIRECTION.md) and use this framing:
 
 ```text
 Use the attached Oscillo native design direction as the source of truth. Design a macOS audio-visual instrument called Oscillo, built in SwiftUI and Metal. The first screen is the instrument: a dominant live visual stage with compact native controls for audio source, sensitivity, scene mode, palette, quality, capture, presets, and update status. The style is Signal Foundry: dark performance surface, precise studio controls, luminous audio-reactive signal color, spectral grids, oscilloscope traces, and a tool-like macOS workflow. Do not copy the old Three.js composition literally. Avoid landing-page structure, generic SaaS dashboards, purple-blue gradient blobs, decorative bokeh, heavy glass everywhere, equal-weight cards, fake analytics widgets, and explanatory onboarding text inside the main instrument.
