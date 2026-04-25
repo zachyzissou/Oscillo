@@ -6,9 +6,39 @@ on:
   pull_request:
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            web:
+              - 'app/**'
+              - 'src/**'
+              - 'server/**'
+              - 'public/**'
+              - 'tests/**'
+              - 'cypress/**'
+              - 'tools/**'
+              - 'scripts/**'
+              - 'package.json'
+              - 'package-lock.json'
+              - 'next.config*.js'
+              - 'tsconfig.json'
+              - 'tailwind.config.ts'
+              - 'postcss.config.js'
+              - 'eslint.config.js'
+              - 'Dockerfile'
+
   # Quick checks for all PRs and main branch - under 10 minutes
   quick-checks:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -38,6 +68,8 @@ jobs:
 
   security-audit:
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
     env:
       SECURITY_AUDIT_LEVEL: ${{ vars.SECURITY_AUDIT_LEVEL }}
     steps:
@@ -75,8 +107,8 @@ jobs:
   # Full test suite - only runs on staging branch
   full-tests:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/staging'
-    needs: quick-checks
+    if: needs.changes.outputs.web == 'true' && github.ref == 'refs/heads/staging'
+    needs: [changes, quick-checks]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -131,8 +163,8 @@ jobs:
 
   visual-regression:
     runs-on: ubuntu-latest
-    needs: quick-checks
-    if: github.ref == 'refs/heads/main' || github.event_name == 'pull_request'
+    needs: [changes, quick-checks]
+    if: needs.changes.outputs.web == 'true' && (github.ref == 'refs/heads/main' || github.event_name == 'pull_request')
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -164,20 +196,27 @@ jobs:
 
   baseline-ci:
     runs-on: ubuntu-latest
-    needs: [quick-checks, visual-regression, security-audit, full-tests]
+    needs: [changes, quick-checks, visual-regression, security-audit, full-tests]
     if: always()
     steps:
       - name: Enforce baseline CI signal
         run: |
+          web="${{ needs.changes.outputs.web }}"
           quick="${{ needs.quick-checks.result }}"
           visual="${{ needs.visual-regression.result }}"
           security="${{ needs.security-audit.result }}"
           full="${{ needs.full-tests.result }}"
 
+          echo "web changes: ${web}"
           echo "quick-checks: ${quick}"
           echo "visual-regression: ${visual}"
           echo "security-audit: ${security}"
           echo "full-tests: ${full}"
+
+          if [ "${web}" != "true" ]; then
+            echo "No web runtime changes detected; web CI jobs intentionally skipped."
+            exit 0
+          fi
 
           if [ "${quick}" != "success" ]; then
             echo "quick-checks must pass."
