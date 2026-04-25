@@ -33,12 +33,20 @@ private struct ControlPanel: View {
     @ObservedObject var audioEngine: LiveAudioEngine
     @ObservedObject var sceneController: SceneController
     @ObservedObject var updateController: UpdateController
+    private let buildMetadata = AppBuildMetadata(bundleInfo: Bundle.main.infoDictionary ?? [:])
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             VStack(alignment: .leading, spacing: 4) {
-                Text("Oscillo")
-                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                HStack(alignment: .firstTextBaseline) {
+                    Text("Oscillo")
+                        .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    Spacer(minLength: 10)
+                    Text(buildMetadata.visibleBuildMarker)
+                        .font(.caption2.monospacedDigit())
+                        .foregroundStyle(.secondary)
+                }
+
                 Text(audioEngine.statusMessage)
                     .font(.caption)
                     .foregroundStyle(.secondary)
