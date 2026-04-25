@@ -31,6 +31,7 @@
     "build:analyze": "ANALYZE=true npm run build",
     "security:audit": "npm audit --audit-level moderate",
     "security:fix": "npm audit fix",
+    "security:secrets": "bash native/Scripts/check-no-secrets.sh",
     "release:prepare": "changeset version && npm install --package-lock-only && npm run build",
     "prepare": "husky install",
     "jam-server": "node server/jam-server.js",
