@@ -4,7 +4,8 @@ set -euo pipefail
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT"
 
-failures="$(mktemp)"
+tmp_dir="${TMPDIR:-/tmp}"
+failures="$(mktemp "${tmp_dir%/}/oscillo-secret-guard.XXXXXX")"
 trap 'rm -f "$failures"' EXIT
 
 while IFS= read -r file; do
