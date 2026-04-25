@@ -90,6 +90,67 @@ public enum SceneMode: String, CaseIterable, Equatable, Identifiable, Sendable {
     }
 }
 
+public enum PerformancePreset: String, CaseIterable, Equatable, Identifiable, Sendable {
+    case drift
+    case pulse
+    case orbit
+    case surge
+
+    public var id: String { rawValue }
+
+    public var displayName: String {
+        switch self {
+        case .drift:
+            "Drift"
+        case .pulse:
+            "Pulse"
+        case .orbit:
+            "Orbit"
+        case .surge:
+            "Surge"
+        }
+    }
+
+    public var shortName: String { displayName }
+
+    public var settings: SceneSettings {
+        switch self {
+        case .drift:
+            SceneSettings(
+                visualGain: 0.82,
+                particleDensity: 0.62,
+                previewTempo: 0.72,
+                palette: .aurora,
+                sceneMode: .spectralTerrain
+            )
+        case .pulse:
+            SceneSettings(
+                visualGain: 1.32,
+                particleDensity: 0.96,
+                previewTempo: 1.18,
+                palette: .neon,
+                sceneMode: .tunnel
+            )
+        case .orbit:
+            SceneSettings(
+                visualGain: 1.08,
+                particleDensity: 1.22,
+                previewTempo: 0.94,
+                palette: .mono,
+                sceneMode: .constellation
+            )
+        case .surge:
+            SceneSettings(
+                visualGain: 1.64,
+                particleDensity: 1.36,
+                previewTempo: 1.46,
+                palette: .solar,
+                sceneMode: .spectrogramStage
+            )
+        }
+    }
+}
+
 public struct SceneSettings: Equatable, Sendable {
     public var visualGain: Float
     public var particleDensity: Float
