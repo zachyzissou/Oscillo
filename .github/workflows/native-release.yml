@@ -85,12 +85,22 @@ jobs:
           fi
 
           echo "identity=$identity" >> "$GITHUB_OUTPUT"
+          echo "keychain_path=$keychain_path" >> "$GITHUB_OUTPUT"
 
       - name: Build app bundle
         working-directory: native
         env:
           CODE_SIGN_IDENTITY: ${{ steps.signing.outputs.identity }}
         run: ./Scripts/build-macos-app.sh
+
+      - name: Delete signing keychain
+        if: always()
+        env:
+          KEYCHAIN_PATH: ${{ steps.signing.outputs.keychain_path }}
+        run: |
+          if [ -n "${KEYCHAIN_PATH}" ] && [ -f "${KEYCHAIN_PATH}" ]; then
+            security delete-keychain "${KEYCHAIN_PATH}"
+          fi
 
       - name: Notarize and staple app
         working-directory: native
@@ -132,7 +142,11 @@ jobs:
           download_url="https://github.com/${REPOSITORY}/releases/download/${TAG_NAME}/${zip_name}"
           release_url="https://github.com/${REPOSITORY}/releases/tag/${TAG_NAME}"
           sparkle_archives_dir="dist/sparkle-appcast"
-          sparkle_tools_dir=".build/artifacts/sparkle/Sparkle/bin"
+          sparkle_tools_dir="$(find .build/artifacts -name generate_appcast -type f | head -1 | xargs dirname)"
+          if [ -z "$sparkle_tools_dir" ]; then
+            echo "generate_appcast not found under .build/artifacts; run 'swift build' first" >&2
+            exit 66
+          fi
 
           if [ -z "${SPARKLE_ED_PRIVATE_KEY}" ]; then
             echo "SPARKLE_ED_PRIVATE_KEY secret is required for native Sparkle releases" >&2
