@@ -7,6 +7,7 @@ public final class VDSPFrequencyAnalyzer: @unchecked Sendable {
     private let halfCount: Int
     private let log2SampleCount: vDSP_Length
     private let fftSetup: FFTSetup
+    private let hannWindow: [Float]
 
     public init?(sampleCount: Int) {
         guard sampleCount >= 2, sampleCount.isPowerOfTwo else {
@@ -22,6 +23,10 @@ public final class VDSPFrequencyAnalyzer: @unchecked Sendable {
         self.halfCount = sampleCount / 2
         self.log2SampleCount = log2Value
         self.fftSetup = setup
+
+        var window = Array(repeating: Float(0), count: sampleCount)
+        vDSP_hann_window(&window, vDSP_Length(sampleCount), Int32(vDSP_HANN_NORM))
+        self.hannWindow = window
     }
 
     deinit {
@@ -37,9 +42,7 @@ public final class VDSPFrequencyAnalyzer: @unchecked Sendable {
         }
 
         if applyHannWindow {
-            var window = Array(repeating: Float(0), count: sampleCount)
-            vDSP_hann_window(&window, vDSP_Length(sampleCount), Int32(vDSP_HANN_NORM))
-            vDSP_vmul(input, 1, window, 1, &input, 1, vDSP_Length(sampleCount))
+            vDSP_vmul(input, 1, hannWindow, 1, &input, 1, vDSP_Length(sampleCount))
         }
 
         var real = Array(repeating: Float(0), count: halfCount)

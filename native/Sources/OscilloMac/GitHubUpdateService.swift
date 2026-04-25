@@ -14,13 +14,22 @@ enum UpdateCheckResult: Equatable {
     case updateAvailable(AvailableUpdate)
 }
 
-enum GitHubUpdateServiceError: Error {
+enum GitHubUpdateServiceError: Error, LocalizedError {
     case invalidResponse
     case invalidCurrentVersion
+
+    var errorDescription: String? {
+        switch self {
+        case .invalidResponse:
+            "GitHub Releases returned an unexpected response."
+        case .invalidCurrentVersion:
+            "This Oscillo build has an invalid version number."
+        }
+    }
 }
 
 final class GitHubUpdateService: @unchecked Sendable {
-    private let releaseURL = URL(string: "https://api.github.com/repos/zachyzissou/Oscillo/releases/latest")!
+    private let releasesURL = URL(string: "https://api.github.com/repos/zachyzissou/Oscillo/releases?per_page=20")!
     private let session: URLSession
 
     init(session: URLSession = .shared) {
@@ -32,7 +41,7 @@ final class GitHubUpdateService: @unchecked Sendable {
             throw GitHubUpdateServiceError.invalidCurrentVersion
         }
 
-        var request = URLRequest(url: releaseURL)
+        var request = URLRequest(url: releasesURL)
         request.setValue("application/vnd.github+json", forHTTPHeaderField: "Accept")
         request.setValue("OscilloNative", forHTTPHeaderField: "User-Agent")
 
@@ -49,17 +58,19 @@ final class GitHubUpdateService: @unchecked Sendable {
             throw GitHubUpdateServiceError.invalidResponse
         }
 
-        let release = try JSONDecoder().decode(GitHubRelease.self, from: data)
-        guard let remoteVersion = AppVersion(release.tagName) else {
-            return .current
+        let releases = try JSONDecoder().decode([GitHubRelease].self, from: data)
+        guard let nativeRelease = NativeReleaseSelector.newest(in: releases.map(\.tagName)),
+              let release = releases.first(where: { $0.tagName == nativeRelease.tagName })
+        else {
+            return .noRelease
         }
 
-        guard remoteVersion > currentVersion else {
+        guard nativeRelease.version > currentVersion else {
             return .current
         }
 
         return .updateAvailable(AvailableUpdate(
-            version: remoteVersion,
+            version: nativeRelease.version,
             tagName: release.tagName,
             releaseURL: release.htmlURL,
             downloadURL: release.assets.first { asset in

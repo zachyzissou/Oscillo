@@ -81,27 +81,33 @@ public enum AudioFeatureExtractor {
             return (0, 0, 0)
         }
 
-        var bass: [Float] = []
-        var mid: [Float] = []
-        var treble: [Float] = []
+        var bassSum = Float(0)
+        var bassCount = 0
+        var midSum = Float(0)
+        var midCount = 0
+        var trebleSum = Float(0)
+        var trebleCount = 0
 
         for (index, magnitude) in magnitudes.enumerated() {
             let frequency = frequencyForBin(index, binCount: magnitudes.count, sampleRate: sampleRate)
             let normalized = min(max(magnitude, 0), 1)
 
             if frequency < 250 {
-                bass.append(normalized)
+                bassSum += normalized
+                bassCount += 1
             } else if frequency < 4_000 {
-                mid.append(normalized)
+                midSum += normalized
+                midCount += 1
             } else {
-                treble.append(normalized)
+                trebleSum += normalized
+                trebleCount += 1
             }
         }
 
         return (
-            average(bass),
-            average(mid),
-            average(treble)
+            average(sum: bassSum, count: bassCount),
+            average(sum: midSum, count: midCount),
+            average(sum: trebleSum, count: trebleCount)
         )
     }
 
@@ -165,8 +171,8 @@ public enum AudioFeatureExtractor {
         return Float(index) * (sampleRate / 2) / Float(binCount)
     }
 
-    private static func average(_ values: [Float]) -> Float {
-        guard !values.isEmpty else { return 0 }
-        return values.reduce(0, +) / Float(values.count)
+    private static func average(sum: Float, count: Int) -> Float {
+        guard count > 0 else { return 0 }
+        return sum / Float(count)
     }
 }

@@ -22,7 +22,7 @@ case "$CONFIGURATION" in
 esac
 
 swift build --configuration "$CONFIGURATION" --product "$PRODUCT"
-BIN_PATH="$(swift build --configuration "$CONFIGURATION" --show-bin-path)"
+BIN_PATH="$ROOT/.build/$CONFIGURATION"
 EXECUTABLE="$BIN_PATH/$PRODUCT"
 
 if [[ ! -x "$EXECUTABLE" ]]; then

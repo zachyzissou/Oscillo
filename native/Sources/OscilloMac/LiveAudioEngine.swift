@@ -1,6 +1,4 @@
-import Accelerate
 import AVFoundation
-import Combine
 import OscilloCore
 import SwiftUI
 
@@ -22,6 +20,11 @@ final class LiveAudioEngine: ObservableObject {
 
     init(sceneSettingsStore: SceneSettingsStore = SceneSettingsStore()) {
         self.sceneSettingsStore = sceneSettingsStore
+    }
+
+    isolated deinit {
+        previewTimer?.invalidate()
+        publishTimer?.invalidate()
     }
 
     func startMicrophone() {
@@ -86,6 +89,8 @@ final class LiveAudioEngine: ObservableObject {
             features = .silence
             statusMessage = "Idle"
         }
+
+        stopPublishingIfIdle()
     }
 
     private func beginPublishing() {
@@ -97,6 +102,13 @@ final class LiveAudioEngine: ObservableObject {
                 self.features = self.featureStore.snapshot()
             }
         }
+    }
+
+    private func stopPublishingIfIdle() {
+        guard !isRunning, !isPreviewing else { return }
+
+        publishTimer?.invalidate()
+        publishTimer = nil
     }
 
     private func advancePreviewSignal() {
