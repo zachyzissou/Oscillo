@@ -68,3 +68,11 @@ native/Scripts/configure-macos-signing-secrets.sh /path/to/developer_id_applicat
 ```
 
 The script builds a password-protected `.p12` from the local private key, pushes the GitHub secrets, and leaves the generated key material under ignored `native/secrets/`.
+
+Before pushing release changes, run the tracked-file secret guard:
+
+```bash
+native/Scripts/check-no-secrets.sh
+```
+
+The guard scans files already tracked by Git and fails if signing material, real `.env` files, private-key blocks, or common credential token formats are present in the repository.
