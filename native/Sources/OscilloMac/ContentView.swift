@@ -27,28 +27,13 @@ struct ContentView: View {
             .allowsHitTesting(false)
             .ignoresSafeArea()
 
-            HStack(alignment: .top) {
-                InstrumentSpine(
+            GeometryReader { proxy in
+                InstrumentOverlayLayout(
                     audioEngine: audioEngine,
                     sceneController: sceneController,
-                    updateController: updateController
+                    updateController: updateController,
+                    availableSize: proxy.size
                 )
-                .padding(18)
-
-                Spacer(minLength: 16)
-
-                SceneStatusDeck(
-                    sceneController: sceneController,
-                    updateController: updateController
-                )
-                .padding(18)
-            }
-
-            VStack {
-                Spacer()
-                BottomSignalConsole(audioEngine: audioEngine, sceneController: sceneController)
-                    .padding(.horizontal, 18)
-                    .padding(.bottom, 18)
             }
         }
         .background(SignalTheme.voidBlack)
@@ -59,128 +44,224 @@ struct ContentView: View {
     }
 }
 
+private struct InstrumentOverlayLayout: View {
+    @ObservedObject var audioEngine: LiveAudioEngine
+    @ObservedObject var sceneController: SceneController
+    @ObservedObject var updateController: UpdateController
+    let availableSize: CGSize
+
+    private let edgePadding: CGFloat = 18
+    private let controlRailWidth: CGFloat = 302
+    private let overlayGap: CGFloat = 14
+    private let minimumRailHeight: CGFloat = 360
+
+    var body: some View {
+        if usesCompactLayout {
+            compactLayout
+        } else {
+            performanceLayout
+        }
+    }
+
+    private var usesCompactLayout: Bool {
+        availableSize.width < 980 || availableSize.height < 620
+    }
+
+    private var railMaxHeight: CGFloat {
+        max(
+            minimumRailHeight,
+            availableSize.height - edgePadding * 2 - BottomSignalConsole.minimumHeight - overlayGap
+        )
+    }
+
+    private var compactWidth: CGFloat {
+        min(controlRailWidth, max(260, availableSize.width - edgePadding * 2))
+    }
+
+    private var performanceLayout: some View {
+        VStack(alignment: .leading, spacing: overlayGap) {
+            HStack(alignment: .top, spacing: overlayGap) {
+                InstrumentSpine(
+                    audioEngine: audioEngine,
+                    sceneController: sceneController,
+                    updateController: updateController
+                )
+                .frame(width: controlRailWidth)
+                .frame(maxHeight: railMaxHeight, alignment: .topLeading)
+
+                Spacer(minLength: 24)
+            }
+
+            Spacer(minLength: 0)
+
+            HStack(alignment: .bottom, spacing: overlayGap) {
+                Color.clear
+                    .frame(width: controlRailWidth)
+
+                BottomSignalConsole(audioEngine: audioEngine, sceneController: sceneController)
+                    .frame(maxWidth: .infinity, alignment: .bottom)
+            }
+        }
+        .padding(edgePadding)
+    }
+
+    private var compactLayout: some View {
+        ScrollView(.vertical) {
+            VStack(alignment: .leading, spacing: overlayGap) {
+                InstrumentSpine(
+                    audioEngine: audioEngine,
+                    sceneController: sceneController,
+                    updateController: updateController,
+                    scrollsInternally: false
+                )
+                .frame(width: compactWidth)
+
+                BottomSignalConsole(audioEngine: audioEngine, sceneController: sceneController)
+                    .frame(width: max(260, availableSize.width - edgePadding * 2), alignment: .leading)
+            }
+            .padding(edgePadding)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .scrollIndicators(.never)
+    }
+}
+
 private struct InstrumentSpine: View {
     @ObservedObject var audioEngine: LiveAudioEngine
     @ObservedObject var sceneController: SceneController
     @ObservedObject var updateController: UpdateController
+    var scrollsInternally = true
     private let buildMetadata = AppBuildMetadata(bundleInfo: Bundle.main.infoDictionary ?? [:])
 
     var body: some View {
+        Group {
+            if scrollsInternally {
+                ScrollView(.vertical) {
+                    spineContent
+                }
+                .scrollIndicators(.never)
+            } else {
+                spineContent
+            }
+        }
+        .frame(alignment: .topLeading)
+        .signalPanel(cornerRadius: 10)
+    }
+
+    private var spineContent: some View {
         VStack(alignment: .leading, spacing: 14) {
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(alignment: .firstTextBaseline) {
-                    Text("OSCILLO")
-                        .font(.system(size: 22, weight: .black, design: .rounded))
-                        .foregroundStyle(SignalTheme.softWhite)
-                    Spacer(minLength: 12)
-                    Text(buildMetadata.visibleBuildMarker.uppercased())
-                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text("OSCILLO")
+                            .font(.system(size: 22, weight: .black, design: .rounded))
+                            .foregroundStyle(SignalTheme.softWhite)
+                        Spacer(minLength: 12)
+                        Text(buildMetadata.visibleBuildMarker.uppercased())
+                            .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                            .foregroundStyle(SignalTheme.mutedSteel)
+                    }
+
+                    Text(sceneController.settings.sceneMode.displayName.uppercased())
+                        .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(SignalTheme.signalTeal)
+
+                    Text(audioEngine.statusMessage)
+                        .font(.system(size: 11, weight: .medium, design: .monospaced))
                         .foregroundStyle(SignalTheme.mutedSteel)
+                        .lineLimit(2)
                 }
 
-                Text(sceneController.settings.sceneMode.displayName.uppercased())
-                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                    .foregroundStyle(SignalTheme.signalTeal)
+                Divider()
+                    .overlay(SignalTheme.gridLine.opacity(0.9))
 
-                Text(audioEngine.statusMessage)
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    .foregroundStyle(SignalTheme.mutedSteel)
-                    .lineLimit(2)
-            }
+                VStack(alignment: .leading, spacing: 8) {
+                    ModuleLabel("INPUT")
+                    HStack(spacing: 8) {
+                        SignalActionButton(
+                            title: audioEngine.isRunning ? "STOP" : "MIC",
+                            systemImage: audioEngine.isRunning ? "stop.fill" : "waveform",
+                            isActive: audioEngine.isRunning,
+                            action: toggleMicrophone
+                        )
 
-            Divider()
-                .overlay(SignalTheme.gridLine.opacity(0.9))
-
-            VStack(alignment: .leading, spacing: 8) {
-                ModuleLabel("INPUT")
-                HStack(spacing: 8) {
-                    SignalActionButton(
-                        title: audioEngine.isRunning ? "STOP" : "MIC",
-                        systemImage: audioEngine.isRunning ? "stop.fill" : "waveform",
-                        isActive: audioEngine.isRunning,
-                        action: toggleMicrophone
-                    )
-
-                    SignalActionButton(
-                        title: audioEngine.isPreviewing ? "PAUSE" : "PREVIEW",
-                        systemImage: audioEngine.isPreviewing ? "pause.fill" : "play.fill",
-                        isActive: audioEngine.isPreviewing,
-                        action: togglePreview
-                    )
+                        SignalActionButton(
+                            title: audioEngine.isPreviewing ? "PAUSE" : "PREVIEW",
+                            systemImage: audioEngine.isPreviewing ? "pause.fill" : "play.fill",
+                            isActive: audioEngine.isPreviewing,
+                            action: togglePreview
+                        )
+                    }
                 }
-            }
 
-            VStack(alignment: .leading, spacing: 8) {
-                ModuleLabel("SCENE")
-                LazyVGrid(columns: [
-                    GridItem(.flexible(), spacing: 6),
-                    GridItem(.flexible(), spacing: 6)
-                ], spacing: 6) {
-                    ForEach(SceneMode.allCases) { mode in
-                        SceneModePill(
-                            mode: mode,
-                            isSelected: mode == sceneController.settings.sceneMode
-                        ) {
-                            sceneController.setSceneMode(mode)
+                VStack(alignment: .leading, spacing: 8) {
+                    ModuleLabel("SCENE")
+                    LazyVGrid(columns: [
+                        GridItem(.flexible(), spacing: 6),
+                        GridItem(.flexible(), spacing: 6)
+                    ], spacing: 6) {
+                        ForEach(SceneMode.allCases) { mode in
+                            SceneModePill(
+                                mode: mode,
+                                isSelected: mode == sceneController.settings.sceneMode
+                            ) {
+                                sceneController.setSceneMode(mode)
+                            }
                         }
                     }
                 }
-            }
 
-            VStack(alignment: .leading, spacing: 8) {
-                ModuleLabel("PALETTE")
-                Picker("Palette", selection: Binding(
-                    get: { sceneController.settings.palette },
-                    set: { sceneController.setPalette($0) }
-                )) {
-                    ForEach(ScenePalette.allCases) { palette in
-                        Text(palette.displayName).tag(palette)
+                VStack(alignment: .leading, spacing: 8) {
+                    ModuleLabel("PALETTE")
+                    Picker("Palette", selection: Binding(
+                        get: { sceneController.settings.palette },
+                        set: { sceneController.setPalette($0) }
+                    )) {
+                        ForEach(ScenePalette.allCases) { palette in
+                            Text(palette.displayName).tag(palette)
+                        }
                     }
+                    .pickerStyle(.segmented)
+                    .controlSize(.small)
                 }
-                .pickerStyle(.segmented)
-                .controlSize(.small)
-            }
 
-            VStack(spacing: 12) {
-                SignalSlider(
-                    title: "INTENSITY",
-                    value: Binding(
-                        get: { sceneController.settings.visualGain },
-                        set: { sceneController.setVisualGain($0) }
-                    ),
-                    range: 0.25...2.0,
-                    accent: SignalTheme.signalTeal
-                )
+                VStack(spacing: 12) {
+                    SignalSlider(
+                        title: "INTENSITY",
+                        value: Binding(
+                            get: { sceneController.settings.visualGain },
+                            set: { sceneController.setVisualGain($0) }
+                        ),
+                        range: 0.25...2.0,
+                        accent: SignalTheme.signalTeal
+                    )
 
-                SignalSlider(
-                    title: "PARTICLES",
-                    value: Binding(
-                        get: { sceneController.settings.particleDensity },
-                        set: { sceneController.setParticleDensity($0) }
-                    ),
-                    range: 0.15...1.5,
-                    accent: SignalTheme.transientCoral
-                )
+                    SignalSlider(
+                        title: "PARTICLES",
+                        value: Binding(
+                            get: { sceneController.settings.particleDensity },
+                            set: { sceneController.setParticleDensity($0) }
+                        ),
+                        range: 0.15...1.5,
+                        accent: SignalTheme.transientCoral
+                    )
 
-                SignalSlider(
-                    title: "TEMPO",
-                    value: Binding(
-                        get: { sceneController.settings.previewTempo },
-                        set: { sceneController.setPreviewTempo($0) }
-                    ),
-                    range: 0.5...2.0,
-                    accent: SignalTheme.warmPeak
-                )
-            }
+                    SignalSlider(
+                        title: "TEMPO",
+                        value: Binding(
+                            get: { sceneController.settings.previewTempo },
+                            set: { sceneController.setPreviewTempo($0) }
+                        ),
+                        range: 0.5...2.0,
+                        accent: SignalTheme.warmPeak
+                    )
+                }
 
-            Spacer(minLength: 4)
+                Divider()
+                    .overlay(SignalTheme.gridLine.opacity(0.9))
 
-            UpdateRackModule(updateController: updateController)
+                UpdateRackModule(updateController: updateController)
         }
         .padding(16)
-        .frame(width: 302, alignment: .topLeading)
-        .frame(minHeight: 620, alignment: .topLeading)
-        .signalPanel(cornerRadius: 10)
     }
 
     private func toggleMicrophone() {
@@ -200,97 +281,81 @@ private struct InstrumentSpine: View {
     }
 }
 
-private struct SceneStatusDeck: View {
-    @ObservedObject var sceneController: SceneController
-    @ObservedObject var updateController: UpdateController
-
-    var body: some View {
-        VStack(alignment: .trailing, spacing: 10) {
-            HStack(spacing: 8) {
-                SignalBadge(sceneController.settings.sceneMode.displayName)
-                SignalBadge("METAL LIVE")
-                SignalBadge(updateController.isChecking ? "OTA CHECK" : "OTA READY")
-            }
-
-            HStack(spacing: 8) {
-                Button {
-                    updateController.checkNow()
-                } label: {
-                    Label(updateController.isChecking ? "Checking" : "Check", systemImage: "arrow.triangle.2.circlepath")
-                }
-                .disabled(updateController.isChecking)
-
-                Button {
-                    updateController.openReleasePage()
-                } label: {
-                    Label("Release", systemImage: "arrow.up.forward.app")
-                }
-                .disabled(updateController.releaseURL == nil)
-            }
-            .buttonStyle(.bordered)
-            .controlSize(.small)
-
-            Text(updateController.statusText)
-                .font(.system(size: 11, weight: .medium, design: .monospaced))
-                .foregroundStyle(SignalTheme.mutedSteel)
-                .multilineTextAlignment(.trailing)
-                .lineLimit(2)
-                .frame(maxWidth: 320, alignment: .trailing)
-        }
-        .padding(12)
-        .signalPanel(cornerRadius: 10)
-    }
-}
-
 private struct BottomSignalConsole: View {
+    static let minimumHeight: CGFloat = 96
+
     @ObservedObject var audioEngine: LiveAudioEngine
     @ObservedObject var sceneController: SceneController
 
     var body: some View {
-        HStack(alignment: .center, spacing: 18) {
-            VStack(alignment: .leading, spacing: 6) {
-                Text("SIGNAL CONSOLE")
-                    .font(.system(size: 11, weight: .bold, design: .monospaced))
-                    .foregroundStyle(SignalTheme.signalTeal)
-                Text(sceneController.settings.sceneMode.displayName)
-                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                    .foregroundStyle(SignalTheme.softWhite)
-            }
-            .frame(width: 190, alignment: .leading)
+        ViewThatFits(in: .horizontal) {
+            expandedConsole
+            compactConsole
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, minHeight: Self.minimumHeight, alignment: .leading)
+        .signalPanel(cornerRadius: 12)
+    }
 
-            HStack(spacing: 12) {
-                HardwareMeter(title: "LVL", value: audioEngine.features.volume, accent: SignalTheme.meterGreen)
-                HardwareMeter(title: "BASS", value: audioEngine.features.bassEnergy, accent: SignalTheme.signalTeal)
-                HardwareMeter(title: "MID", value: audioEngine.features.midEnergy, accent: SignalTheme.oscillatorCyan)
-                HardwareMeter(title: "HI", value: audioEngine.features.trebleEnergy, accent: SignalTheme.warmPeak)
-            }
+    private var expandedConsole: some View {
+        HStack(alignment: .center, spacing: 18) {
+            consoleTitle
+                .frame(width: 190, alignment: .leading)
+
+            meterBank
 
             Divider()
                 .frame(height: 62)
                 .overlay(SignalTheme.gridLine)
 
-            HStack(spacing: 8) {
-                ForEach(SceneMode.allCases) { mode in
-                    SceneChip(
-                        mode: mode,
-                        isSelected: mode == sceneController.settings.sceneMode
-                    ) {
-                        sceneController.setSceneMode(mode)
-                    }
-                }
-            }
-
             Spacer(minLength: 12)
 
-            HStack(spacing: 8) {
-                SignalBadge("QUALITY AUTO")
-                SignalBadge("OUTPUT LIVE")
-            }
+            statusBadges
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .frame(maxWidth: .infinity, minHeight: 96)
-        .signalPanel(cornerRadius: 12)
+    }
+
+    private var compactConsole: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                consoleTitle
+                Spacer(minLength: 12)
+                SignalBadge(sceneController.settings.sceneMode.shortName)
+            }
+
+            meterBank
+            statusBadges
+        }
+    }
+
+    private var consoleTitle: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("SIGNAL CONSOLE")
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .foregroundStyle(SignalTheme.signalTeal)
+            Text(sceneController.settings.sceneMode.displayName)
+                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                .foregroundStyle(SignalTheme.softWhite)
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
+        }
+    }
+
+    private var meterBank: some View {
+        HStack(spacing: 12) {
+            HardwareMeter(title: "LVL", value: audioEngine.features.volume, accent: SignalTheme.meterGreen)
+            HardwareMeter(title: "BASS", value: audioEngine.features.bassEnergy, accent: SignalTheme.signalTeal)
+            HardwareMeter(title: "MID", value: audioEngine.features.midEnergy, accent: SignalTheme.oscillatorCyan)
+            HardwareMeter(title: "HI", value: audioEngine.features.trebleEnergy, accent: SignalTheme.warmPeak)
+        }
+    }
+
+    private var statusBadges: some View {
+        HStack(spacing: 8) {
+            SignalBadge("METAL LIVE")
+            SignalBadge("QUALITY AUTO")
+            SignalBadge("OUTPUT LIVE")
+        }
     }
 }
 
@@ -405,28 +470,6 @@ private struct SceneModePill: View {
         .overlay(
             RoundedRectangle(cornerRadius: 5)
                 .stroke(isSelected ? SignalTheme.signalTeal : SignalTheme.gridLine, lineWidth: 1)
-        )
-    }
-}
-
-private struct SceneChip: View {
-    let mode: SceneMode
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(mode.shortName)
-                .font(.system(size: 11, weight: .semibold, design: .monospaced))
-                .padding(.horizontal, 10)
-                .padding(.vertical, 7)
-        }
-        .buttonStyle(.plain)
-        .foregroundStyle(isSelected ? SignalTheme.voidBlack : SignalTheme.softWhite)
-        .background(isSelected ? SignalTheme.warmPeak : SignalTheme.panelCarbon, in: RoundedRectangle(cornerRadius: 6))
-        .overlay(
-            RoundedRectangle(cornerRadius: 6)
-                .stroke(isSelected ? SignalTheme.warmPeak : SignalTheme.gridLine, lineWidth: 1)
         )
     }
 }
