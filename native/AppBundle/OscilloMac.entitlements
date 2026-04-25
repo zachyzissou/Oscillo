@@ -8,5 +8,10 @@
 	<true/>
 	<key>com.apple.security.network.client</key>
 	<true/>
+	<key>com.apple.security.temporary-exception.mach-lookup.global-name</key>
+	<array>
+		<string>com.zachyzissou.oscillo.native.mac-spks</string>
+		<string>com.zachyzissou.oscillo.native.mac-spki</string>
+	</array>
 </dict>
 </plist>
