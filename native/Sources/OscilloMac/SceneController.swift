@@ -62,6 +62,11 @@ final class SceneController: ObservableObject {
         )
     }
 
+    func applyPreset(_ preset: PerformancePreset) {
+        settings = preset.settings
+        settingsStore.update(preset.settings)
+    }
+
     private func update(
         visualGain: Float,
         particleDensity: Float,

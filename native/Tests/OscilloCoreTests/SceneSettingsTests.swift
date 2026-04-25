@@ -51,4 +51,33 @@ final class SceneSettingsTests: XCTestCase {
         XCTAssertEqual(SceneMode.liquidSurface.uniformIndex, 3)
         XCTAssertEqual(SceneMode.spectrogramStage.uniformIndex, 4)
     }
+
+    func testPerformancePresetsAreValidControlSnapshots() {
+        XCTAssertEqual(PerformancePreset.allCases.count, 4)
+
+        for preset in PerformancePreset.allCases {
+            let settings = preset.settings
+            XCTAssertEqual(settings.visualGain, settings.visualGain.clamped(to: 0.25...2.0))
+            XCTAssertEqual(settings.particleDensity, settings.particleDensity.clamped(to: 0.15...1.5))
+            XCTAssertEqual(settings.previewTempo, settings.previewTempo.clamped(to: 0.5...2.0))
+        }
+    }
+
+    func testPerformancePresetsCoverDistinctScenesAndPalettes() {
+        XCTAssertEqual(PerformancePreset.drift.settings.sceneMode, .spectralTerrain)
+        XCTAssertEqual(PerformancePreset.pulse.settings.sceneMode, .tunnel)
+        XCTAssertEqual(PerformancePreset.orbit.settings.sceneMode, .constellation)
+        XCTAssertEqual(PerformancePreset.surge.settings.sceneMode, .spectrogramStage)
+
+        XCTAssertEqual(PerformancePreset.drift.settings.palette, .aurora)
+        XCTAssertEqual(PerformancePreset.pulse.settings.palette, .neon)
+        XCTAssertEqual(PerformancePreset.orbit.settings.palette, .mono)
+        XCTAssertEqual(PerformancePreset.surge.settings.palette, .solar)
+    }
+}
+
+private extension Float {
+    func clamped(to range: ClosedRange<Float>) -> Float {
+        min(max(self, range.lowerBound), range.upperBound)
+    }
 }

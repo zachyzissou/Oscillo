@@ -145,6 +145,23 @@ private struct InstrumentSpine: View {
                 SignalReadoutModule(audioEngine: audioEngine)
 
                 VStack(alignment: .leading, spacing: 8) {
+                    ModuleLabel("PERFORM")
+                    LazyVGrid(columns: [
+                        GridItem(.flexible(), spacing: 6),
+                        GridItem(.flexible(), spacing: 6)
+                    ], spacing: 6) {
+                        ForEach(PerformancePreset.allCases) { preset in
+                            PerformancePresetPill(
+                                preset: preset,
+                                isSelected: sceneController.settings == preset.settings
+                            ) {
+                                sceneController.applyPreset(preset)
+                            }
+                        }
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
                     ModuleLabel("SCENE")
                     LazyVGrid(columns: [
                         GridItem(.flexible(), spacing: 6),
@@ -366,6 +383,58 @@ private struct SceneModePill: View {
             RoundedRectangle(cornerRadius: 5)
                 .stroke(isSelected ? SignalTheme.signalTeal : SignalTheme.gridLine, lineWidth: 1)
         )
+    }
+}
+
+private struct PerformancePresetPill: View {
+    let preset: PerformancePreset
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 6) {
+                Image(systemName: systemImage)
+                    .font(.system(size: 10, weight: .black))
+                Text(preset.shortName.uppercased())
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 7)
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(isSelected ? SignalTheme.voidBlack : accent)
+        .background(isSelected ? accent : SignalTheme.raisedGraphite, in: RoundedRectangle(cornerRadius: 5))
+        .overlay(
+            RoundedRectangle(cornerRadius: 5)
+                .stroke(isSelected ? accent : SignalTheme.gridLine, lineWidth: 1)
+        )
+    }
+
+    private var accent: Color {
+        switch preset {
+        case .drift:
+            SignalTheme.signalTeal
+        case .pulse:
+            SignalTheme.transientCoral
+        case .orbit:
+            SignalTheme.oscillatorCyan
+        case .surge:
+            SignalTheme.warmPeak
+        }
+    }
+
+    private var systemImage: String {
+        switch preset {
+        case .drift:
+            "wind"
+        case .pulse:
+            "bolt.fill"
+        case .orbit:
+            "sparkle"
+        case .surge:
+            "waveform.path.ecg"
+        }
     }
 }
 
