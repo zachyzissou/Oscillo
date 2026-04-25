@@ -56,44 +56,51 @@ public final class VDSPFrequencyAnalyzer: @unchecked Sendable {
                     imagp: imaginaryPointer.baseAddress!
                 )
 
-                input.withUnsafeBufferPointer { inputPointer in
-                    inputPointer.baseAddress!.withMemoryRebound(
-                        to: DSPComplex.self,
-                        capacity: halfCount
-                    ) { complexPointer in
-                        vDSP_ctoz(
-                            complexPointer,
-                            2,
-                            &splitComplex,
-                            1,
-                            vDSP_Length(halfCount)
-                        )
-                    }
-                }
-
-                vDSP_fft_zrip(
-                    fftSetup,
-                    &splitComplex,
-                    1,
-                    log2SampleCount,
-                    FFTDirection(FFT_FORWARD)
-                )
-
-                splitComplex.realp[0] = 0
-                splitComplex.imagp[0] = 0
-
-                vDSP_zvmags(
-                    &splitComplex,
-                    1,
-                    &powers,
-                    1,
-                    vDSP_Length(halfCount)
-                )
+                copyInput(input, into: &splitComplex)
+                transform(&splitComplex, powers: &powers)
             }
         }
 
         let scale = Float(2) / Float(sampleCount)
         return powers.map { sqrt(max($0, 0)) * scale }
+    }
+
+    private func copyInput(_ input: [Float], into splitComplex: inout DSPSplitComplex) {
+        input.withUnsafeBufferPointer { inputPointer in
+            inputPointer.baseAddress!.withMemoryRebound(
+                to: DSPComplex.self,
+                capacity: halfCount
+            ) { complexPointer in
+                vDSP_ctoz(
+                    complexPointer,
+                    2,
+                    &splitComplex,
+                    1,
+                    vDSP_Length(halfCount)
+                )
+            }
+        }
+    }
+
+    private func transform(_ splitComplex: inout DSPSplitComplex, powers: inout [Float]) {
+        vDSP_fft_zrip(
+            fftSetup,
+            &splitComplex,
+            1,
+            log2SampleCount,
+            FFTDirection(FFT_FORWARD)
+        )
+
+        splitComplex.realp[0] = 0
+        splitComplex.imagp[0] = 0
+
+        vDSP_zvmags(
+            &splitComplex,
+            1,
+            &powers,
+            1,
+            vDSP_Length(halfCount)
+        )
     }
 }
 

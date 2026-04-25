@@ -1,5 +1,19 @@
 import Foundation
 
+public struct AudioEnergyBands: Equatable, Sendable {
+    public var bass: Float
+    public var mid: Float
+    public var treble: Float
+
+    public init(bass: Float, mid: Float, treble: Float) {
+        self.bass = bass
+        self.mid = mid
+        self.treble = treble
+    }
+
+    public static let silence = AudioEnergyBands(bass: 0, mid: 0, treble: 0)
+}
+
 public struct AudioFeatures: Equatable, Sendable {
     public var volume: Float
     public var bassEnergy: Float
@@ -12,18 +26,16 @@ public struct AudioFeatures: Equatable, Sendable {
 
     public init(
         volume: Float,
-        bassEnergy: Float,
-        midEnergy: Float,
-        trebleEnergy: Float,
+        bands: AudioEnergyBands,
         peakFrequency: Float,
         spectralCentroid: Float,
         rms: Float,
         zeroCrossingRate: Float
     ) {
         self.volume = volume
-        self.bassEnergy = bassEnergy
-        self.midEnergy = midEnergy
-        self.trebleEnergy = trebleEnergy
+        self.bassEnergy = bands.bass
+        self.midEnergy = bands.mid
+        self.trebleEnergy = bands.treble
         self.peakFrequency = peakFrequency
         self.spectralCentroid = spectralCentroid
         self.rms = rms
@@ -32,9 +44,7 @@ public struct AudioFeatures: Equatable, Sendable {
 
     public static let silence = AudioFeatures(
         volume: 0,
-        bassEnergy: 0,
-        midEnergy: 0,
-        trebleEnergy: 0,
+        bands: .silence,
         peakFrequency: 0,
         spectralCentroid: 0,
         rms: 0,
@@ -53,9 +63,7 @@ public enum AudioFeatureExtractor {
 
         return AudioFeatures(
             volume: rms,
-            bassEnergy: bands.bass,
-            midEnergy: bands.mid,
-            trebleEnergy: bands.treble,
+            bands: bands,
             peakFrequency: calculatePeakFrequency(frequencyMagnitudes, sampleRate: sampleRate),
             spectralCentroid: calculateSpectralCentroid(frequencyMagnitudes, sampleRate: sampleRate),
             rms: rms,
@@ -76,9 +84,9 @@ public enum AudioFeatureExtractor {
     private static func calculateBands(
         _ magnitudes: [Float],
         sampleRate: Float
-    ) -> (bass: Float, mid: Float, treble: Float) {
+    ) -> AudioEnergyBands {
         guard !magnitudes.isEmpty, sampleRate > 0 else {
-            return (0, 0, 0)
+            return .silence
         }
 
         var bassSum = Float(0)
@@ -104,10 +112,10 @@ public enum AudioFeatureExtractor {
             }
         }
 
-        return (
-            average(sum: bassSum, count: bassCount),
-            average(sum: midSum, count: midCount),
-            average(sum: trebleSum, count: trebleCount)
+        return AudioEnergyBands(
+            bass: average(sum: bassSum, count: bassCount),
+            mid: average(sum: midSum, count: midCount),
+            treble: average(sum: trebleSum, count: trebleCount)
         )
     }
 

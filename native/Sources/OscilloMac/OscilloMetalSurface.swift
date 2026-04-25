@@ -24,7 +24,7 @@ struct OscilloMetalSurface: NSViewRepresentable {
         return view
     }
 
-    func updateNSView(_ view: MTKView, context: Context) {
+    func updateNSView(_: MTKView, context: Context) {
         context.coordinator.isActive = isActive
     }
 }

@@ -53,7 +53,7 @@ public struct SceneSettings: Equatable, Sendable {
         self.palette = palette
     }
 
-    public static let `default` = SceneSettings(
+    public static let standard = SceneSettings(
         visualGain: 1.0,
         particleDensity: 0.9,
         previewTempo: 1.0,
@@ -65,7 +65,7 @@ public final class SceneSettingsStore: @unchecked Sendable {
     private let lock = NSLock()
     private var currentSettings: SceneSettings
 
-    public init(initialSettings: SceneSettings = .default) {
+    public init(initialSettings: SceneSettings = .standard) {
         self.currentSettings = initialSettings
     }
 

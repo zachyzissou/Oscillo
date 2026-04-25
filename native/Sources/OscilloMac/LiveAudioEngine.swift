@@ -123,9 +123,7 @@ final class LiveAudioEngine: ObservableObject {
 
         featureStore.update(AudioFeatures(
             volume: volume,
-            bassEnergy: bass,
-            midEnergy: mid,
-            trebleEnergy: treble,
+            bands: AudioEnergyBands(bass: bass, mid: mid, treble: treble),
             peakFrequency: 120 + mid * 2_800,
             spectralCentroid: 600 + treble * 7_500,
             rms: volume,

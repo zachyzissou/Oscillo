@@ -37,7 +37,9 @@ final class OscilloRenderer: NSObject, MTKViewDelegate {
         }
     }
 
-    func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {}
+    func mtkView(_: MTKView, drawableSizeWillChange _: CGSize) {
+        // The renderer reads drawableSize each frame when building shader uniforms.
+    }
 
     func draw(in view: MTKView) {
         guard

@@ -26,9 +26,11 @@ jobs:
 
       - name: Resolve release metadata
         id: meta
+        env:
+          REQUESTED_TAG: ${{ inputs.tag }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            tag="${{ inputs.tag }}"
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            tag="${REQUESTED_TAG}"
           else
             tag="${GITHUB_REF_NAME}"
           fi

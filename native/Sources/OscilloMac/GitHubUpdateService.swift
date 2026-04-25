@@ -29,11 +29,15 @@ enum GitHubUpdateServiceError: Error, LocalizedError {
 }
 
 final class GitHubUpdateService: @unchecked Sendable {
-    private let releasesURL = URL(string: "https://api.github.com/repos/zachyzissou/Oscillo/releases?per_page=20")!
+    private let releasesURL: URL
     private let session: URLSession
 
-    init(session: URLSession = .shared) {
+    init(
+        session: URLSession = .shared,
+        releasesURL: URL = GitHubUpdateService.defaultReleasesURL()
+    ) {
         self.session = session
+        self.releasesURL = releasesURL
     }
 
     func checkForUpdates(currentVersionString: String) async throws -> UpdateCheckResult {
@@ -77,6 +81,17 @@ final class GitHubUpdateService: @unchecked Sendable {
                 asset.name.hasSuffix(".zip") && asset.name.contains("Oscillo-macOS")
             }?.browserDownloadURL
         ))
+    }
+
+    private static func defaultReleasesURL() -> URL {
+        var components = URLComponents()
+        components.scheme = "https"
+        components.host = "api.github.com"
+        components.path = "/repos/zachyzissou/Oscillo/releases"
+        components.queryItems = [
+            URLQueryItem(name: "per_page", value: "20")
+        ]
+        return components.url!
     }
 }
 
