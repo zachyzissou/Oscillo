@@ -19,13 +19,13 @@ jobs:
 
     steps:
       - name: 🧾 Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6.0.2
         with:
           fetch-depth: 0
 
       - name: Determine changed paths
         id: changes
-        uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d
         with:
           filters: |
             src:
@@ -51,7 +51,7 @@ jobs:
           echo "✅ Early cleanup completed"
 
       - name: 🔄 Restore Next.js cache
-        uses: actions/cache@v3
+        uses: actions/cache@v5.0.5
         with:
           path: .next/cache
           key: ${{ runner.os }}-nextjs-${{ hashFiles('package-lock.json') }}
@@ -60,13 +60,13 @@ jobs:
 
       - name: 🔧 Set up Node.js
         if: steps.changes.outputs.src == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6.4.0
         with:
           node-version: 20
 
       - name: 📦 Cache npm
         if: steps.changes.outputs.src == 'true'
-        uses: actions/cache@v3
+        uses: actions/cache@v5.0.5
         with:
           path: ~/.npm
           key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
@@ -83,7 +83,7 @@ jobs:
 
       - name: 🛠 Set up Docker Buildx
         if: steps.changes.outputs.src == 'true'
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd
         with:
           driver: docker-container
 
