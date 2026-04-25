@@ -7,7 +7,7 @@ struct ContentView: View {
     @StateObject private var updateController = UpdateController()
 
     var body: some View {
-        ZStack(alignment: .topLeading) {
+        ZStack {
             OscilloMetalSurface(
                 featureStore: audioEngine.featureStore,
                 settingsStore: sceneController.settingsStore,
@@ -15,13 +15,43 @@ struct ContentView: View {
             )
             .ignoresSafeArea()
 
-            ControlPanel(
-                audioEngine: audioEngine,
-                sceneController: sceneController,
-                updateController: updateController
+            LinearGradient(
+                colors: [
+                    SignalTheme.voidBlack.opacity(0.72),
+                    .clear,
+                    SignalTheme.voidBlack.opacity(0.54)
+                ],
+                startPoint: .leading,
+                endPoint: .trailing
             )
+            .allowsHitTesting(false)
+            .ignoresSafeArea()
+
+            HStack(alignment: .top) {
+                InstrumentSpine(
+                    audioEngine: audioEngine,
+                    sceneController: sceneController,
+                    updateController: updateController
+                )
                 .padding(18)
+
+                Spacer(minLength: 16)
+
+                SceneStatusDeck(
+                    sceneController: sceneController,
+                    updateController: updateController
+                )
+                .padding(18)
+            }
+
+            VStack {
+                Spacer()
+                BottomSignalConsole(audioEngine: audioEngine, sceneController: sceneController)
+                    .padding(.horizontal, 18)
+                    .padding(.bottom, 18)
+            }
         }
+        .background(SignalTheme.voidBlack)
         .task {
             audioEngine.startPreview()
             updateController.checkAutomaticallyOnLaunch()
@@ -29,130 +59,246 @@ struct ContentView: View {
     }
 }
 
-private struct ControlPanel: View {
+private struct InstrumentSpine: View {
     @ObservedObject var audioEngine: LiveAudioEngine
     @ObservedObject var sceneController: SceneController
     @ObservedObject var updateController: UpdateController
     private let buildMetadata = AppBuildMetadata(bundleInfo: Bundle.main.infoDictionary ?? [:])
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text("Oscillo")
-                        .font(.system(size: 20, weight: .semibold, design: .rounded))
-                    Spacer(minLength: 10)
-                    Text(buildMetadata.visibleBuildMarker)
-                        .font(.caption2.monospacedDigit())
-                        .foregroundStyle(.secondary)
+                    Text("OSCILLO")
+                        .font(.system(size: 22, weight: .black, design: .rounded))
+                        .foregroundStyle(SignalTheme.softWhite)
+                    Spacer(minLength: 12)
+                    Text(buildMetadata.visibleBuildMarker.uppercased())
+                        .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                        .foregroundStyle(SignalTheme.mutedSteel)
                 }
+
+                Text(sceneController.settings.sceneMode.displayName.uppercased())
+                    .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(SignalTheme.signalTeal)
 
                 Text(audioEngine.statusMessage)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .foregroundStyle(SignalTheme.mutedSteel)
+                    .lineLimit(2)
             }
-
-            HStack(spacing: 10) {
-                Button(audioEngine.isRunning ? "Stop Input" : "Use Microphone") {
-                    if audioEngine.isRunning {
-                        audioEngine.stopMicrophone()
-                    } else {
-                        audioEngine.startMicrophone()
-                    }
-                }
-                .buttonStyle(.borderedProminent)
-
-                Button(audioEngine.isPreviewing ? "Pause Preview" : "Preview") {
-                    if audioEngine.isPreviewing {
-                        audioEngine.stopPreview(resetFeatures: true)
-                    } else {
-                        audioEngine.startPreview()
-                    }
-                }
-                .buttonStyle(.bordered)
-            }
-
-            Picker("Palette", selection: Binding(
-                get: { sceneController.settings.palette },
-                set: { sceneController.setPalette($0) }
-            )) {
-                ForEach(ScenePalette.allCases) { palette in
-                    Text(palette.displayName).tag(palette)
-                }
-            }
-            .pickerStyle(.segmented)
-
-            ControlSlider(
-                title: "Intensity",
-                value: Binding(
-                    get: { sceneController.settings.visualGain },
-                    set: { sceneController.setVisualGain($0) }
-                ),
-                range: 0.25...2.0
-            )
-
-            ControlSlider(
-                title: "Particles",
-                value: Binding(
-                    get: { sceneController.settings.particleDensity },
-                    set: { sceneController.setParticleDensity($0) }
-                ),
-                range: 0.15...1.5
-            )
-
-            ControlSlider(
-                title: "Preview Tempo",
-                value: Binding(
-                    get: { sceneController.settings.previewTempo },
-                    set: { sceneController.setPreviewTempo($0) }
-                ),
-                range: 0.5...2.0
-            )
 
             Divider()
-                .overlay(.white.opacity(0.16))
-
-            FeatureMeter(title: "Level", value: audioEngine.features.volume)
-            FeatureMeter(title: "Bass", value: audioEngine.features.bassEnergy)
-            FeatureMeter(title: "Mid", value: audioEngine.features.midEnergy)
-            FeatureMeter(title: "Treble", value: audioEngine.features.trebleEnergy)
-
-            Divider()
-                .overlay(.white.opacity(0.16))
+                .overlay(SignalTheme.gridLine.opacity(0.9))
 
             VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 10) {
-                    Button(updateController.isChecking ? "Checking..." : "Check Updates") {
-                        updateController.checkNow()
-                    }
-                    .disabled(updateController.isChecking)
+                ModuleLabel("INPUT")
+                HStack(spacing: 8) {
+                    SignalActionButton(
+                        title: audioEngine.isRunning ? "STOP" : "MIC",
+                        systemImage: audioEngine.isRunning ? "stop.fill" : "waveform",
+                        isActive: audioEngine.isRunning,
+                        action: toggleMicrophone
+                    )
 
-                    Button("Open Release") {
-                        updateController.openReleasePage()
-                    }
-                    .disabled(updateController.releaseURL == nil)
+                    SignalActionButton(
+                        title: audioEngine.isPreviewing ? "PAUSE" : "PREVIEW",
+                        systemImage: audioEngine.isPreviewing ? "pause.fill" : "play.fill",
+                        isActive: audioEngine.isPreviewing,
+                        action: togglePreview
+                    )
                 }
-
-                Text(updateController.statusText)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
             }
+
+            VStack(alignment: .leading, spacing: 8) {
+                ModuleLabel("SCENE")
+                LazyVGrid(columns: [
+                    GridItem(.flexible(), spacing: 6),
+                    GridItem(.flexible(), spacing: 6)
+                ], spacing: 6) {
+                    ForEach(SceneMode.allCases) { mode in
+                        SceneModePill(
+                            mode: mode,
+                            isSelected: mode == sceneController.settings.sceneMode
+                        ) {
+                            sceneController.setSceneMode(mode)
+                        }
+                    }
+                }
+            }
+
+            VStack(alignment: .leading, spacing: 8) {
+                ModuleLabel("PALETTE")
+                Picker("Palette", selection: Binding(
+                    get: { sceneController.settings.palette },
+                    set: { sceneController.setPalette($0) }
+                )) {
+                    ForEach(ScenePalette.allCases) { palette in
+                        Text(palette.displayName).tag(palette)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .controlSize(.small)
+            }
+
+            VStack(spacing: 12) {
+                SignalSlider(
+                    title: "INTENSITY",
+                    value: Binding(
+                        get: { sceneController.settings.visualGain },
+                        set: { sceneController.setVisualGain($0) }
+                    ),
+                    range: 0.25...2.0,
+                    accent: SignalTheme.signalTeal
+                )
+
+                SignalSlider(
+                    title: "PARTICLES",
+                    value: Binding(
+                        get: { sceneController.settings.particleDensity },
+                        set: { sceneController.setParticleDensity($0) }
+                    ),
+                    range: 0.15...1.5,
+                    accent: SignalTheme.transientCoral
+                )
+
+                SignalSlider(
+                    title: "TEMPO",
+                    value: Binding(
+                        get: { sceneController.settings.previewTempo },
+                        set: { sceneController.setPreviewTempo($0) }
+                    ),
+                    range: 0.5...2.0,
+                    accent: SignalTheme.warmPeak
+                )
+            }
+
+            Spacer(minLength: 4)
+
+            UpdateRackModule(updateController: updateController)
         }
-        .padding(18)
-        .frame(width: 312, alignment: .leading)
-        .background(.black.opacity(0.58), in: RoundedRectangle(cornerRadius: 8))
-        .overlay(
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(.white.opacity(0.14), lineWidth: 1)
-        )
+        .padding(16)
+        .frame(width: 302, alignment: .topLeading)
+        .frame(minHeight: 620, alignment: .topLeading)
+        .signalPanel(cornerRadius: 10)
+    }
+
+    private func toggleMicrophone() {
+        if audioEngine.isRunning {
+            audioEngine.stopMicrophone()
+        } else {
+            audioEngine.startMicrophone()
+        }
+    }
+
+    private func togglePreview() {
+        if audioEngine.isPreviewing {
+            audioEngine.stopPreview(resetFeatures: true)
+        } else {
+            audioEngine.startPreview()
+        }
     }
 }
 
-private struct ControlSlider: View {
+private struct SceneStatusDeck: View {
+    @ObservedObject var sceneController: SceneController
+    @ObservedObject var updateController: UpdateController
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 10) {
+            HStack(spacing: 8) {
+                SignalBadge(sceneController.settings.sceneMode.displayName)
+                SignalBadge("METAL LIVE")
+                SignalBadge(updateController.isChecking ? "OTA CHECK" : "OTA READY")
+            }
+
+            HStack(spacing: 8) {
+                Button {
+                    updateController.checkNow()
+                } label: {
+                    Label(updateController.isChecking ? "Checking" : "Check", systemImage: "arrow.triangle.2.circlepath")
+                }
+                .disabled(updateController.isChecking)
+
+                Button {
+                    updateController.openReleasePage()
+                } label: {
+                    Label("Release", systemImage: "arrow.up.forward.app")
+                }
+                .disabled(updateController.releaseURL == nil)
+            }
+            .buttonStyle(.bordered)
+            .controlSize(.small)
+
+            Text(updateController.statusText)
+                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                .foregroundStyle(SignalTheme.mutedSteel)
+                .multilineTextAlignment(.trailing)
+                .lineLimit(2)
+                .frame(maxWidth: 320, alignment: .trailing)
+        }
+        .padding(12)
+        .signalPanel(cornerRadius: 10)
+    }
+}
+
+private struct BottomSignalConsole: View {
+    @ObservedObject var audioEngine: LiveAudioEngine
+    @ObservedObject var sceneController: SceneController
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 18) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("SIGNAL CONSOLE")
+                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                    .foregroundStyle(SignalTheme.signalTeal)
+                Text(sceneController.settings.sceneMode.displayName)
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .foregroundStyle(SignalTheme.softWhite)
+            }
+            .frame(width: 190, alignment: .leading)
+
+            HStack(spacing: 12) {
+                HardwareMeter(title: "LVL", value: audioEngine.features.volume, accent: SignalTheme.meterGreen)
+                HardwareMeter(title: "BASS", value: audioEngine.features.bassEnergy, accent: SignalTheme.signalTeal)
+                HardwareMeter(title: "MID", value: audioEngine.features.midEnergy, accent: SignalTheme.oscillatorCyan)
+                HardwareMeter(title: "HI", value: audioEngine.features.trebleEnergy, accent: SignalTheme.warmPeak)
+            }
+
+            Divider()
+                .frame(height: 62)
+                .overlay(SignalTheme.gridLine)
+
+            HStack(spacing: 8) {
+                ForEach(SceneMode.allCases) { mode in
+                    SceneChip(
+                        mode: mode,
+                        isSelected: mode == sceneController.settings.sceneMode
+                    ) {
+                        sceneController.setSceneMode(mode)
+                    }
+                }
+            }
+
+            Spacer(minLength: 12)
+
+            HStack(spacing: 8) {
+                SignalBadge("QUALITY AUTO")
+                SignalBadge("OUTPUT LIVE")
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, minHeight: 96)
+        .signalPanel(cornerRadius: 12)
+    }
+}
+
+private struct SignalSlider: View {
     let title: String
     @Binding var value: Float
     let range: ClosedRange<Float>
+    let accent: Color
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -161,9 +307,22 @@ private struct ControlSlider: View {
                 Spacer()
                 Text(value.formatted(.number.precision(.fractionLength(2))))
                     .monospacedDigit()
-                    .foregroundStyle(.secondary)
             }
-            .font(.caption)
+            .font(.system(size: 10, weight: .bold, design: .monospaced))
+            .foregroundStyle(SignalTheme.mutedSteel)
+
+            GeometryReader { proxy in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(SignalTheme.raisedGraphite)
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(accent)
+                        .frame(width: proxy.size.width * normalizedValue)
+                    RoundedRectangle(cornerRadius: 2)
+                        .stroke(SignalTheme.gridLine, lineWidth: 1)
+                }
+            }
+            .frame(height: 6)
 
             Slider(
                 value: Binding(
@@ -172,40 +331,225 @@ private struct ControlSlider: View {
                 ),
                 in: Double(range.lowerBound)...Double(range.upperBound)
             )
+            .controlSize(.small)
+            .tint(accent)
         }
-        .foregroundStyle(.white)
+    }
+
+    private var normalizedValue: CGFloat {
+        let span = range.upperBound - range.lowerBound
+        guard span > 0 else { return 0 }
+        return CGFloat((value - range.lowerBound) / span)
     }
 }
 
-private struct FeatureMeter: View {
+private struct HardwareMeter: View {
     let title: String
     let value: Float
+    let accent: Color
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
-            HStack {
-                Text(title)
-                Spacer()
-                Text(value.formatted(.number.precision(.fractionLength(2))))
-                    .monospacedDigit()
+        VStack(spacing: 5) {
+            HStack(spacing: 3) {
+                ForEach(0..<12, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 1)
+                        .fill(segmentColor(index: index))
+                        .frame(width: 7, height: 26)
+                }
             }
-            .font(.caption)
 
-            GeometryReader { proxy in
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(.white.opacity(0.14))
-                    .overlay(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 2)
-                            .fill(LinearGradient(
-                                colors: [.cyan, .pink],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            ))
-                            .frame(width: proxy.size.width * CGFloat(min(max(value, 0), 1)))
-                    }
+            HStack(spacing: 5) {
+                Text(title)
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                Text(value.formatted(.number.precision(.fractionLength(2))))
+                    .font(.system(size: 10, weight: .medium, design: .monospaced))
+                    .monospacedDigit()
+                    .foregroundStyle(SignalTheme.mutedSteel)
             }
-            .frame(height: 5)
         }
-        .foregroundStyle(.white)
+        .frame(width: 108)
+        .foregroundStyle(SignalTheme.softWhite)
     }
+
+    private func segmentColor(index: Int) -> Color {
+        let normalized = CGFloat(min(max(value, 0), 1))
+        let threshold = CGFloat(index + 1) / 12.0
+        guard normalized >= threshold else {
+            return SignalTheme.panelCarbon
+        }
+        if index > 9 {
+            return SignalTheme.transientCoral
+        }
+        if index > 7 {
+            return SignalTheme.warmPeak
+        }
+        return accent
+    }
+}
+
+private struct SceneModePill: View {
+    let mode: SceneMode
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(mode.shortName.uppercased())
+                .font(.system(size: 10, weight: .bold, design: .monospaced))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 7)
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(isSelected ? SignalTheme.voidBlack : SignalTheme.mutedSteel)
+        .background(isSelected ? SignalTheme.signalTeal : SignalTheme.raisedGraphite, in: RoundedRectangle(cornerRadius: 5))
+        .overlay(
+            RoundedRectangle(cornerRadius: 5)
+                .stroke(isSelected ? SignalTheme.signalTeal : SignalTheme.gridLine, lineWidth: 1)
+        )
+    }
+}
+
+private struct SceneChip: View {
+    let mode: SceneMode
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(mode.shortName)
+                .font(.system(size: 11, weight: .semibold, design: .monospaced))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 7)
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(isSelected ? SignalTheme.voidBlack : SignalTheme.softWhite)
+        .background(isSelected ? SignalTheme.warmPeak : SignalTheme.panelCarbon, in: RoundedRectangle(cornerRadius: 6))
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(isSelected ? SignalTheme.warmPeak : SignalTheme.gridLine, lineWidth: 1)
+        )
+    }
+}
+
+private struct SignalActionButton: View {
+    let title: String
+    let systemImage: String
+    let isActive: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Label(title, systemImage: systemImage)
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+                .labelStyle(.titleAndIcon)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .padding(.horizontal, 9)
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(isActive ? SignalTheme.voidBlack : SignalTheme.softWhite)
+        .background(isActive ? SignalTheme.signalTeal : SignalTheme.raisedGraphite, in: RoundedRectangle(cornerRadius: 7))
+        .overlay(
+            RoundedRectangle(cornerRadius: 7)
+                .stroke(isActive ? SignalTheme.signalTeal : SignalTheme.gridLine, lineWidth: 1)
+        )
+    }
+}
+
+private struct UpdateRackModule: View {
+    @ObservedObject var updateController: UpdateController
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ModuleLabel("RELEASE")
+            HStack(spacing: 8) {
+                SignalActionButton(
+                    title: updateController.isChecking ? "CHECKING" : "CHECK",
+                    systemImage: "arrow.triangle.2.circlepath",
+                    isActive: updateController.isChecking
+                ) {
+                    updateController.checkNow()
+                }
+                .disabled(updateController.isChecking)
+
+                SignalActionButton(
+                    title: "OPEN",
+                    systemImage: "arrow.up.forward.app",
+                    isActive: updateController.releaseURL != nil
+                ) {
+                    updateController.openReleasePage()
+                }
+                .disabled(updateController.releaseURL == nil)
+            }
+
+            Text(updateController.statusText)
+                .font(.system(size: 10, weight: .medium, design: .monospaced))
+                .foregroundStyle(SignalTheme.mutedSteel)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+
+private struct SignalBadge: View {
+    let text: String
+
+    init(_ text: String) {
+        self.text = text
+    }
+
+    var body: some View {
+        Text(text.uppercased())
+            .font(.system(size: 10, weight: .bold, design: .monospaced))
+            .foregroundStyle(SignalTheme.signalTeal)
+            .padding(.horizontal, 9)
+            .padding(.vertical, 5)
+            .background(SignalTheme.panelCarbon, in: RoundedRectangle(cornerRadius: 5))
+            .overlay(
+                RoundedRectangle(cornerRadius: 5)
+                    .stroke(SignalTheme.gridLine, lineWidth: 1)
+            )
+    }
+}
+
+private struct ModuleLabel: View {
+    let title: String
+
+    init(_ title: String) {
+        self.title = title
+    }
+
+    var body: some View {
+        Text(title)
+            .font(.system(size: 10, weight: .bold, design: .monospaced))
+            .foregroundStyle(SignalTheme.mutedSteel)
+            .tracking(1.2)
+    }
+}
+
+private extension View {
+    func signalPanel(cornerRadius: CGFloat) -> some View {
+        background(
+            SignalTheme.panelCarbon.opacity(0.82),
+            in: RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                .stroke(SignalTheme.gridLine.opacity(0.92), lineWidth: 1)
+        )
+        .shadow(color: SignalTheme.signalTeal.opacity(0.12), radius: 28, x: 0, y: 18)
+    }
+}
+
+private enum SignalTheme {
+    static let voidBlack = Color(red: 0.02, green: 0.025, blue: 0.035)
+    static let panelCarbon = Color(red: 0.045, green: 0.052, blue: 0.065)
+    static let raisedGraphite = Color(red: 0.078, green: 0.094, blue: 0.122)
+    static let gridLine = Color(red: 0.18, green: 0.23, blue: 0.28)
+    static let signalTeal = Color(red: 0.13, green: 0.90, blue: 0.76)
+    static let oscillatorCyan = Color(red: 0.22, green: 0.74, blue: 0.97)
+    static let transientCoral = Color(red: 1.0, green: 0.30, blue: 0.43)
+    static let warmPeak = Color(red: 0.97, green: 0.84, blue: 0.43)
+    static let meterGreen = Color(red: 0.49, green: 1.0, blue: 0.42)
+    static let softWhite = Color(red: 0.95, green: 0.97, blue: 0.98)
+    static let mutedSteel = Color(red: 0.60, green: 0.66, blue: 0.71)
 }

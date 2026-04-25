@@ -19,6 +19,20 @@ Important distinction:
 
 Verification note: `list_design_systems` returns the asset above. `get_project` may show an empty `designTheme` even after the design-system asset is created.
 
+Generated concept screens:
+
+- `Oscillo Native - Instrument View`
+  - Screen ID: `0f6bee9346494223b495eeb07869b229`
+  - Screen resource: `projects/2328505340539181137/screens/0f6bee9346494223b495eeb07869b229`
+- `Performance Cockpit - Variation 1`
+  - Screen ID: `01f93dcb49f94f819b9dabac88c968d4`
+  - Screen resource: `projects/2328505340539181137/screens/01f93dcb49f94f819b9dabac88c968d4`
+- Reimagined variants from `Oscillo Native - Instrument View`
+  - `41b5cd25345747a88a5b8261ce36473b`: left instrument spine / performance cockpit
+  - `f55f61e2a73945a5bbb864217e54ea02`: bottom-console live visual rig
+  - `85576dc0e45441dcbf0e1ff7502fcf5e`: floating HUD over full-bleed spectral terrain
+  - `95bcdf361bd44308b06f97131b8c8188`: compact spectral workbench
+
 ## Current Local MCP Status
 
 Oscillo does not have a repo-local Stitch MCP JSON file to copy. It uses a repo-safe workflow document and a global Codex MCP config.
@@ -77,6 +91,25 @@ Working shape:
 ```
 
 After `create_design_system`, immediately call `update_design_system` with the returned asset name so the design system is displayed in the Stitch project.
+
+Variant generation uses an object-shaped `variantOptions` payload, despite some client schemas making this look string-like:
+
+```json
+{
+  "projectId": "2328505340539181137",
+  "selectedScreenIds": ["0f6bee9346494223b495eeb07869b229"],
+  "deviceType": "DESKTOP",
+  "modelId": "GEMINI_3_PRO",
+  "variantOptions": {
+    "variantCount": 4,
+    "creativeRange": "REIMAGINE",
+    "aspects": ["LAYOUT", "COLOR_SCHEME", "TEXT_FONT", "TEXT_CONTENT"]
+  },
+  "prompt": "Generate four divergent variants..."
+}
+```
+
+Documented `creativeRange` values are `REFINE`, `EXPLORE`, and `REIMAGINE`. Documented `aspects` values are `LAYOUT`, `COLOR_SCHEME`, `IMAGES`, `TEXT_FONT`, and `TEXT_CONTENT`.
 
 ## Stitch Prompt Contract
 
