@@ -142,11 +142,12 @@ jobs:
           download_url="https://github.com/${REPOSITORY}/releases/download/${TAG_NAME}/${zip_name}"
           release_url="https://github.com/${REPOSITORY}/releases/tag/${TAG_NAME}"
           sparkle_archives_dir="dist/sparkle-appcast"
-          sparkle_tools_dir="$(find .build/artifacts -name generate_appcast -type f | head -1 | xargs dirname)"
-          if [ -z "$sparkle_tools_dir" ]; then
-            echo "generate_appcast not found under .build/artifacts; run 'swift build' first" >&2
+          sparkle_generate_appcast="$(find .build/artifacts/sparkle -name generate_appcast -type f | head -1)"
+          if [ -z "$sparkle_generate_appcast" ]; then
+            echo "generate_appcast not found under .build/artifacts/sparkle; the Sparkle binary artifact may not have been extracted (expected after 'swift build --product OscilloMac')" >&2
             exit 66
           fi
+          sparkle_tools_dir="$(dirname "$sparkle_generate_appcast")"
 
           if [ -z "${SPARKLE_ED_PRIVATE_KEY}" ]; then
             echo "SPARKLE_ED_PRIVATE_KEY secret is required for native Sparkle releases" >&2
