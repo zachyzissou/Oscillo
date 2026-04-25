@@ -12,6 +12,14 @@ Oscillo Native should feel like a living instrument for sound-driven light.
 
 It should be immediate enough to open on a MacBook Pro and play with in seconds, but deep enough that each control changes the character of the scene. The app should feel native to Apple platforms: fast, tactile, precise, and visually rich without copying a web HUD.
 
+## Operating Definition
+
+Oscillo is a real-time creative instrument where audio analysis, visual synthesis, and performance controls are one playable surface.
+
+It should not behave like a passive visualizer, a media player, a DAW clone, a SaaS dashboard, or a marketing site. The native app should open directly into an instrument state: preview or microphone signal is available, the Metal scene is alive, and compact controls let the user shape how sound becomes motion, color, topology, and spatial behavior.
+
+The pre-Swift app defines the domain more than the destination. Its important ideas are audio reactivity, interactive 3D music play, AI composition potential, spatial rendering, and collaborative jam-session ambition. The Swift app should grow those ideas through Apple-native tools and interaction patterns instead of recreating the web layout or every old panel.
+
 ## Creative Principles
 
 - Prefer native interaction patterns over web parity.
@@ -19,6 +27,7 @@ It should be immediate enough to open on a MacBook Pro and play with in seconds,
 - Make the first screen the instrument, not an explanatory landing page.
 - Keep controls compact and inspectable; the scene should own most of the window.
 - Use Metal for visual identity, not just as a Three.js replacement.
+- Do not expose controls that imply unfinished features work; represent future capture, export, AI, spatial, and collaboration features only when there is a real implementation path.
 - Design macOS first for testing and iteration, but avoid choices that would make iOS feel bolted on later.
 - Treat Apple frameworks as creative material: Core Haptics, AVAudioEnvironmentNode, MetalFX, Sound Analysis, Core ML, Foundation Models, SwiftData, App Intents, and SharePlay can all become product features when they serve the experience.
 

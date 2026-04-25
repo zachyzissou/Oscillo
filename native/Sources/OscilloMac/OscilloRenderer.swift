@@ -83,6 +83,7 @@ final class OscilloRenderer: NSObject, MTKViewDelegate {
             visualGain: settings.visualGain,
             particleDensity: settings.particleDensity,
             paletteIndex: settings.palette.uniformIndex,
+            sceneModeIndex: settings.sceneMode.uniformIndex,
             padding: 0,
             resolution: SIMD2<Float>(Float(max(size.width, 1)), Float(max(size.height, 1)))
         )
@@ -98,6 +99,7 @@ private struct ShaderUniforms {
     var visualGain: Float
     var particleDensity: Float
     var paletteIndex: Int32
+    var sceneModeIndex: Int32
     var padding: Float
     var resolution: SIMD2<Float>
 }

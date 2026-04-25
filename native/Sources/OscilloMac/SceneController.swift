@@ -17,7 +17,8 @@ final class SceneController: ObservableObject {
             visualGain: value,
             particleDensity: settings.particleDensity,
             previewTempo: settings.previewTempo,
-            palette: settings.palette
+            palette: settings.palette,
+            sceneMode: settings.sceneMode
         )
     }
 
@@ -26,7 +27,8 @@ final class SceneController: ObservableObject {
             visualGain: settings.visualGain,
             particleDensity: value,
             previewTempo: settings.previewTempo,
-            palette: settings.palette
+            palette: settings.palette,
+            sceneMode: settings.sceneMode
         )
     }
 
@@ -35,7 +37,8 @@ final class SceneController: ObservableObject {
             visualGain: settings.visualGain,
             particleDensity: settings.particleDensity,
             previewTempo: value,
-            palette: settings.palette
+            palette: settings.palette,
+            sceneMode: settings.sceneMode
         )
     }
 
@@ -44,7 +47,18 @@ final class SceneController: ObservableObject {
             visualGain: settings.visualGain,
             particleDensity: settings.particleDensity,
             previewTempo: settings.previewTempo,
-            palette: palette
+            palette: palette,
+            sceneMode: settings.sceneMode
+        )
+    }
+
+    func setSceneMode(_ sceneMode: SceneMode) {
+        update(
+            visualGain: settings.visualGain,
+            particleDensity: settings.particleDensity,
+            previewTempo: settings.previewTempo,
+            palette: settings.palette,
+            sceneMode: sceneMode
         )
     }
 
@@ -52,13 +66,15 @@ final class SceneController: ObservableObject {
         visualGain: Float,
         particleDensity: Float,
         previewTempo: Float,
-        palette: ScenePalette
+        palette: ScenePalette,
+        sceneMode: SceneMode
     ) {
         let next = SceneSettings(
             visualGain: visualGain,
             particleDensity: particleDensity,
             previewTempo: previewTempo,
-            palette: palette
+            palette: palette,
+            sceneMode: sceneMode
         )
         settings = next
         settingsStore.update(next)
