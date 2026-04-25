@@ -57,6 +57,10 @@ chmod +x "$MACOS_DIR/$PRODUCT"
 
 plutil -lint "$CONTENTS_DIR/Info.plist" >/dev/null
 
+if ! otool -l "$MACOS_DIR/$PRODUCT" | grep -q "@executable_path/../Frameworks"; then
+  install_name_tool -add_rpath "@executable_path/../Frameworks" "$MACOS_DIR/$PRODUCT"
+fi
+
 SPARKLE_APP_FRAMEWORK="$FRAMEWORKS_DIR/Sparkle.framework"
 SPARKLE_CURRENT_VERSION_DIR="$SPARKLE_APP_FRAMEWORK/Versions/Current"
 sign_item "$SPARKLE_CURRENT_VERSION_DIR/XPCServices/Installer.xpc" >/dev/null

@@ -93,6 +93,14 @@ jobs:
           CODE_SIGN_IDENTITY: ${{ steps.signing.outputs.identity }}
         run: ./Scripts/build-macos-app.sh
 
+      - name: Verify bundled framework rpath
+        working-directory: native
+        run: |
+          if ! otool -l dist/Oscillo.app/Contents/MacOS/OscilloMac | grep -q '@executable_path/../Frameworks'; then
+            echo "OscilloMac is missing @executable_path/../Frameworks rpath for bundled frameworks" >&2
+            exit 66
+          fi
+
       - name: Delete signing keychain
         if: always()
         env:
