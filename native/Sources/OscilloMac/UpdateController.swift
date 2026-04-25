@@ -26,11 +26,9 @@ final class UpdateController: ObservableObject {
     }
 
     func checkNow() {
+        statusText = "Opening in-app update check..."
+        releaseURL = nil
         installUpdates()
-        startCheck(
-            statusText: "Checking GitHub Releases...",
-            failurePrefix: "Update check failed"
-        )
     }
 
     func installUpdates() {

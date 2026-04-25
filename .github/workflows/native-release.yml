@@ -69,7 +69,7 @@ jobs:
           keychain_path="${RUNNER_TEMP}/oscillo-signing.keychain-db"
           keychain_password="$(uuidgen)"
 
-          printf '%s' "$MACOS_DEVELOPER_ID_APPLICATION_P12_BASE64" | base64 --decode > "$cert_path"
+          printf '%s' "$MACOS_DEVELOPER_ID_APPLICATION_P12_BASE64" | base64 -D > "$cert_path"
           security create-keychain -p "$keychain_password" "$keychain_path"
           security set-keychain-settings -lut 21600 "$keychain_path"
           security unlock-keychain -p "$keychain_password" "$keychain_path"
@@ -155,7 +155,7 @@ jobs:
             echo "- Includes the latest signed app bundle for Sparkle OTA updates."
           } > "$sparkle_archives_dir/Oscillo-macOS-${VERSION}.md"
 
-          echo "$SPARKLE_ED_PRIVATE_KEY" | "$sparkle_tools_dir/generate_appcast" \
+          printf '%s' "$SPARKLE_ED_PRIVATE_KEY" | "$sparkle_tools_dir/generate_appcast" \
             --ed-key-file - \
             --download-url-prefix "https://github.com/${REPOSITORY}/releases/download/${TAG_NAME}/" \
             --link "$release_url" \

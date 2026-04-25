@@ -58,10 +58,11 @@ chmod +x "$MACOS_DIR/$PRODUCT"
 plutil -lint "$CONTENTS_DIR/Info.plist" >/dev/null
 
 SPARKLE_APP_FRAMEWORK="$FRAMEWORKS_DIR/Sparkle.framework"
-sign_item "$SPARKLE_APP_FRAMEWORK/Versions/B/XPCServices/Installer.xpc" >/dev/null
-sign_item --preserve-metadata=entitlements "$SPARKLE_APP_FRAMEWORK/Versions/B/XPCServices/Downloader.xpc" >/dev/null
-sign_item "$SPARKLE_APP_FRAMEWORK/Versions/B/Autoupdate" >/dev/null
-sign_item "$SPARKLE_APP_FRAMEWORK/Versions/B/Updater.app" >/dev/null
+SPARKLE_CURRENT_VERSION_DIR="$SPARKLE_APP_FRAMEWORK/Versions/Current"
+sign_item "$SPARKLE_CURRENT_VERSION_DIR/XPCServices/Installer.xpc" >/dev/null
+sign_item --preserve-metadata=entitlements "$SPARKLE_CURRENT_VERSION_DIR/XPCServices/Downloader.xpc" >/dev/null
+sign_item "$SPARKLE_CURRENT_VERSION_DIR/Autoupdate" >/dev/null
+sign_item "$SPARKLE_CURRENT_VERSION_DIR/Updater.app" >/dev/null
 sign_item "$SPARKLE_APP_FRAMEWORK" >/dev/null
 sign_item --entitlements "$ENTITLEMENTS" "$APP_DIR" >/dev/null
 codesign --verify --deep --strict "$APP_DIR"
