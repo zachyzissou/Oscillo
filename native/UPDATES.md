@@ -1,6 +1,6 @@
 # Native Update Channel
 
-Oscillo now has the first GitHub-backed native update lane.
+Oscillo has a GitHub-backed native update lane plus a Sparkle OTA install path.
 
 ## Current Behavior
 
@@ -8,9 +8,10 @@ Oscillo now has the first GitHub-backed native update lane.
 - The app includes a visible `Check Updates` control.
 - The update check calls GitHub Releases for `zachyzissou/Oscillo`.
 - If a newer `native-vX.Y.Z` release exists, the app enables an `Open Release` button.
-- Release builds publish a macOS zip asset and `oscillo-native-update.json` manifest.
+- Release builds publish a notarized macOS zip asset, `oscillo-native-update.json`, and a Sparkle `oscillo-appcast.xml`.
+- Sparkle uses the appcast to download and install signed updates in-app.
 
-This is enough for test builds on a MacBook Pro without pretending we have secure self-replacement yet.
+The GitHub release check remains in the UI as a visible status and fallback path. Sparkle handles the actual OTA install flow.
 
 ## Release Flow
 
@@ -32,17 +33,19 @@ Both paths build and publish:
 - `Oscillo-macOS-<version>.zip`
 - `Oscillo-macOS-<version>.zip.sha256`
 - `oscillo-native-update.json`
+- `oscillo-appcast.xml`
 
-## Secure OTA Install Path
+## Signing and Notarization
 
-For automatic in-app download/install, use Sparkle 2 once the project has a full Xcode app target and signing secrets.
+GitHub native releases require Apple Developer ID signing and notarization secrets before publishing update assets:
 
-Required future work:
+- `MACOS_DEVELOPER_ID_APPLICATION_P12_BASE64`: base64-encoded `.p12` export for a `Developer ID Application` certificate.
+- `MACOS_DEVELOPER_ID_APPLICATION_P12_PASSWORD`: password for the `.p12` export.
+- `APPLE_ID`: Apple ID used for notarization.
+- `APPLE_APP_SPECIFIC_PASSWORD`: app-specific password for `notarytool`.
+- `APPLE_TEAM_ID`: Apple Developer Program team ID.
+- `SPARKLE_ED_PRIVATE_KEY`: Sparkle EdDSA private key for signing appcast update items.
 
-- Add Sparkle as a Swift package or embedded framework in the Xcode app target.
-- Generate and protect Sparkle EdDSA private key outside the repo.
-- Add the Sparkle public key and appcast URL to app metadata.
-- Use Developer ID signing and notarization for public MacBook installs.
-- Publish Sparkle appcast assets from the native release workflow.
+The matching Sparkle public key lives in `AppBundle/Info.plist` as `SUPublicEDKey`.
 
-Sparkle is the right self-update mechanism for direct-distributed macOS apps. The current GitHub release check is the safe interim step.
+Developer ID signing plus notarization is what prevents the recurring Gatekeeper "Open Anyway" approval flow for direct-download builds. Sparkle's EdDSA signature protects the update feed and archive, but it does not replace Apple's Gatekeeper trust chain.

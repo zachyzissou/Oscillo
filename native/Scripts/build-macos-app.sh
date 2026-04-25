@@ -9,8 +9,18 @@ APP_DIR="$ROOT/dist/$APP_NAME.app"
 CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
 RESOURCES_DIR="$CONTENTS_DIR/Resources"
+FRAMEWORKS_DIR="$CONTENTS_DIR/Frameworks"
 INFO_PLIST="$ROOT/AppBundle/Info.plist"
 ENTITLEMENTS="$ROOT/AppBundle/OscilloMac.entitlements"
+CODE_SIGN_IDENTITY="${CODE_SIGN_IDENTITY:--}"
+
+sign_item() {
+  if [[ "$CODE_SIGN_IDENTITY" = "-" ]]; then
+    codesign --force --sign "$CODE_SIGN_IDENTITY" "$@"
+  else
+    codesign --force --sign "$CODE_SIGN_IDENTITY" --timestamp --options runtime "$@"
+  fi
+}
 
 case "$CONFIGURATION" in
   debug|release)
@@ -22,24 +32,38 @@ case "$CONFIGURATION" in
 esac
 
 swift build --configuration "$CONFIGURATION" --product "$PRODUCT"
-BIN_PATH="$ROOT/.build/$CONFIGURATION"
+BIN_PATH="$(swift build --configuration "$CONFIGURATION" --show-bin-path)"
 EXECUTABLE="$BIN_PATH/$PRODUCT"
+SPARKLE_FRAMEWORK="$BIN_PATH/Sparkle.framework"
 
 if [[ ! -x "$EXECUTABLE" ]]; then
   echo "Expected executable not found: $EXECUTABLE" >&2
   exit 66
 fi
 
+if [[ ! -d "$SPARKLE_FRAMEWORK" ]]; then
+  echo "Expected Sparkle framework not found: $SPARKLE_FRAMEWORK" >&2
+  exit 66
+fi
+
 rm -rf "$APP_DIR"
-mkdir -p "$MACOS_DIR" "$RESOURCES_DIR"
+mkdir -p "$MACOS_DIR" "$RESOURCES_DIR" "$FRAMEWORKS_DIR"
 
 cp "$INFO_PLIST" "$CONTENTS_DIR/Info.plist"
 printf "APPL????" > "$CONTENTS_DIR/PkgInfo"
 cp "$EXECUTABLE" "$MACOS_DIR/$PRODUCT"
+ditto "$SPARKLE_FRAMEWORK" "$FRAMEWORKS_DIR/Sparkle.framework"
 chmod +x "$MACOS_DIR/$PRODUCT"
 
 plutil -lint "$CONTENTS_DIR/Info.plist" >/dev/null
-codesign --force --sign - --entitlements "$ENTITLEMENTS" "$APP_DIR" >/dev/null
+
+SPARKLE_APP_FRAMEWORK="$FRAMEWORKS_DIR/Sparkle.framework"
+sign_item "$SPARKLE_APP_FRAMEWORK/Versions/B/XPCServices/Installer.xpc" >/dev/null
+sign_item --preserve-metadata=entitlements "$SPARKLE_APP_FRAMEWORK/Versions/B/XPCServices/Downloader.xpc" >/dev/null
+sign_item "$SPARKLE_APP_FRAMEWORK/Versions/B/Autoupdate" >/dev/null
+sign_item "$SPARKLE_APP_FRAMEWORK/Versions/B/Updater.app" >/dev/null
+sign_item "$SPARKLE_APP_FRAMEWORK" >/dev/null
+sign_item --entitlements "$ENTITLEMENTS" "$APP_DIR" >/dev/null
 codesign --verify --deep --strict "$APP_DIR"
 
 echo "$APP_DIR"

@@ -11,11 +11,17 @@ let package = Package(
         .library(name: "OscilloCore", targets: ["OscilloCore"]),
         .executable(name: "OscilloMac", targets: ["OscilloMac"])
     ],
+    dependencies: [
+        .package(url: "https://github.com/sparkle-project/Sparkle", exact: "2.9.1")
+    ],
     targets: [
         .target(name: "OscilloCore"),
         .executableTarget(
             name: "OscilloMac",
-            dependencies: ["OscilloCore"]
+            dependencies: [
+                "OscilloCore",
+                .product(name: "Sparkle", package: "Sparkle")
+            ]
         ),
         .testTarget(
             name: "OscilloCoreTests",
