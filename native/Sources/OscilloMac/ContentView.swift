@@ -144,6 +144,8 @@ private struct InstrumentSpine: View {
 
                 SignalReadoutModule(audioEngine: audioEngine)
 
+                CalibrationRackModule(audioEngine: audioEngine)
+
                 VStack(alignment: .leading, spacing: 8) {
                     ModuleLabel("PERFORM")
                     LazyVGrid(columns: [
@@ -257,6 +259,48 @@ private struct SignalReadoutModule: View {
                 RailMeter(title: "BASS", value: audioEngine.features.bassEnergy, accent: SignalTheme.signalTeal)
                 RailMeter(title: "MID", value: audioEngine.features.midEnergy, accent: SignalTheme.oscillatorCyan)
                 RailMeter(title: "HI", value: audioEngine.features.trebleEnergy, accent: SignalTheme.warmPeak)
+            }
+        }
+    }
+}
+
+private struct CalibrationRackModule: View {
+    @ObservedObject var audioEngine: LiveAudioEngine
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline) {
+                ModuleLabel("CALIBRATE")
+                Spacer(minLength: 10)
+                SignalBadge("INPUT")
+            }
+
+            SignalSlider(
+                title: "SENS",
+                value: Binding(
+                    get: { audioEngine.calibration.sensitivity },
+                    set: { audioEngine.setSensitivity($0) }
+                ),
+                range: 0.25...3.0,
+                accent: SignalTheme.signalTeal
+            )
+
+            SignalSlider(
+                title: "GATE",
+                value: Binding(
+                    get: { audioEngine.calibration.noiseFloor },
+                    set: { audioEngine.setNoiseFloor($0) }
+                ),
+                range: 0.0...0.45,
+                accent: SignalTheme.warmPeak
+            )
+
+            SignalActionButton(
+                title: "RESET",
+                systemImage: "dial.low",
+                isActive: false
+            ) {
+                audioEngine.resetCalibration()
             }
         }
     }

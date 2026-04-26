@@ -7,11 +7,13 @@ final class LiveAudioEngine: ObservableObject {
     @Published private(set) var isRunning = false
     @Published private(set) var isPreviewing = false
     @Published private(set) var features = AudioFeatures.silence
+    @Published private(set) var calibration = AudioCalibration.standard
     @Published private(set) var statusMessage = "Preview signal"
 
     let featureStore = AudioFeatureStore()
 
     private let sceneSettingsStore: SceneSettingsStore
+    private let calibrationStore = AudioCalibrationStore()
     private let engine = AVAudioEngine()
     private let processor = AudioProcessor()
     private var previewTimer: Timer?
@@ -36,12 +38,16 @@ final class LiveAudioEngine: ObservableObject {
         let format = input.outputFormat(forBus: 0)
         let processor = processor
         let featureStore = featureStore
+        let calibrationStore = calibrationStore
 
         input.installTap(onBus: 0, bufferSize: 1_024, format: format) { buffer, _ in
             guard let features = processor.process(buffer: buffer) else {
                 return
             }
-            featureStore.update(features)
+            featureStore.update(AudioFeatureCalibrator.apply(
+                features,
+                calibration: calibrationStore.snapshot()
+            ))
         }
 
         do {
@@ -111,6 +117,27 @@ final class LiveAudioEngine: ObservableObject {
         }
     }
 
+    func setSensitivity(_ value: Float) {
+        updateCalibration(
+            sensitivity: value,
+            noiseFloor: calibration.noiseFloor
+        )
+    }
+
+    func setNoiseFloor(_ value: Float) {
+        updateCalibration(
+            sensitivity: calibration.sensitivity,
+            noiseFloor: value
+        )
+    }
+
+    func resetCalibration() {
+        updateCalibration(
+            sensitivity: AudioCalibration.standard.sensitivity,
+            noiseFloor: AudioCalibration.standard.noiseFloor
+        )
+    }
+
     private func beginPublishing() {
         guard publishTimer == nil else { return }
 
@@ -139,14 +166,28 @@ final class LiveAudioEngine: ObservableObject {
         let treble = normalizedWave(previewPhase * 2.6 + 2.0) * 0.48
         let volume = min(1, 0.28 + bass * 0.44 + treble * 0.18)
 
-        featureStore.update(AudioFeatures(
+        let rawFeatures = AudioFeatures(
             volume: volume,
             bands: AudioEnergyBands(bass: bass, mid: mid, treble: treble),
             peakFrequency: 120 + mid * 2_800,
             spectralCentroid: 600 + treble * 7_500,
             rms: volume,
             zeroCrossingRate: 0.04 + treble * 0.16
+        )
+
+        featureStore.update(AudioFeatureCalibrator.apply(
+            rawFeatures,
+            calibration: calibrationStore.snapshot()
         ))
+    }
+
+    private func updateCalibration(sensitivity: Float, noiseFloor: Float) {
+        let next = AudioCalibration(
+            sensitivity: sensitivity,
+            noiseFloor: noiseFloor
+        )
+        calibration = next
+        calibrationStore.update(next)
     }
 
     private func normalizedWave(_ phase: Float) -> Float {
