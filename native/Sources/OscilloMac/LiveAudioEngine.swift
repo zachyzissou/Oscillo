@@ -75,9 +75,9 @@ final class LiveAudioEngine: ObservableObject {
     }
 
     func startPreview() {
-        guard previewTimer == nil else { return }
+        guard !isRunning, previewTimer == nil else { return }
         isPreviewing = true
-        statusMessage = isRunning ? "Microphone input" : "Preview signal"
+        statusMessage = "Preview signal"
         beginPublishing()
 
         previewTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
@@ -104,6 +104,8 @@ final class LiveAudioEngine: ObservableObject {
     func togglePreview() {
         if isPreviewing {
             stopPreview(resetFeatures: true)
+        } else if isRunning {
+            stopMicrophone()
         } else {
             startPreview()
         }

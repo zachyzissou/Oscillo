@@ -19,7 +19,7 @@ public enum PerformanceCommand: Equatable, Sendable {
         }
     }
 
-    public var keyEquivalent: String {
+    public var keyEquivalent: Character {
         switch self {
         case .togglePreview:
             " "
@@ -34,7 +34,7 @@ public enum PerformanceCommand: Equatable, Sendable {
 }
 
 public extension SceneMode {
-    var performanceKey: String {
+    var performanceKey: Character {
         switch self {
         case .spectralTerrain:
             "1"
@@ -51,7 +51,7 @@ public extension SceneMode {
 }
 
 public extension PerformancePreset {
-    var performanceKey: String {
+    var performanceKey: Character {
         switch self {
         case .drift:
             "q"

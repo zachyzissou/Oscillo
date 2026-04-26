@@ -23,12 +23,18 @@ struct OscilloMacApp: App {
                 Button(PerformanceCommand.togglePreview.title) {
                     audioEngine.togglePreview()
                 }
-                .keyboardShortcut(.space, modifiers: [])
+                .keyboardShortcut(
+                    KeyEquivalent(PerformanceCommand.togglePreview.keyEquivalent),
+                    modifiers: []
+                )
 
                 Button(PerformanceCommand.toggleMicrophone.title) {
                     audioEngine.toggleMicrophone()
                 }
-                .keyboardShortcut("m", modifiers: [])
+                .keyboardShortcut(
+                    KeyEquivalent(PerformanceCommand.toggleMicrophone.keyEquivalent),
+                    modifiers: []
+                )
 
                 Divider()
 
@@ -37,7 +43,7 @@ struct OscilloMacApp: App {
                         sceneController.applyPreset(preset)
                     }
                     .keyboardShortcut(
-                        KeyEquivalent(Character(preset.performanceKey)),
+                        KeyEquivalent(PerformanceCommand.preset(preset).keyEquivalent),
                         modifiers: []
                     )
                 }
@@ -49,7 +55,7 @@ struct OscilloMacApp: App {
                         sceneController.setSceneMode(sceneMode)
                     }
                     .keyboardShortcut(
-                        KeyEquivalent(Character(sceneMode.performanceKey)),
+                        KeyEquivalent(PerformanceCommand.scene(sceneMode).keyEquivalent),
                         modifiers: []
                     )
                 }
