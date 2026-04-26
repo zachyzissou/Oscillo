@@ -66,6 +66,14 @@ final class LiveAudioEngine: ObservableObject {
         startPreview()
     }
 
+    func toggleMicrophone() {
+        if isRunning {
+            stopMicrophone()
+        } else {
+            startMicrophone()
+        }
+    }
+
     func startPreview() {
         guard previewTimer == nil else { return }
         isPreviewing = true
@@ -91,6 +99,14 @@ final class LiveAudioEngine: ObservableObject {
         }
 
         stopPublishingIfIdle()
+    }
+
+    func togglePreview() {
+        if isPreviewing {
+            stopPreview(resetFeatures: true)
+        } else {
+            startPreview()
+        }
     }
 
     private func beginPublishing() {

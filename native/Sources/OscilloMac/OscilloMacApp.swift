@@ -18,5 +18,42 @@ struct OscilloMacApp: App {
                 .frame(minWidth: 960, minHeight: 640)
         }
         .windowStyle(.hiddenTitleBar)
+        .commands {
+            CommandMenu("Perform") {
+                Button(PerformanceCommand.togglePreview.title) {
+                    audioEngine.togglePreview()
+                }
+                .keyboardShortcut(.space, modifiers: [])
+
+                Button(PerformanceCommand.toggleMicrophone.title) {
+                    audioEngine.toggleMicrophone()
+                }
+                .keyboardShortcut("m", modifiers: [])
+
+                Divider()
+
+                ForEach(PerformancePreset.allCases) { preset in
+                    Button(PerformanceCommand.preset(preset).title) {
+                        sceneController.applyPreset(preset)
+                    }
+                    .keyboardShortcut(
+                        KeyEquivalent(Character(preset.performanceKey)),
+                        modifiers: []
+                    )
+                }
+
+                Divider()
+
+                ForEach(SceneMode.allCases) { sceneMode in
+                    Button(PerformanceCommand.scene(sceneMode).title) {
+                        sceneController.setSceneMode(sceneMode)
+                    }
+                    .keyboardShortcut(
+                        KeyEquivalent(Character(sceneMode.performanceKey)),
+                        modifiers: []
+                    )
+                }
+            }
+        }
     }
 }

@@ -233,19 +233,11 @@ private struct InstrumentSpine: View {
     }
 
     private func toggleMicrophone() {
-        if audioEngine.isRunning {
-            audioEngine.stopMicrophone()
-        } else {
-            audioEngine.startMicrophone()
-        }
+        audioEngine.toggleMicrophone()
     }
 
     private func togglePreview() {
-        if audioEngine.isPreviewing {
-            audioEngine.stopPreview(resetFeatures: true)
-        } else {
-            audioEngine.startPreview()
-        }
+        audioEngine.togglePreview()
     }
 }
 
