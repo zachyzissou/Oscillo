@@ -282,7 +282,8 @@ private struct CalibrationRackModule: View {
                     set: { audioEngine.setSensitivity($0) }
                 ),
                 range: 0.25...3.0,
-                accent: SignalTheme.signalTeal
+                accent: SignalTheme.signalTeal,
+                accessibilityLabel: "Sensitivity"
             )
 
             SignalSlider(
@@ -292,7 +293,8 @@ private struct CalibrationRackModule: View {
                     set: { audioEngine.setNoiseFloor($0) }
                 ),
                 range: 0.0...0.45,
-                accent: SignalTheme.warmPeak
+                accent: SignalTheme.warmPeak,
+                accessibilityLabel: "Noise gate"
             )
 
             SignalActionButton(
@@ -311,6 +313,7 @@ private struct SignalSlider: View {
     @Binding var value: Float
     let range: ClosedRange<Float>
     let accent: Color
+    var accessibilityLabel: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -345,6 +348,8 @@ private struct SignalSlider: View {
             )
             .controlSize(.small)
             .tint(accent)
+            .accessibilityLabel(Text(accessibilityLabel ?? title))
+            .accessibilityValue(Text(value.formatted(.number.precision(.fractionLength(2)))))
         }
     }
 

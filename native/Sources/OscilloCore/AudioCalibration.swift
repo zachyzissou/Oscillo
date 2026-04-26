@@ -1,39 +1,39 @@
 import Foundation
+import os
 
 public struct AudioCalibration: Equatable, Sendable {
-    public var sensitivity: Float
-    public var noiseFloor: Float
+    private static let sensitivityRange: ClosedRange<Float> = 0.25...3.0
+    private static let noiseFloorRange: ClosedRange<Float> = 0.0...0.45
+
+    public let sensitivity: Float
+    public let noiseFloor: Float
 
     public init(
         sensitivity: Float = 1.0,
         noiseFloor: Float = 0.03
     ) {
-        self.sensitivity = sensitivity.clamped(to: 0.25...3.0)
-        self.noiseFloor = noiseFloor.clamped(to: 0.0...0.45)
+        self.sensitivity = sensitivity.clamped(to: Self.sensitivityRange)
+        self.noiseFloor = noiseFloor.clamped(to: Self.noiseFloorRange)
     }
 
     public static let standard = AudioCalibration()
 }
 
 public final class AudioCalibrationStore: @unchecked Sendable {
-    private let lock = NSLock()
-    private var currentCalibration: AudioCalibration
+    private let calibration: OSAllocatedUnfairLock<AudioCalibration>
 
     public init(initialCalibration: AudioCalibration = .standard) {
-        self.currentCalibration = initialCalibration
+        self.calibration = OSAllocatedUnfairLock(initialState: initialCalibration)
     }
 
     public func update(_ calibration: AudioCalibration) {
-        lock.lock()
-        currentCalibration = calibration
-        lock.unlock()
+        self.calibration.withLock { currentCalibration in
+            currentCalibration = calibration
+        }
     }
 
     public func snapshot() -> AudioCalibration {
-        lock.lock()
-        let calibration = currentCalibration
-        lock.unlock()
-        return calibration
+        calibration.withLock { $0 }
     }
 }
 
