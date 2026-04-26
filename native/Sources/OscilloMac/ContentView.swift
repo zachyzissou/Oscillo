@@ -144,6 +144,8 @@ private struct InstrumentSpine: View {
 
                 SignalReadoutModule(audioEngine: audioEngine)
 
+                CalibrationRackModule(audioEngine: audioEngine)
+
                 VStack(alignment: .leading, spacing: 8) {
                     ModuleLabel("PERFORM")
                     LazyVGrid(columns: [
@@ -262,11 +264,56 @@ private struct SignalReadoutModule: View {
     }
 }
 
+private struct CalibrationRackModule: View {
+    @ObservedObject var audioEngine: LiveAudioEngine
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .firstTextBaseline) {
+                ModuleLabel("CALIBRATE")
+                Spacer(minLength: 10)
+                SignalBadge("INPUT")
+            }
+
+            SignalSlider(
+                title: "SENS",
+                value: Binding(
+                    get: { audioEngine.calibration.sensitivity },
+                    set: { audioEngine.setSensitivity($0) }
+                ),
+                range: 0.25...3.0,
+                accent: SignalTheme.signalTeal,
+                accessibilityLabel: "Sensitivity"
+            )
+
+            SignalSlider(
+                title: "GATE",
+                value: Binding(
+                    get: { audioEngine.calibration.noiseFloor },
+                    set: { audioEngine.setNoiseFloor($0) }
+                ),
+                range: 0.0...0.45,
+                accent: SignalTheme.warmPeak,
+                accessibilityLabel: "Noise gate"
+            )
+
+            SignalActionButton(
+                title: "RESET",
+                systemImage: "dial.low",
+                isActive: false
+            ) {
+                audioEngine.resetCalibration()
+            }
+        }
+    }
+}
+
 private struct SignalSlider: View {
     let title: String
     @Binding var value: Float
     let range: ClosedRange<Float>
     let accent: Color
+    var accessibilityLabel: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -301,6 +348,8 @@ private struct SignalSlider: View {
             )
             .controlSize(.small)
             .tint(accent)
+            .accessibilityLabel(Text(accessibilityLabel ?? title))
+            .accessibilityValue(Text(value.formatted(.number.precision(.fractionLength(2)))))
         }
     }
 
